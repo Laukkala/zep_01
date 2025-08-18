@@ -1028,11 +1028,7 @@ public class JDBCInterpreter extends KerberosInterpreter {
 
     String cancelReason = context.getLocalProperties().get(CANCEL_REASON);
     if (StringUtils.isNotBlank(cancelReason)) {
-      try {
-        context.out.write(cancelReason);
-      } catch (IOException e) {
-        LOGGER.error("Fail to write cancel reason");
-      }
+      context.out.write(cancelReason);
     }
   }
 

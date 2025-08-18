@@ -216,11 +216,7 @@ public class RemoteInterpreterServerTest {
       } else if (st.equals("SINGLE_OUTPUT_ERROR")) {
         return new InterpreterResult(InterpreterResult.Code.ERROR, "SINGLE_OUTPUT_ERROR");
       } else if (st.equals("COMBO_OUTPUT_SUCCESS")) {
-        try {
-          context.out.write("INTERPRETER_OUT");
-        } catch (IOException e) {
-          fail("Failure happened: " + e.getMessage());
-        }
+        context.out.write("INTERPRETER_OUT");
         return new InterpreterResult(InterpreterResult.Code.SUCCESS, "SINGLE_OUTPUT_SUCCESS");
       } else if (st.equals("SLEEP")) {
         try {

@@ -60,11 +60,7 @@ public class OutputContent extends AbstractUserInterfaceElement {
     @Override
     protected void draw() {
         getInterpreterContext().out().clear(false);
-        try {
-            getInterpreterContext().out().write(outputContent);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        getInterpreterContext().out().write(outputContent);
     }
 
     @Override

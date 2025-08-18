@@ -105,7 +105,6 @@ public class SparkSqlInterpreter extends AbstractInterpreter {
       }
       context.out.flush();
     } catch (Exception e) {
-      try {
         if (e.getCause() instanceof AnalysisException) {
           // just return the error message from spark if it is AnalysisException
           context.out.write(e.getCause().getMessage());
@@ -133,10 +132,6 @@ public class SparkSqlInterpreter extends AbstractInterpreter {
           context.out.flush();
           return new InterpreterResult(Code.ERROR);
         }
-      } catch (IOException ex) {
-        LOGGER.error("Fail to write output", ex);
-        return new InterpreterResult(Code.ERROR);
-      }
     } finally {
       sc.clearJobGroup();
       Thread.currentThread().setContextClassLoader(originalClassLoader);

@@ -423,16 +423,11 @@ public abstract class ZeppelinContext {
    */
   @ZeppelinApi
   public void show(Object o, int maxResult) {
-    try {
-      if (isSupportedObject(o)) {
-        interpreterContext.out.write(showData(o));
-      } else {
-        interpreterContext.out.write("ZeppelinContext doesn't support to show type: "
-            + o.getClass().getCanonicalName() + "\n");
-        interpreterContext.out.write(o.toString());
-      }
-    } catch (IOException e) {
-      throw new RuntimeException(e);
+    if (isSupportedObject(o)) {
+      interpreterContext.out.write(showData(o));
+    } else {
+      interpreterContext.out.write("ZeppelinContext doesn't support to show type: " + o.getClass().getCanonicalName() + "\n");
+      interpreterContext.out.write(o.toString());
     }
   }
 

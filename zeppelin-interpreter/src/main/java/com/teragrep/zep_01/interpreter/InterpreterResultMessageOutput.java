@@ -53,15 +53,6 @@ public class InterpreterResultMessageOutput extends OutputStream {
     this.flushListener = listener;
   }
 
-  public InterpreterResultMessageOutput(
-      InterpreterResult.Type type,
-      InterpreterResultMessageOutputListener flushListener,
-      InterpreterOutputChangeListener listener) throws IOException {
-    this.type = type;
-    this.flushListener = flushListener;
-    watcher = new InterpreterOutputChangeWatcher(listener);
-    watcher.start();
-  }
 
   public void setEnableTableAppend(boolean enableTableAppend) {
     this.enableTableAppend = enableTableAppend;
@@ -101,7 +92,7 @@ public class InterpreterResultMessageOutput extends OutputStream {
   }
 
   @Override
-  public void write(int b) throws IOException {
+  public void write(int b) {
     synchronized (outList) {
       buffer.write(b);
       if (b == NEW_LINE_CHAR) {
@@ -122,12 +113,12 @@ public class InterpreterResultMessageOutput extends OutputStream {
   }
 
   @Override
-  public void write(byte [] b) throws IOException {
+  public void write(byte [] b) {
     write(b, 0, b.length);
   }
 
   @Override
-  public void write(byte [] b, int off, int len) throws IOException {
+  public void write(byte [] b, int off, int len) {
     synchronized (outList) {
       for (int i = off; i < len; i++) {
         write(b[i]);
@@ -220,9 +211,8 @@ public class InterpreterResultMessageOutput extends OutputStream {
     return new InterpreterResultMessage(type, new String(toByteArray()));
   }
 
-  private void flush(boolean append) throws IOException {
+  private void flush(boolean append) {
     synchronized (outList) {
-      buffer.flush();
       byte[] bytes = buffer.toByteArray();
       if (bytes != null && bytes.length > 0) {
         outList.add(bytes);
@@ -240,7 +230,7 @@ public class InterpreterResultMessageOutput extends OutputStream {
     }
   }
 
-  public void flush() throws IOException {
+  public void flush() {
     flush(isAppendSupported());
   }
 

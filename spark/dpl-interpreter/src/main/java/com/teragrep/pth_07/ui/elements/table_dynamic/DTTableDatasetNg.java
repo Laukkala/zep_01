@@ -191,7 +191,6 @@ public final class DTTableDatasetNg extends AbstractUserInterfaceElement {
         try {
             lock.lock();
             if (!tableAnchorPrinted && dataAvailable) {
-                try {
                     String outputContent = "%angular \n" +
                             "<table id=\"DT_table_" + getInterpreterContext().getParagraphId() + "\" class=\"table table-striped table-bordered\">" +
                             datasetAsJSONSchema +
@@ -201,9 +200,6 @@ public final class DTTableDatasetNg extends AbstractUserInterfaceElement {
                     getInterpreterContext().out().flush();
                     tableAnchorPrinted = true;
                     DTAnchorReadyAngularObject.set(tableAnchorPrinted, true);
-                } catch (java.io.IOException e) {
-                    LOGGER.error(e.toString());
-                }
             }
 
             serverUpdateCount++;

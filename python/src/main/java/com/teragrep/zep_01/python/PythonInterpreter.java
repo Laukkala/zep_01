@@ -351,11 +351,7 @@ public class PythonInterpreter extends Interpreter {
     if (statementError) {
       return new InterpreterResult(Code.ERROR, statementOutput);
     } else {
-      try {
-        context.out.flush();
-      } catch (IOException e) {
-        throw new InterpreterException(e);
-      }
+      context.out.flush();
       if (pythonProcessLauncher.isRunning()) {
         return new InterpreterResult(Code.SUCCESS);
       } else {

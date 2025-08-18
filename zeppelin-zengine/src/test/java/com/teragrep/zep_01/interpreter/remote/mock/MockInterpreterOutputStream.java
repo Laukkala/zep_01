@@ -55,12 +55,8 @@ public class MockInterpreterOutputStream extends Interpreter {
   public InterpreterResult interpret(String st, InterpreterContext context)
       throws InterpreterException {
     String[] ret = st.split(":");
-    try {
-      if (ret[1] != null) {
-        context.out.write(ret[1]);
-      }
-    } catch (IOException e) {
-      throw new InterpreterException(e);
+    if (ret[1] != null) {
+      context.out.write(ret[1]);
     }
     return new InterpreterResult(InterpreterResult.Code.valueOf(ret[0]), (ret.length > 2) ?
             ret[2] : "");

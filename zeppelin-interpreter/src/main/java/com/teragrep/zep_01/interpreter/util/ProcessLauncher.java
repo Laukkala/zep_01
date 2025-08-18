@@ -194,11 +194,7 @@ public abstract class ProcessLauncher implements ExecuteResultHandler {
         launchOutput.append(s + "\n");
       }
       if (redirectedContext != null) {
-        try {
-          redirectedContext.out.write(s + "\n");
-        } catch (IOException e) {
-          LOGGER.error("unable to write to redirectedContext", e);
-        }
+        redirectedContext.out.write(s + "\n");
       }
     }
   }
