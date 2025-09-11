@@ -48,7 +48,9 @@ package com.teragrep.pth_07.ui.elements.table_dynamic;
 import com.google.gson.Gson;
 import com.teragrep.pth_07.ui.elements.table_dynamic.pojo.AJAXRequest;
 import com.teragrep.zep_01.display.AngularObject;
-import com.teragrep.zep_01.display.AngularObjectListener;
+import com.teragrep.zep_01.display.AngularObjectRegistry;
+import com.teragrep.zep_01.interpreter.InterpreterContext;
+import com.teragrep.zep_01.interpreter.InterpreterOutput;
 import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
 import org.apache.spark.sql.RowFactory;
@@ -67,6 +69,8 @@ import javax.json.*;
 import java.io.StringReader;
 import java.sql.Timestamp;
 import java.time.Instant;
+import java.time.temporal.ChronoUnit;
+import java.time.temporal.TemporalUnit;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -160,9 +164,11 @@ public class DTTableDatasetNgTest {
         assertEquals(false, ajaxRequest.getColumns().get(7).getSearch().getRegex());
         
     }
-
     @Test
     public void testAJAXResponse() {
+        String paragraphId = "testPara";
+        String noteId = "testNote";
+
        StructType testSchema = new StructType(
                 new StructField[] {
                         new StructField("_time", DataTypes.TimestampType, false, new MetadataBuilder().build()),
@@ -200,85 +206,56 @@ public class DTTableDatasetNgTest {
         );
 
         Dataset<Row> testDs = sparkSession.createDataFrame(rows, testSchema);
-        List<String> datasetAsJSON = testDs.toJSON().collectAsList();
 
-        List<String> subList = datasetAsJSON.subList(0, 5);
+        InterpreterContext context = InterpreterContext.builder()
+                .setParagraphId(paragraphId)
+                .setNoteId(noteId)
+                .setInterpreterOut(new InterpreterOutput())
+                .setAngularObjectRegistry(new AngularObjectRegistry("testInterpreterGroup",null)).build();
 
-        JsonArray formated = DTTableDatasetNg.dataStreamParser(subList);
+        context.getAngularObjectRegistry().add("AJAXRequest_"+paragraphId,"{}",noteId,paragraphId);
+        AngularObject<String> ajaxRequestAO = context.getAngularObjectRegistry().get("AJAXRequest_"+paragraphId,noteId,paragraphId);
+        DTTableDatasetNg datasetNg = new DTTableDatasetNg(context,ajaxRequestAO);
+        datasetNg.setParagraphDataset(testDs);
 
-        DTHeader dtHeader = new DTHeader(testSchema);
-        JsonArray headers = dtHeader.json();
-        JsonObject response = DTTableDatasetNg.DTNetResponse(formated, headers, 1, datasetAsJSON.size(),formated.size());
-
-        ArrayList<String> timestamps = new ArrayList<>();
-        timestamps.add("1970-01-01T00:00:49.000Z");
-        timestamps.add("1970-01-01T00:00:48.000Z");
-        timestamps.add("1970-01-01T00:00:47.000Z");
-        timestamps.add("1970-01-01T00:00:46.000Z");
-        timestamps.add("1970-01-01T00:00:45.000Z");
-
-        JsonArrayBuilder dataBuilder = Json.createArrayBuilder();
-        for (String timestamp:timestamps
-             ) {
-            JsonObject rowJson = Json.createObjectBuilder()
-                    .add("_time",timestamp)
-                    .add("id",0)
-                    .add("_raw","data data")
-                    .add("index","index_A")
-                    .add("sourcetype","stream")
-                    .add("host","host")
-                    .add("source","input")
-                    .add("partition","0")
-                    .add("offset",0)
-                    .add("origin","test data")
-                    .build();
-            dataBuilder.add(rowJson);
-        }
-        JsonArray data = dataBuilder.build();
-
-        // Ensure that data field has the correct number of rows.
-        Assertions.assertEquals(5,data.size());
-
-        JsonObject expectedJson = Json.createObjectBuilder()
-                .add("headers",headers)
-                .add("data", data)
-                .add("draw",1)
-                .add("recordsTotal",49)
-                .add("recordsFiltered",5)
-                .build();
-
-        assertEquals(expectedJson.toString()
-                , response.toString()
-        );
-    }
-
-    @Test
-    public void AjaxRequestToJsonTest(){
-        String paragraphId = "testParag";
-        String noteId ="testNoteId";
-        String angularObjectName = "AJAXRequest_"+paragraphId;
-        JsonObject angularObject  = Json.createObjectBuilder()
+        JsonObject ajaxRequest = Json.createObjectBuilder()
+                .add("draw",0)
                 .add("start",0)
-                .add("length",25)
+                .add("length",5)
                 .add("search",Json.createObjectBuilder()
                         .add("value","")
                         .add("regex",false)
                         .build())
                 .build();
+        ajaxRequestAO.set(ajaxRequest.toString());
+        String expectedOutput = "%text {\"headers\":[\"_time\",\"id\",\"_raw\",\"index\",\"sourcetype\",\"host\",\"source\",\"partition\",\"offset\",\"origin\"],\"data\":[{\"_time\":\"1970-01-01T00:00:49.000Z\",\"id\":0,\"_raw\":\"data data\",\"index\":\"index_A\",\"sourcetype\":\"stream\",\"host\":\"host\",\"source\":\"input\",\"partition\":\"0\",\"offset\":0,\"origin\":\"test data\"},{\"_time\":\"1970-01-01T00:00:48.000Z\",\"id\":0,\"_raw\":\"data data\",\"index\":\"index_A\",\"sourcetype\":\"stream\",\"host\":\"host\",\"source\":\"input\",\"partition\":\"0\",\"offset\":0,\"origin\":\"test data\"},{\"_time\":\"1970-01-01T00:00:47.000Z\",\"id\":0,\"_raw\":\"data data\",\"index\":\"index_A\",\"sourcetype\":\"stream\",\"host\":\"host\",\"source\":\"input\",\"partition\":\"0\",\"offset\":0,\"origin\":\"test data\"},{\"_time\":\"1970-01-01T00:00:46.000Z\",\"id\":0,\"_raw\":\"data data\",\"index\":\"index_A\",\"sourcetype\":\"stream\",\"host\":\"host\",\"source\":\"input\",\"partition\":\"0\",\"offset\":0,\"origin\":\"test data\"},{\"_time\":\"1970-01-01T00:00:45.000Z\",\"id\":0,\"_raw\":\"data data\",\"index\":\"index_A\",\"sourcetype\":\"stream\",\"host\":\"host\",\"source\":\"input\",\"partition\":\"0\",\"offset\":0,\"origin\":\"test data\"}],\"draw\":0,\"recordsTotal\":49,\"recordsFiltered\":49}";
 
-        String angularObjectContent = angularObject.toString();
-        AngularObjectListener listener = new AngularObjectListener() {
-            @Override
-            public void updated(AngularObject updatedObject) {
-                // Do nothing
-            }
-        };
-        AngularObject<String> ao = new AngularObject<String>(angularObjectName,angularObjectContent,noteId,paragraphId,listener);
-        JsonObject ajaxRequest = Json.createReader(new StringReader(ao.get().toString())).readObject();
-        Assertions.assertEquals(0,ajaxRequest.getJsonNumber("start").intValue());
-        Assertions.assertEquals(25,ajaxRequest.getJsonNumber("length").intValue());
-        Assertions.assertEquals("",ajaxRequest.getJsonObject("search").getString("value").toString());
-        Assertions.assertEquals(false,ajaxRequest.getJsonObject("search").getBoolean("regex"));
+        // We have to wait for InterpreterContext.out to be updated by an AJAXRequestWatcher attached to the AngularObject, which is running on another thread. Timout included to avoid locking out fully.
+        Instant timeout = Instant.now().plus(15, ChronoUnit.SECONDS);
+        while(Instant.now().isBefore(timeout) && (context.out().getCurrentOutput() == null || !context.out.getCurrentOutput().toString().equals(expectedOutput))){
+
+        }
+        Assertions.assertEquals(expectedOutput,context.out().getCurrentOutput().toString());
+
+        datasetNg.setParagraphDataset(testDs);
+        JsonObject ajaxRequest2 = Json.createObjectBuilder()
+                .add("draw",0)
+                .add("start",0)
+                .add("length",1)
+                .add("search",Json.createObjectBuilder()
+                        .add("value","")
+                        .add("regex",false)
+                        .build())
+                .build();
+        ajaxRequestAO.set(ajaxRequest2.toString());
+        String secondExpectedOutput = "%text {\"headers\":[\"_time\",\"id\",\"_raw\",\"index\",\"sourcetype\",\"host\",\"source\",\"partition\",\"offset\",\"origin\"],\"data\":[{\"_time\":\"1970-01-01T00:00:49.000Z\",\"id\":0,\"_raw\":\"data data\",\"index\":\"index_A\",\"sourcetype\":\"stream\",\"host\":\"host\",\"source\":\"input\",\"partition\":\"0\",\"offset\":0,\"origin\":\"test data\"},{\"_time\":\"1970-01-01T00:00:48.000Z\",\"id\":0,\"_raw\":\"data data\",\"index\":\"index_A\",\"sourcetype\":\"stream\",\"host\":\"host\",\"source\":\"input\",\"partition\":\"0\",\"offset\":0,\"origin\":\"test data\"},{\"_time\":\"1970-01-01T00:00:47.000Z\",\"id\":0,\"_raw\":\"data data\",\"index\":\"index_A\",\"sourcetype\":\"stream\",\"host\":\"host\",\"source\":\"input\",\"partition\":\"0\",\"offset\":0,\"origin\":\"test data\"},{\"_time\":\"1970-01-01T00:00:46.000Z\",\"id\":0,\"_raw\":\"data data\",\"index\":\"index_A\",\"sourcetype\":\"stream\",\"host\":\"host\",\"source\":\"input\",\"partition\":\"0\",\"offset\":0,\"origin\":\"test data\"},{\"_time\":\"1970-01-01T00:00:45.000Z\",\"id\":0,\"_raw\":\"data data\",\"index\":\"index_A\",\"sourcetype\":\"stream\",\"host\":\"host\",\"source\":\"input\",\"partition\":\"0\",\"offset\":0,\"origin\":\"test data\"}],\"draw\":0,\"recordsTotal\":49,\"recordsFiltered\":49}";
+
+        // We have to wait for InterpreterContext.out to be updated by an AJAXRequestWatcher attached to the AngularObject, which is running on another thread. Timout included to avoid locking out fully.
+        timeout = Instant.now().plus(15, ChronoUnit.SECONDS);
+        while(Instant.now().isBefore(timeout) && (context.out().getCurrentOutput() == null || !context.out.getCurrentOutput().toString().equals(secondExpectedOutput))){
+
+        }
+        Assertions.assertEquals(secondExpectedOutput,context.out().getCurrentOutput().toString());
     }
 
     private List<Row> makeRowsList(long _time, Long id, String _raw, String index, String sourcetype, String host, String source, String partition, Long offset, String origin, long amount) {
@@ -295,5 +272,4 @@ public class DTTableDatasetNgTest {
 
         return rowArrayList;
     }
-
 }

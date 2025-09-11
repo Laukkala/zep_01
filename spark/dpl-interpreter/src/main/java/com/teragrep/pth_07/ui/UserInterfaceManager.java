@@ -49,6 +49,7 @@ import com.teragrep.pth_07.ui.elements.MessageLog;
 import com.teragrep.pth_07.ui.elements.OutputContent;
 import com.teragrep.pth_07.ui.elements.PerformanceIndicator;
 import com.teragrep.pth_07.ui.elements.table_dynamic.DTTableDatasetNg;
+import com.teragrep.zep_01.display.AngularObject;
 import com.teragrep.zep_01.interpreter.InterpreterContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -61,8 +62,8 @@ public class UserInterfaceManager {
     private final MessageLog messageLog;
     private final OutputContent outputContent;
 
-    public UserInterfaceManager(InterpreterContext interpreterContext) {
-        dtTableDatasetNg = new DTTableDatasetNg(interpreterContext);
+    public UserInterfaceManager(InterpreterContext interpreterContext, AngularObject AJAXRequestAngularObject) {
+        dtTableDatasetNg = new DTTableDatasetNg(interpreterContext, AJAXRequestAngularObject);
         performanceIndicator = new PerformanceIndicator(interpreterContext);
         messageLog = new MessageLog(interpreterContext);
         outputContent = new OutputContent(interpreterContext);

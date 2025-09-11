@@ -48,10 +48,11 @@ package com.teragrep.pth_07;
 
 import com.teragrep.pth_07.stream.BatchHandler;
 import com.teragrep.pth_07.ui.UserInterfaceManager;
+import com.teragrep.pth_07.ui.elements.table_dynamic.AJAXRequestWatcher;
+import com.teragrep.zep_01.display.AngularObject;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
 import org.apache.spark.SparkContext;
-import org.apache.spark.sql.SparkSession;
 import com.teragrep.zep_01.interpreter.*;
 import com.teragrep.zep_01.interpreter.InterpreterResult.Code;
 import com.teragrep.zep_01.interpreter.thrift.InterpreterCompletion;
@@ -148,7 +149,17 @@ public class DPLInterpreter extends AbstractInterpreter {
         // FIXME clear fron NgDPLRenderer too
 
         // setup UserInterfaceManager
-        UserInterfaceManager userInterfaceManager = new UserInterfaceManager(interpreterContext);
+        // Create an AngularObject for this InterpreterContext, which is watched by AJAXRequestWatcher for pagination or search requests from UI.
+        AngularObject AJAXRequestAngularObject = interpreterContext.getAngularObjectRegistry().add(
+                "AJAXRequest_"+interpreterContext.getParagraphId(),
+                "{}",
+                interpreterContext.getNoteId(),
+                interpreterContext.getParagraphId(),
+                true
+        );
+        // Since there is no data before PTH_07's BatchHandler calls DTTableDatasetNg.setParagraphDataset(), we set an empty dataframe to the initial watcher.
+        AJAXRequestAngularObject.addWatcher(new AJAXRequestWatcher(interpreterContext,sparkInterpreter.getSparkSession().emptyDataFrame()));
+        UserInterfaceManager userInterfaceManager = new UserInterfaceManager(interpreterContext,AJAXRequestAngularObject);
 
         // store UserInterfaceManager
         if (!notebookParagraphUserInterfaceManager.containsKey(interpreterContext.getNoteId())) {

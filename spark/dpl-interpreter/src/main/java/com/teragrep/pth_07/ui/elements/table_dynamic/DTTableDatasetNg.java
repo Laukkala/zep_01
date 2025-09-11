@@ -45,83 +45,24 @@
  */
 package com.teragrep.pth_07.ui.elements.table_dynamic;
 
-import com.teragrep.pth_07.ui.elements.table_dynamic.pojo.Order;
 import com.teragrep.pth_07.ui.elements.AbstractUserInterfaceElement;
 import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
 import com.teragrep.zep_01.display.AngularObject;
 import com.teragrep.zep_01.interpreter.InterpreterContext;
 
-import javax.json.*;
-import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.transform.TransformerException;
-import java.io.StringReader;
-import java.util.List;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
-
-import java.lang.reflect.Method;
-import java.lang.reflect.InvocationTargetException;
-import com.teragrep.zep_01.interpreter.InterpreterOutput;
 
 public final class DTTableDatasetNg extends AbstractUserInterfaceElement {
     // FIXME Exceptions should cause interpreter to stop
 
     private final Lock lock = new ReentrantLock();
+    private final AngularObject AJAXRequestAngularObject;
 
-    private final AngularObject<String> AJAXRequestAngularObject;
-
-    private List<String> datasetAsJSON = null;
-    private JsonArray schemaHeadersJson;
-
-    /*
-    currentAJAXLength is shared between all the clients when server refreshes
-    perhaps we could just let the clients know that there is an update and
-    that they would each request their own copy and the request would contain
-    the size?
-     */
-    private int currentAJAXLength = 25;
-
-    public DTTableDatasetNg(InterpreterContext interpreterContext) {
+    public DTTableDatasetNg(InterpreterContext interpreterContext, AngularObject AJAXRequestAngularObject) {
         super(interpreterContext);
-        AJAXRequestAngularObject = getInterpreterContext().getAngularObjectRegistry().add(
-                "AJAXRequest_"+getInterpreterContext().getParagraphId(),
-                "{}",
-                getInterpreterContext().getNoteId(),
-                getInterpreterContext().getParagraphId(),
-                true
-        );
-        schemaHeadersJson = Json.createArrayBuilder().build();
-        AJAXRequestAngularObject.addWatcher(new AJAXRequestWatcher(interpreterContext, this));
-    }
-
-    void refreshPage() {
-        try {
-            lock.lock();
-                Method updateAllResultMessagesMethod = InterpreterOutput.class.getDeclaredMethod("updateAllResultMessages");
-                updateAllResultMessagesMethod.setAccessible(true);
-                updateAllResultMessagesMethod.invoke(getInterpreterContext().out);
-        }catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e){
-            LOGGER.error(e.toString());
-        } finally {
-            lock.unlock();
-        }
-    }
-
-    void handeAJAXRequest(JsonObject ajaxRequest) {
-        try {
-            lock.lock();
-            // Apply defaults if parameters are not provided
-            int start = ajaxRequest.getJsonNumber("start").intValue();
-            int length = ajaxRequest.getJsonNumber("length").intValue();
-            int draw = ajaxRequest.getJsonNumber("draw").intValue();
-            String searchString = ajaxRequest.getJsonObject("search").getString("value");
-            updatePage(start,length,searchString, draw);
-        }
-        finally {
-            lock.unlock();
-        }
-
+        this.AJAXRequestAngularObject = AJAXRequestAngularObject;
     }
 
     @Override
@@ -144,97 +85,14 @@ public final class DTTableDatasetNg extends AbstractUserInterfaceElement {
          TODO check if other presentation can be used than string, for order
          i.e. rowDataset.collectAsList()
          */
-
         try {
             lock.lock();
             if (rowDataset.schema().nonEmpty()) {
-                // needs to be here as sparkContext might disappear later
-                DTHeader dtHeader = new DTHeader(rowDataset.schema());
-                schemaHeadersJson = dtHeader.json();
-                datasetAsJSON = rowDataset.toJSON().collectAsList();
-                updatePage(0,currentAJAXLength,"",1);
+                AJAXRequestAngularObject.clearAllWatchers();
+                AJAXRequestAngularObject.addWatcher(new AJAXRequestWatcher(getInterpreterContext(),rowDataset));
             }
         } finally {
             lock.unlock();
         }
     }
-
-    // Sends a PARAGRAPH_UPDATE_OUTPUT message to UI containing the paginated data
-    private void updatePage(int start, int length, String searchString, int draw){
-        if (datasetAsJSON == null) {
-            LOGGER.warn("attempting to draw empty dataset");
-            return;
-        }
-        try {
-            JsonObject response = SearchAndPaginate(draw, start,length,searchString);
-            String outputContent = "%jsontable\n" +
-                    response.toString();
-            getInterpreterContext().out().clear();
-            getInterpreterContext().out().write(outputContent);
-            getInterpreterContext().out().flush();
-        } catch (java.io.IOException e) {
-            LOGGER.error(e.toString());
-        }
-    }
-
-    private JsonObject SearchAndPaginate(int draw, int start, int length, String searchString){
-        DTSearch dtSearch = new DTSearch(datasetAsJSON);
-        List<Order> currentOrder = null;
-
-        // TODO these all decode the JSON, it refactor therefore to decode only once
-        // searching
-        List<String> searchedList = dtSearch.search(searchString);
-
-        // TODO ordering
-        //DTOrder dtOrder = new DTOrder(searchedList);
-        //List<String> orderedlist = dtOrder.order(searchedList, currentOrder);
-        List<String> orderedlist = searchedList;
-
-        // pagination
-        DTPagination dtPagination = new DTPagination(orderedlist);
-        List<String> paginatedList = dtPagination.paginate(length, start);
-
-        // ui formatting
-        JsonArray formated = dataStreamParser(paginatedList);
-
-        int recordsTotal = datasetAsJSON.size();
-        int recordsFiltered = searchedList.size();
-
-        return DTNetResponse(formated, schemaHeadersJson, draw, recordsTotal,recordsFiltered);
-    }
-
-    static JsonArray dataStreamParser(List<String> data){
-
-        try{
-            JsonArrayBuilder builder = Json.createArrayBuilder();
-
-
-            for (String S : data) {
-                JsonReader reader = Json.createReader(new StringReader(S));
-                JsonObject line = reader.readObject();
-                builder.add(line);
-                reader.close();
-            }
-            return builder.build();
-        }catch(JsonException|IllegalStateException e){
-            LOGGER.error(e.toString());
-            return(Json.createArrayBuilder().build());
-        }
-    }
-
-    static JsonObject DTNetResponse(JsonArray data, JsonArray schemaHeadersJson, int draw, int recordsTotal, int recordsFiltered){
-        try{
-            JsonObjectBuilder builder = Json.createObjectBuilder();
-            builder.add("headers",schemaHeadersJson);
-            builder.add("data", data);
-            builder.add("draw", draw);
-            builder.add("recordsTotal", recordsTotal);
-            builder.add("recordsFiltered", recordsFiltered);
-            return builder.build();
-        }catch(JsonException|IllegalStateException e){
-            LOGGER.error(e.toString());
-            return(Json.createObjectBuilder().build());
-        }
-    }
-
 }
