@@ -114,7 +114,7 @@ public final class DTTableDatasetNg extends AbstractUserInterfaceElement {
             int length = ajaxRequest.getJsonNumber("length").intValue();
             int draw = ajaxRequest.getJsonNumber("draw").intValue();
             String searchString = ajaxRequest.getJsonObject("search").getString("value");
-            updatePage(start,length,searchString, draw);
+            updatePage(start,length,searchString, draw,false);
         }
         finally {
             lock.unlock();
@@ -150,7 +150,7 @@ public final class DTTableDatasetNg extends AbstractUserInterfaceElement {
                 DTHeader dtHeader = new DTHeader(rowDataset.schema());
                 schemaHeadersJson = dtHeader.json();
                 datasetAsJSON = rowDataset.toJSON().collectAsList();
-                updatePage(0,currentAJAXLength,"",1);
+                updatePage(0,currentAJAXLength,"",1,true);
             }
         } finally {
             lock.unlock();
@@ -158,7 +158,7 @@ public final class DTTableDatasetNg extends AbstractUserInterfaceElement {
     }
 
     // Sends a PARAGRAPH_UPDATE_OUTPUT message to UI containing the paginated data
-    private void updatePage(int start, int length, String searchString, int draw){
+    private void updatePage(int start, int length, String searchString, int draw, boolean clearParagraphResults){
         if (datasetAsJSON == null) {
             LOGGER.warn("attempting to draw empty dataset");
             return;
@@ -167,9 +167,10 @@ public final class DTTableDatasetNg extends AbstractUserInterfaceElement {
             JsonObject response = SearchAndPaginate(draw, start,length,searchString);
             String outputContent = "%jsontable\n" +
                     response.toString();
-            getInterpreterContext().out().clear();
-            getInterpreterContext().out().write(outputContent);
-            getInterpreterContext().out().flush();
+            // We want to send the clear to frontend when we are running paragraph, but not when making a pagination change
+            getInterpreterContext().out().clear(clearParagraphResults); // This guy removes paragraph.results. Could use clear(false) to stop ajaxRequests from clearing the results.
+            getInterpreterContext().out().write(outputContent); // nothing gets sent yet
+            getInterpreterContext().out().flush(); // flushlistener updates Paragraph.outputBuffer, but not paragraph.results --> results are lost on pagination update
         } catch (java.io.IOException e) {
             LOGGER.error(e.toString());
         }
