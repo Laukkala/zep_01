@@ -48,6 +48,7 @@ package com.teragrep.pth_07.ui.elements.table_dynamic;
 import com.teragrep.pth_07.ui.elements.table_dynamic.pojo.Order;
 import com.teragrep.pth_07.ui.elements.AbstractUserInterfaceElement;
 import com.teragrep.zep_01.interpreter.DataTableUserInterfaceElement;
+import com.teragrep.zep_01.interpreter.InterpreterException;
 import jakarta.json.*;
 import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
@@ -160,10 +161,6 @@ public final class DTTableDatasetNg extends AbstractUserInterfaceElement impleme
 
     // Sends a PARAGRAPH_UPDATE_OUTPUT message to UI containing the paginated data
     private void updatePage(int start, int length, String searchString, int draw, boolean clearParagraphResults){
-        if (datasetAsJSON == null) {
-            LOGGER.warn("attempting to draw empty dataset");
-            return;
-        }
         try {
             JsonObject response = SearchAndPaginate(draw, start,length,searchString);
             String outputContent = "%jsontable\n" +
@@ -172,12 +169,19 @@ public final class DTTableDatasetNg extends AbstractUserInterfaceElement impleme
             getInterpreterContext().out().clear(clearParagraphResults); // This guy removes paragraph.results. Could use clear(false) to stop ajaxRequests from clearing the results.
             getInterpreterContext().out().write(outputContent); // nothing gets sent yet
             getInterpreterContext().out().flush(); // flushlistener updates Paragraph.outputBuffer, but not paragraph.results --> results are lost on pagination update
-        } catch (java.io.IOException e) {
+        }
+        catch (InterpreterException ie){
+            LOGGER.error("Failed to update datatable!",ie);
+        }
+        catch (java.io.IOException e) {
             LOGGER.error(e.toString());
         }
     }
 
-    private JsonObject SearchAndPaginate(int draw, int start, int length, String searchString){
+    public JsonObject SearchAndPaginate(int draw, int start, int length, String searchString) throws InterpreterException {
+        if(datasetAsJSON == null){
+            throw new InterpreterException("Attempting to draw an empty dataset!");
+        }
         DTSearch dtSearch = new DTSearch(datasetAsJSON);
         List<Order> currentOrder = null;
 
