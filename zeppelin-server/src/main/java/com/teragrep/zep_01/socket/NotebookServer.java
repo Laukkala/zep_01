@@ -296,6 +296,7 @@ public class NotebookServer extends WebSocketServlet
           break;
         case GET_NOTE:
           getNote(conn, context, receivedMessage);
+          preloadInterpreter(conn,context,receivedMessage);
           break;
         case RELOAD_NOTE:
           reloadNote(conn, context, receivedMessage);
@@ -444,6 +445,9 @@ public class NotebookServer extends WebSocketServlet
           break;
         case PATCH_PARAGRAPH:
           patchParagraph(conn, context, receivedMessage);
+          break;
+        case PRELOAD_INTERPRETER:
+          preloadInterpreter(conn, context, receivedMessage);
           break;
         default:
           break;
@@ -1161,6 +1165,30 @@ public class NotebookServer extends WebSocketServlet
               .put("index",0)
               .put("noteId", noteId)
               .put("paragraphId", paragraphId);
+      conn.send(serializeMessage(msg));
+    }
+  }
+
+  private void preloadInterpreter(NotebookSocket conn,
+                                    ServiceContext context,
+                                    Message fromMessage) throws IOException, InterpreterException {
+    final String noteId = (String) fromMessage.get("id");
+    Note note = getNotebook().getNote(noteId);
+    // Get all binded interpreters
+    List<Interpreter> interpreters = new ArrayList<Interpreter>();
+    for (Paragraph paragraph:note.getParagraphs()) {
+      Interpreter interpreter = paragraph.getBindedInterpreter();
+      if(interpreter instanceof ConfInterpreter){
+        throw new InterpreterException("ConfInterpreter present, canceling preloading!");
+      }
+      interpreters.add(paragraph.getBindedInterpreter());
+    }
+
+    // Open interpreters
+    for (Interpreter interpreter:interpreters) {
+      interpreter.open();
+      Message msg = new Message(OP.INTERPRETER_PRELOADED);
+      msg.put("data","Preloaded interpreter "+interpreter.getClassName()+" | "+interpreter.getClass().getName()+" !");
       conn.send(serializeMessage(msg));
     }
   }
