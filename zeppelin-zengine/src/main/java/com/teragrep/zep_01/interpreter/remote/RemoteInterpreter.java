@@ -127,7 +127,7 @@ public class RemoteInterpreter extends Interpreter {
         interpreterProcess.callRemoteFunction(client -> {
           LOGGER.info("Open RemoteInterpreter {}", getClassName());
           // open interpreter here instead of in the jobRun method in RemoteInterpreterServer
-          // client.open(sessionId, className);
+          client.open(sessionId, className);
           // Push angular object loaded from JSON file to remote interpreter
           synchronized (getInterpreterGroup()) {
             if (!getInterpreterGroup().isAngularRegistryPushed()) {
