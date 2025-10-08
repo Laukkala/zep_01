@@ -27,6 +27,7 @@ import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.stream.Collectors;
 import javax.inject.Inject;
 import javax.inject.Provider;
 import javax.servlet.http.HttpServletRequest;
@@ -296,7 +297,6 @@ public class NotebookServer extends WebSocketServlet
           break;
         case GET_NOTE:
           getNote(conn, context, receivedMessage);
-          preloadInterpreter(conn,context,receivedMessage);
           break;
         case RELOAD_NOTE:
           reloadNote(conn, context, receivedMessage);
@@ -368,6 +368,7 @@ public class NotebookServer extends WebSocketServlet
           break;
         case PARAGRAPH_CLEAR_ALL_OUTPUT:
           clearAllParagraphOutput(conn, context, receivedMessage);
+          preloadInterpreter(conn,context,receivedMessage);
           break;
         case PARAGRAPH_UPDATE_RESULT:
           updateParagraphResult(conn, context, receivedMessage);
@@ -1189,6 +1190,12 @@ public class NotebookServer extends WebSocketServlet
       interpreter.open();
       Message msg = new Message(OP.INTERPRETER_PRELOADED);
       msg.put("data","Preloaded interpreter "+interpreter.getClassName()+" | "+interpreter.getClass().getName()+" !");
+      conn.send(serializeMessage(msg));
+    }
+
+    for (Interpreter interpreter:interpreters.stream().distinct().collect(Collectors.toList())) {
+      Message msg = new Message(OP.ERROR_INFO);
+      msg.put("info","Distinct interpreters: "+interpreter.getClassName()+" | "+interpreter.getClass().getName()+" !");
       conn.send(serializeMessage(msg));
     }
   }
