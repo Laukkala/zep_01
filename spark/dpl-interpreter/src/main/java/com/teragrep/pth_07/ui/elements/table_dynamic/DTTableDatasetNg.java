@@ -126,9 +126,9 @@ public final class DTTableDatasetNg extends AbstractUserInterfaceElement {
             JsonObject response = SearchAndPaginate(draw, start,length,searchString);
             String outputContent = "%jsontable\n" +
                     response.toString();
-            getInterpreterContext().out().clear(false);
+            //getInterpreterContext().out().clear(false); thats crazy
             getInterpreterContext().out().write(outputContent);
-            getInterpreterContext().out().flush();
+            //getInterpreterContext().out().flush(); thats crazy
         }
         // We catch and log Exceptions here instead of rethrowing because calls to this method come from DPLInterpreter's BatchHandler, which doesn't seem to have easy ways to propagate Exceptions.
         catch (InterpreterException ie){

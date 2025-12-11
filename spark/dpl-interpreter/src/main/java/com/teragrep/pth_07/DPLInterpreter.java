@@ -66,6 +66,7 @@ import org.apache.spark.sql.SparkSession;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 import java.util.List;
@@ -215,6 +216,10 @@ public class DPLInterpreter extends AbstractInterpreter {
 
         sparkSession.streams().addListener(new DPLMetricsListener(sparkSession, userInterfaceManager, queryId));
         try {
+            InterpreterOutput interpreterOutput = interpreterContext.out();
+            if(interpreterOutput != null){
+                interpreterOutput.clear(false); // thats crazy
+            }
             final DPLExecutorResult executorResult = dplExecutor.interpret(
                     batchHandler,
                     sparkSession,
@@ -233,10 +238,15 @@ public class DPLInterpreter extends AbstractInterpreter {
             } else {
                 code = Code.ERROR;
             }
-
+            interpreterOutput =  interpreterContext.out();
+            if(interpreterOutput != null){
+                interpreterOutput.flush();// thats crazy
+            }
             output = new InterpreterResult(code, executorResult.message());
             LOGGER.info("Query done, return code: {}", output.code());
         } catch (TimeoutException e) {
+            throw new RuntimeException(e);
+        } catch (IOException e) {
             throw new RuntimeException(e);
         }
 
