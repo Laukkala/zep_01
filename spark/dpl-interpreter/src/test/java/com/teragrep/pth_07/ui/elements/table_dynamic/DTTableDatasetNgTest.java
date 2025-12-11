@@ -204,15 +204,14 @@ public class DTTableDatasetNgTest {
         Assertions.assertDoesNotThrow(()->{
             dtTableDatasetNg.setParagraphDataset(testDs);
         });
-        //Assertions.assertEquals(1,listener.numberOfUpdateCalls());
+        Assertions.assertEquals(1,listener.numberOfUpdateCalls());
         Assertions.assertEquals(0,listener.numberOfResetCalls());
 
         // Simulate DPL receiving another batch of data.
         Assertions.assertDoesNotThrow(()->{
             dtTableDatasetNg.setParagraphDataset(testDs);
         });
-        Assertions.assertDoesNotThrow(()->{testOutput.flush();});
-        //Assertions.assertEquals(2,listener.numberOfUpdateCalls());
+        Assertions.assertEquals(2,listener.numberOfUpdateCalls());
         Assertions.assertEquals(0,listener.numberOfResetCalls());
 
     }
@@ -234,30 +233,25 @@ public class DTTableDatasetNgTest {
         Assertions.assertDoesNotThrow(()->{
             dtTableDatasetNg.setParagraphDataset(testDs);
         });
-        //Assertions.assertDoesNotThrow(()->testOutput.flush());
         List<InterpreterResultMessage> messages = Assertions.assertDoesNotThrow(()->testOutput.toInterpreterResultMessage());
         // First message should have draw value of 1
-        //Assertions.assertTrue(messages.get(0).getData().contains("\"draw\":1"));
+        Assertions.assertTrue(messages.get(0).getData().contains("\"draw\":1"));
 
         // Simulate DPL receiving another batch of new data without changing schema.
         Assertions.assertDoesNotThrow(()->{
             dtTableDatasetNg.setParagraphDataset(testDs);
         });
-        //Assertions.assertDoesNotThrow(()->testOutput.flush());
         List<InterpreterResultMessage> messages2 = Assertions.assertDoesNotThrow(()->testOutput.toInterpreterResultMessage());
         // Second message should have draw value of 2
-        //Assertions.assertTrue(messages2.get(1).getData().contains("\"draw\":2"));
+        Assertions.assertTrue(messages2.get(0).getData().contains("\"draw\":2"));
 
         // Simulate DPL receiving yet another batch of new data but with a changed schema.
         Assertions.assertDoesNotThrow(()->{
             dtTableDatasetNg.setParagraphDataset(smallTestDs);
         });
-        Assertions.assertDoesNotThrow(()->testOutput.flush());
         List<InterpreterResultMessage> messages3 = Assertions.assertDoesNotThrow(()->testOutput.toInterpreterResultMessage());
         // Third message's draw value should be reset to 1
         Assertions.assertTrue(messages3.get(0).getData().contains("\"draw\":1"));
-        Assertions.assertTrue(messages3.get(1).getData().contains("\"draw\":2"));
-        Assertions.assertTrue(messages3.get(2).getData().contains("\"draw\":1"));
     }
 
     private class TestInterpreterOutputListener implements InterpreterOutputListener{
