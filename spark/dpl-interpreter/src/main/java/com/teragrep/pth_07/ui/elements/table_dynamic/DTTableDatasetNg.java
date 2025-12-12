@@ -68,14 +68,6 @@ public final class DTTableDatasetNg extends AbstractUserInterfaceElement {
     private DTHeader schemaHeaders;
     private int drawCount;
 
-    /*
-    currentAJAXLength is shared between all the clients when server refreshes
-    perhaps we could just let the clients know that there is an update and
-    that they would each request their own copy and the request would contain
-    the size?
-     */
-    private int currentAJAXLength = 50;
-
     public DTTableDatasetNg(final InterpreterContext interpreterContext) {
         this(interpreterContext, new DTHeader(), 1);
     }
@@ -113,7 +105,7 @@ public final class DTTableDatasetNg extends AbstractUserInterfaceElement {
                 // needs to be here as sparkContext might disappear later
                 schemaHeaders = new DTHeader(rowDataset.schema());
                 datasetAsJSON = rowDataset.toJSON().collectAsList();
-                updatePage(0,currentAJAXLength,"", drawCount);
+                updatePage(0,datasetAsJSON.size(),"", drawCount);
             }
         } finally {
             lock.unlock();
@@ -126,7 +118,6 @@ public final class DTTableDatasetNg extends AbstractUserInterfaceElement {
             JsonObject response = SearchAndPaginate(draw, start,length,searchString);
             String outputContent = "%jsontable\n" +
                     response.toString();
-            getInterpreterContext().out().clear(false);
             getInterpreterContext().out().write(outputContent);
             getInterpreterContext().out().flush();
         }
