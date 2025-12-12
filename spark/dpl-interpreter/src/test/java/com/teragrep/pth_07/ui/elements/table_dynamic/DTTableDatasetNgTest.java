@@ -92,7 +92,7 @@ public class DTTableDatasetNgTest {
             }
     );
     private final TestDPLData testDataset = new TestDPLData(sparkSession, testSchema);
-    private final Dataset<Row> testDs = testDataset.createDataset(250,Timestamp.from(Instant.ofEpochSecond(0)),0L,"data data","index_A","stream","host","input",String.valueOf(0),0L,"test data");
+    private final Dataset<Row> testDs = testDataset.createDataset(49,Timestamp.from(Instant.ofEpochSecond(0)),0L,"data data","index_A","stream","host","input",String.valueOf(0),0L,"test data");
 
 
     private final StructType smallTestSchema = new StructType(
