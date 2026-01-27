@@ -270,6 +270,12 @@
           <version>3.17.4</version>
           <scope>test</scope>
       </dependency>
+    <dependency>
+      <groupId>org.apache.spark</groupId>
+      <artifactId>spark-launcher_2.12</artifactId>
+      <version>3.4.1</version>
+      <scope>compile</scope>
+    </dependency>
 
   </dependencies>
 
