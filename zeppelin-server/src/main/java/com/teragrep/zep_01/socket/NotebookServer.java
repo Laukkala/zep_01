@@ -633,6 +633,10 @@ public class NotebookServer extends WebSocketServlet
     inlineBroadcastNewParagraph(note, para);
   }
 
+  private void inlineBroadcastNoteList() {
+    broadcastNoteListUpdate();
+  }
+
   public void broadcastNoteListUpdate() {
     AuthorizationService authorizationService = getNotebookAuthorizationService();
 
@@ -643,6 +647,10 @@ public class NotebookServer extends WebSocketServlet
       getConnectionManager().multicastToUser(user,
         new Message(OP.NOTES_INFO).put("notes", notesInfo));
     });
+  }
+
+  public void broadcastNoteList(AuthenticationInfo subject, Set<String> userAndRoles) {
+    inlineBroadcastNoteList();
   }
 
   public void listNotesInfo(NotebookSocket conn, ServiceContext context) throws IOException {
@@ -795,6 +803,7 @@ public class NotebookServer extends WebSocketServlet
             getConnectionManager().broadcast(note.getId(), new Message(OP.NOTE_UPDATED).put("name", name)
                 .put("config", config)
                 .put("info", note.getInfo()));
+            broadcastNoteList(context.getAutheInfo(), context.getUserAndRoles());
           }
         });
   }
@@ -834,6 +843,7 @@ public class NotebookServer extends WebSocketServlet
           public void onSuccess(Note note, ServiceContext context) throws IOException {
             super.onSuccess(note, context);
             broadcastNote(note);
+            broadcastNoteList(context.getAutheInfo(), context.getUserAndRoles());
           }
 
           @Override
@@ -856,6 +866,7 @@ public class NotebookServer extends WebSocketServlet
           @Override
           public void onSuccess(List<NoteInfo> result, ServiceContext context) throws IOException {
             super.onSuccess(result, context);
+            broadcastNoteList(context.getAutheInfo(), context.getUserAndRoles());
           }
         });
   }
@@ -875,6 +886,7 @@ public class NotebookServer extends WebSocketServlet
             getConnectionManager().addNoteConnection(note.getId(), conn);
             final JsonObject message = new JsonMessage(OP.NEW_NOTE,note).asJson();
             conn.send(message.toString());
+            broadcastNoteList(context.getAutheInfo(), context.getUserAndRoles());
           }
 
           @Override
@@ -896,6 +908,7 @@ public class NotebookServer extends WebSocketServlet
           public void onSuccess(String message, ServiceContext context) throws IOException {
             super.onSuccess(message, context);
             getConnectionManager().removeNoteConnection(noteId);
+            broadcastNoteList(context.getAutheInfo(), context.getUserAndRoles());
           }
         });
   }
@@ -915,6 +928,7 @@ public class NotebookServer extends WebSocketServlet
             for (NoteInfo noteInfo : notesInfo) {
               getConnectionManager().removeNoteConnection(noteInfo.getId());
             }
+            broadcastNoteList(context.getAutheInfo(), context.getUserAndRoles());
           }
         });
   }
@@ -929,6 +943,7 @@ public class NotebookServer extends WebSocketServlet
           public void onSuccess(Note note, ServiceContext context) throws IOException {
             super.onSuccess(note, context);
             broadcastNote(note);
+            broadcastNoteList(context.getAutheInfo(), context.getUserAndRoles());
           }
         });
   }
@@ -944,6 +959,7 @@ public class NotebookServer extends WebSocketServlet
           @Override
           public void onSuccess(Void result, ServiceContext context) throws IOException {
             super.onSuccess(result, context);
+            broadcastNoteList(context.getAutheInfo(), context.getUserAndRoles());
           }
         });
 
@@ -959,6 +975,7 @@ public class NotebookServer extends WebSocketServlet
           public void onSuccess(Note note, ServiceContext context) throws IOException {
             super.onSuccess(note, context);
             broadcastNote(note);
+            broadcastNoteList(context.getAutheInfo(), context.getUserAndRoles());
           }
         });
 
@@ -974,6 +991,7 @@ public class NotebookServer extends WebSocketServlet
           @Override
           public void onSuccess(Object result, ServiceContext context) throws IOException {
             super.onSuccess(result, context);
+            broadcastNoteList(context.getAutheInfo(), context.getUserAndRoles());
           }
         });
   }
@@ -986,6 +1004,7 @@ public class NotebookServer extends WebSocketServlet
           @Override
           public void onSuccess(Object result, ServiceContext context) throws IOException {
             super.onSuccess(result, context);
+            broadcastNoteList(context.getAutheInfo(), context.getUserAndRoles());
           }
         });
   }
@@ -997,6 +1016,7 @@ public class NotebookServer extends WebSocketServlet
           @Override
           public void onSuccess(Object result, ServiceContext context) throws IOException {
             super.onSuccess(result, context);
+            broadcastNoteList(context.getAutheInfo(), context.getUserAndRoles());
           }
         });
   }
@@ -1078,6 +1098,7 @@ public class NotebookServer extends WebSocketServlet
             super.onSuccess(newNote, context);
             getConnectionManager().addNoteConnection(newNote.getId(), conn);
             conn.send(serializeMessage(new Message(OP.NEW_NOTE).put("note", newNote)));
+            broadcastNoteList(context.getAutheInfo(), context.getUserAndRoles());
           }
         });
   }
@@ -1182,6 +1203,7 @@ public class NotebookServer extends WebSocketServlet
             super.onSuccess(note, context);
             try {
               broadcastNote(note);
+              broadcastNoteList(context.getAutheInfo(), context.getUserAndRoles());
             } catch (NullPointerException e) {
               // TODO(zjffdu) remove this try catch. This is only for test of
               // NotebookServerTest#testImportNotebook

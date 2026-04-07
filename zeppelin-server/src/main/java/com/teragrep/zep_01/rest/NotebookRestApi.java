@@ -298,6 +298,7 @@ public class NotebookRestApi extends AbstractRestApi {
     AuthenticationInfo subject = new AuthenticationInfo(authenticationService.getPrincipal());
     authorizationService.saveNoteAuth(noteId, subject);
     notebookServer.broadcastNote(note);
+    notebookServer.broadcastNoteList(subject, userAndRoles);
     return new JsonResponse<>(Status.OK).build();
   }
 
@@ -416,6 +417,7 @@ public class NotebookRestApi extends AbstractRestApi {
             new RestServiceCallback<String>() {
               @Override
               public void onSuccess(String message, ServiceContext context) {
+                notebookServer.broadcastNoteList(context.getAutheInfo(), context.getUserAndRoles());
               }
             });
 
@@ -450,6 +452,7 @@ public class NotebookRestApi extends AbstractRestApi {
               @Override
               public void onSuccess(Note newNote, ServiceContext context) throws IOException {
                 notebookServer.broadcastNote(newNote);
+                notebookServer.broadcastNoteList(subject, context.getUserAndRoles());
               }
             });
     return new JsonResponse<>(Status.OK, "", newNote.getId()).build();
@@ -480,6 +483,7 @@ public class NotebookRestApi extends AbstractRestApi {
               @Override
               public void onSuccess(Note note, ServiceContext context) throws IOException {
                 notebookServer.broadcastNote(note);
+                notebookServer.broadcastNoteList(context.getAutheInfo(), context.getUserAndRoles());
               }
             });
     return new JsonResponse<>(Status.OK, "").build();
