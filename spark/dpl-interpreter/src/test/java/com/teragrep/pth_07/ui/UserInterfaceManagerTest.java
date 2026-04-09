@@ -45,6 +45,7 @@
  */
 package com.teragrep.pth_07.ui;
 
+import com.teragrep.pth_07.ui.elements.PerformanceIndicator;
 import com.teragrep.pth_07.ui.elements.table_dynamic.DatasetState;
 import com.teragrep.pth_07.ui.elements.table_dynamic.MaterializedDatasetState;
 import com.teragrep.pth_07.ui.elements.table_dynamic.StubDatasetState;
@@ -156,14 +157,51 @@ class UserInterfaceManagerTest {
 
     @Test
     void equalsVerifier() {
-        final InterpreterContext redPerformanceIndicator = InterpreterContext.builder().setNoteId("red").build();
-        final InterpreterContext bluePerformanceIndicactor = InterpreterContext.builder().setNoteId("blue").build();
+        final InterpreterContext redInterpreterContext = InterpreterContext.builder().setNoteId("red").build();
+        AngularObjectRegistry redRegistry = new AngularObjectRegistry("red", new AngularObjectRegistryListener() {
+            @Override
+            public void onAddAngularObject(String interpreterGroupId, AngularObject angularObject) {
+                //no-op
+            }
+
+            @Override
+            public void onUpdateAngularObject(String interpreterGroupId, AngularObject angularObject) {
+                //no-op
+            }
+
+            @Override
+            public void onRemoveAngularObject(String interpreterGroupId, AngularObject angularObject) {
+                //no-op
+            }
+        });
+        redInterpreterContext.setAngularObjectRegistry(redRegistry);
+        final InterpreterContext blueInterpreterContext = InterpreterContext.builder().setNoteId("blue").build();
+        AngularObjectRegistry blueRegistry = new AngularObjectRegistry("blue", new AngularObjectRegistryListener() {
+            @Override
+            public void onAddAngularObject(String interpreterGroupId, AngularObject angularObject) {
+                //no-op
+            }
+
+            @Override
+            public void onUpdateAngularObject(String interpreterGroupId, AngularObject angularObject) {
+                //no-op
+            }
+
+            @Override
+            public void onRemoveAngularObject(String interpreterGroupId, AngularObject angularObject) {
+                //no-op
+            }
+        });
+        blueInterpreterContext.setAngularObjectRegistry(blueRegistry);
+        final PerformanceIndicator redPerformanceIndicator = new PerformanceIndicator(redInterpreterContext);
+        final PerformanceIndicator bluePerformanceIndicactor = new PerformanceIndicator(blueInterpreterContext);
         final InterpreterOutput redOutput = new InterpreterOutput();
         final InterpreterOutput blueOutput = new InterpreterOutput();
         final AtomicReference<DatasetState> redAtomicReference = new AtomicReference<>(new StubDatasetState(redOutput));
         final AtomicReference<DatasetState> blueAtomicReference = new AtomicReference<>(new StubDatasetState(blueOutput));
         EqualsVerifier.forClass(UserInterfaceManager.class)
-                .withPrefabValues(InterpreterContext.class, redPerformanceIndicator, bluePerformanceIndicactor)
+                .withPrefabValues(InterpreterContext.class, redInterpreterContext, blueInterpreterContext)
+                .withPrefabValues(PerformanceIndicator.class, redPerformanceIndicator,bluePerformanceIndicactor)
                 .withPrefabValues(AtomicReference.class, redAtomicReference, blueAtomicReference)
                 .verify();
     }
