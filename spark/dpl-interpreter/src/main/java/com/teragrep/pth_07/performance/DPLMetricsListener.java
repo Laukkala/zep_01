@@ -56,6 +56,8 @@ import org.apache.spark.sql.streaming.StreamingQueryListener;
 import org.apache.spark.sql.types.DataTypes;
 import org.apache.spark.sql.types.StructField;
 import org.apache.spark.sql.types.StructType;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import scala.collection.Iterator;
 import scala.collection.JavaConverters;
 import scala.collection.Seq;
@@ -63,6 +65,7 @@ import scala.collection.Seq;
 import java.util.*;
 
 public final class DPLMetricsListener extends StreamingQueryListener {
+    private final static Logger LOGGER = LoggerFactory.getLogger(DPLMetricsListener.class);
     private final SparkSession sparkSession;
     private final UserInterfaceManager uiManager;
     private final String queryId;
@@ -87,8 +90,10 @@ public final class DPLMetricsListener extends StreamingQueryListener {
 
     @Override
     public void onQueryProgress(final QueryProgressEvent event) {
+        LOGGER.warn("Query {} received event {} with id {}",queryId, event, event.progress().name());
         if (event.progress().name().equals(queryId)) {
             final Seq<SQLExecutionUIData> executionsList = sparkSession.sharedState().statusStore().executionsList();
+            LOGGER.warn("Event {} has {} executions",event.progress().name(),executionsList.size());
             if (!executionsList.isEmpty()) {
                 final Iterator<SQLExecutionUIData> executionDataIterator = executionsList.iterator();
                 while (executionDataIterator.hasNext()) {
@@ -96,12 +101,15 @@ public final class DPLMetricsListener extends StreamingQueryListener {
                     final Map<Object, String> metricValues = JavaConverters.mapAsJavaMap(executionData.metricValues());
                     final List<Object> typedValues = new ArrayList<>();
                     // Iterate over schema to make sure values are in correct order
+                    LOGGER.warn("Execution has {} values",metricValues.size());
                     for (StructField field: schema.fields()) {
                         // Initialize as null because Spark rows use nulls to indicate lack of data.
                         Object fieldValue = null;
+                        LOGGER.warn("Looking for value with name {}",field.name());
                         for (final SQLPlanMetric metric : JavaConverters.asJavaIterable(executionData.metrics())) {
                             final long id = metric.accumulatorId();
                             final String value = metricValues.get(id);
+                            LOGGER.warn("Encountered value {} with name {}",value,metric.name());
                             if (metric.metricType().startsWith("v2Custom_") && metric.name().contains(field.name())) {
                                 if(field.dataType().equals(DataTypes.StringType)){
                                     fieldValue = value;
@@ -121,6 +129,7 @@ public final class DPLMetricsListener extends StreamingQueryListener {
                                 }
                             }
                         }
+                        LOGGER.warn("Search resulted in value {}",fieldValue);
                         typedValues.add(fieldValue);
                     }
                     Row row = new GenericRowWithSchema(typedValues.toArray(),schema);
