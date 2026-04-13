@@ -116,12 +116,7 @@ public final class DPLMetricsListener extends StreamingQueryListener {
             }
             LOGGER.warn("Creating dataframe for Query {}, number of rows: {}",queryId, rows.size());
             Dataset<Row> metricsDataset = sparkSession.createDataFrame(rows,schema);
-            // Drop values where no data was available.
-            LOGGER.warn("Dropping null values for Query {}",queryId);
-            Dataset<Row> prunedDataset = metricsDataset.na().drop();
-            LOGGER.warn("Setting dataset for Query {}",queryId);
-            uiManager.getPerformanceIndicator().setPerformanceDataset(prunedDataset);
-            LOGGER.warn("Sending Performance update for Query {}",queryId);
+            uiManager.getPerformanceIndicator().setPerformanceDataset(metricsDataset);
             uiManager.getPerformanceIndicator().sendPerformanceUpdate();
         }
     }
