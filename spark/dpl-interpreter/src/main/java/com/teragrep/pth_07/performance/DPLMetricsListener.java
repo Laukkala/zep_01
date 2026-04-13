@@ -118,6 +118,7 @@ public final class DPLMetricsListener extends StreamingQueryListener {
             Dataset<Row> metricsDataset = sparkSession.createDataFrame(rows,schema);
             uiManager.getPerformanceIndicator().setPerformanceDataset(metricsDataset);
             uiManager.getPerformanceIndicator().sendPerformanceUpdate();
+            LOGGER.warn("Sent performance dataframe for Query {]",queryId);
         }
     }
 
