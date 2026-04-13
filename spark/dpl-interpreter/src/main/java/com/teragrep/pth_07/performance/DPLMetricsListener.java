@@ -103,18 +103,25 @@ public final class DPLMetricsListener extends StreamingQueryListener {
                         for (final SQLPlanMetric metric : JavaConverters.asJavaIterable(executionData.metrics())) {
                             final long id = metric.accumulatorId();
                             final String value = metricValues.get(id);
-                            if (metric.metricType().startsWith("v2Custom_") && value != null) {
+                            LOGGER.warn("Query {} received value {}",queryId, value);
+                            if (metric.metricType().startsWith("v2Custom_") && value != null && value != "null") {
+                                LOGGER.warn("Updating query {} data with value {}",queryId, value);
                                 entry = entry.withData(metric.name(),value);
                             }
                     }
+                    LOGGER.warn("Row processed for Query {}",queryId);
                     Row row = entry.asRow();
                     rows.add(row);
                 }
             }
+            LOGGER.warn("Creating dataframe for Query {}, number of rows: {}",queryId, rows.size());
             Dataset<Row> metricsDataset = sparkSession.createDataFrame(rows,schema);
             // Drop values where no data was available.
+            LOGGER.warn("Dropping null values for Query {}",queryId);
             Dataset<Row> prunedDataset = metricsDataset.na().drop();
+            LOGGER.warn("Setting dataset for Query {}",queryId);
             uiManager.getPerformanceIndicator().setPerformanceDataset(prunedDataset);
+            LOGGER.warn("Sending Performance update for Query {}",queryId);
             uiManager.getPerformanceIndicator().sendPerformanceUpdate();
         }
     }
