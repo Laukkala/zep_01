@@ -62,6 +62,7 @@ import scala.collection.Iterator;
 import scala.collection.JavaConverters;
 import scala.collection.Seq;
 
+import java.time.Instant;
 import java.util.*;
 
 public final class DPLMetricsListener extends StreamingQueryListener {
@@ -108,10 +109,13 @@ public final class DPLMetricsListener extends StreamingQueryListener {
                                 LOGGER.warn("Updating query {} data with value {}",queryId, value);
                                 entry = entry.withData(metric.name(),value);
                             }
-                    }
+                        }
+                        entry = entry.withBatchId(event.progress().batchId());
+                        entry = entry.withEps(event.progress().processedRowsPerSecond());
+                        entry = entry.withTimestamp(Instant.now().toEpochMilli());
                     LOGGER.warn("Row processed for Query {}",queryId);
-                    Row row = entry.asRow();
-                    rows.add(row);
+                        Row row = entry.asRow();
+                        rows.add(row);
                 }
             }
             LOGGER.warn("Creating dataframe for Query {}, number of rows: {}",queryId, rows.size());
