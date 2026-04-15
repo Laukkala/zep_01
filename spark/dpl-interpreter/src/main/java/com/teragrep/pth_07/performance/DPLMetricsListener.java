@@ -67,7 +67,6 @@ public final class DPLMetricsListener extends StreamingQueryListener {
     private final SparkSession sparkSession;
     private final UserInterfaceManager uiManager;
     private final String queryId;
-    private final StructType schema;
     private final List<Row> rows;
 
     public DPLMetricsListener(
@@ -77,7 +76,6 @@ public final class DPLMetricsListener extends StreamingQueryListener {
         this.sparkSession = sparkSession;
         this.uiManager = uiManager;
         this.queryId = queryId;
-        this.schema = new DPLPerformanceEntry().schema();
         this.rows = new ArrayList<Row>();
     }
 
@@ -90,6 +88,7 @@ public final class DPLMetricsListener extends StreamingQueryListener {
     public void onQueryProgress(final QueryProgressEvent event) {
         LOGGER.warn("Query {} received event {} with id {}",queryId, event, event.progress().name());
         if (event.progress().name().equals(queryId)) {
+            final StructType schema = new DPLPerformanceEntry().schema();
             final Seq<SQLExecutionUIData> executionsList = sparkSession.sharedState().statusStore().executionsList();
             LOGGER.warn("Event {} has {} executions",event.progress().name(),executionsList.size());
             if (!executionsList.isEmpty()) {
@@ -113,12 +112,12 @@ public final class DPLMetricsListener extends StreamingQueryListener {
                 entry = entry.withBatchId(event.progress().batchId());
                 entry = entry.withEps(event.progress().processedRowsPerSecond());
                 entry = entry.withTimestamp(Instant.now().toEpochMilli());
-                Row row = entry.asRow();
+                final Row row = entry.asRow();
                 LOGGER.warn("Row processed for Query {}",queryId);
                 rows.add(row);
             }
+            final Dataset<Row> metricsDataset = sparkSession.createDataFrame(rows,schema);
             LOGGER.warn("Creating dataframe for Query {}, number of rows: {}",queryId, rows.size());
-            Dataset<Row> metricsDataset = sparkSession.createDataFrame(rows,schema);
             uiManager.getPerformanceIndicator().setPerformanceDataset(metricsDataset);
             uiManager.getPerformanceIndicator().sendPerformanceUpdate();
             LOGGER.warn("Sent performance dataframe for Query {]",queryId);
