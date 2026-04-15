@@ -103,7 +103,7 @@ public final class DPLMetricsListener extends StreamingQueryListener {
                         for (final SQLPlanMetric metric : JavaConverters.asJavaIterable(executionData.metrics())) {
                             final long id = metric.accumulatorId();
                             final String value = metricValues.get(id);
-                            LOGGER.warn("Query {} received value {}",queryId, value);
+                            LOGGER.warn("Query {} received metric {} with value {}",queryId, metric.name(), value);
                             if (metric.metricType().startsWith("v2Custom_") && value != null && value != "null") {
                                 LOGGER.warn("Updating query {} data with value {}",queryId, value);
                                 entry = entry.withData(metric.name(),value);
