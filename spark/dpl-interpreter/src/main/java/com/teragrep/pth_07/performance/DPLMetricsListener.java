@@ -88,14 +88,15 @@ public final class DPLMetricsListener extends StreamingQueryListener {
     public void onQueryProgress(final QueryProgressEvent event) {
         LOGGER.warn("Query {} received event {} with id {}",queryId, event, event.progress().name());
         if (event.progress().name().equals(queryId)) {
-            final StructType schema = new DPLPerformanceEntry().schema();
             final Seq<SQLExecutionUIData> executionsList = sparkSession.sharedState().statusStore().executionsList();
+            DPLPerformanceEntry entry = new DPLPerformanceEntry();
+            final StructType schema = entry.schema();
             LOGGER.warn("Event {} has {} executions",event.progress().name(),executionsList.size());
             if (!executionsList.isEmpty()) {
                 final Iterator<SQLExecutionUIData> executionDataIterator = executionsList.iterator();
 
                 // We want only one DPLPerformanceEntry per QueryProgressEvent. Only the latest instances of each metric encountered will be added to the entry.
-                DPLPerformanceEntry entry = new DPLPerformanceEntry();
+
                 while (executionDataIterator.hasNext()) {
                     final SQLExecutionUIData executionData = executionDataIterator.next();
                     final Map<Object, String> metricValues = JavaConverters.mapAsJavaMap(executionData.metricValues());
@@ -112,7 +113,7 @@ public final class DPLMetricsListener extends StreamingQueryListener {
                 entry = entry.withBatchId(event.progress().batchId());
                 entry = entry.withEps(event.progress().processedRowsPerSecond());
                 entry = entry.withTimestamp(Instant.now().toEpochMilli());
-                final Row row = entry.asRow();
+                final Row row = entry.asRow(schema);
                 LOGGER.warn("Row processed for Query {}",queryId);
                 rows.add(row);
             }
