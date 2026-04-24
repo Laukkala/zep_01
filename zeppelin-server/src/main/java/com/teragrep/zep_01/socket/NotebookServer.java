@@ -586,6 +586,23 @@ public class NotebookServer extends WebSocketServlet
 
     if (note.isPersonalizedMode()) {
       broadcastParagraphs(p.getUserParagraphMap(), p, msgId);
+      // send paragraph forms in a separate message
+      GUI settings = p.settings;
+      if(settings != null){
+        Message formMessage = new Message(OP.PARAGRAPH_FORM).withMsgId(msgId);
+        formMessage.put("noteId",note.getId());
+        formMessage.put("paragraphId",p.getId());
+        List<Map> formArray = new ArrayList<>();
+        for (Input form: settings.getForms().values()) {
+          Map<String,String> formObject = new HashMap<>();
+          formObject.put("type",form.inputType());
+          formObject.put("name",form.getName());
+          formObject.put("value",form.toString());
+          formArray.add(formObject);
+        }
+        formMessage.put("forms",formArray);
+        getConnectionManager().broadcast(note.getId(), formMessage);
+      }
     } else {
       // msgId might be null, leading to a NullPointerException, so we need to check it here. Will need to completely remove the old Message object and replace it with JsonMessages.
       final MessageId messageId;
@@ -595,8 +612,26 @@ public class NotebookServer extends WebSocketServlet
       else {
         messageId = new SimpleMessageId(msgId);
       }
+
       final JsonObject message = new JsonMessage(messageId,OP.PARAGRAPH,p).asJson();
       getConnectionManager().broadcast(note.getId(),message.toString());
+      // send paragraph forms in a separate message
+      GUI settings = p.settings;
+      if(settings != null){
+        Message formMessage = new Message(OP.PARAGRAPH_FORM).withMsgId(msgId);
+        formMessage.put("noteId",note.getId());
+        formMessage.put("paragraphId",p.getId());
+        List<Map> formArray = new ArrayList<>();
+        for (Input form: settings.getForms().values()) {
+          Map<String,String> formObject = new HashMap<>();
+          formObject.put("type",form.inputType());
+          formObject.put("name",form.getName());
+          formObject.put("value",form.toString());
+          formArray.add(formObject);
+        }
+        formMessage.put("forms",formArray);
+        getConnectionManager().broadcast(note.getId(), formMessage);
+      }
     }
   }
 
@@ -608,8 +643,28 @@ public class NotebookServer extends WebSocketServlet
                                          String msgId) {
     if (null != userParagraphMap) {
       for (String user : userParagraphMap.keySet()) {
-        Message message = new Message(OP.PARAGRAPH).withMsgId(msgId).put("paragraph", userParagraphMap.get(user));
+        Paragraph p = userParagraphMap.get(user);
+        Message message = new Message(OP.PARAGRAPH).withMsgId(msgId).put("paragraph", p);
         getConnectionManager().multicastToUser(user, message);
+
+        // send paragraph forms in a separate message
+        Note note = p.getNote();
+        GUI settings = p.settings;
+        if(settings != null){
+          Message formMessage = new Message(OP.PARAGRAPH_FORM).withMsgId(msgId);
+          formMessage.put("noteId",note.getId());
+          formMessage.put("paragraphId",p.getId());
+          List<Map> formArray = new ArrayList<>();
+          for (Input form: settings.getForms().values()) {
+            Map<String,String> formObject = new HashMap<>();
+            formObject.put("type",form.inputType());
+            formObject.put("name",form.getName());
+            formObject.put("value",form.toString());
+            formArray.add(formObject);
+          }
+          formMessage.put("forms",formArray);
+          getConnectionManager().multicastToUser(user, formMessage);
+        }
       }
     }
   }
@@ -2176,13 +2231,15 @@ public class NotebookServer extends WebSocketServlet
             Message message = new Message(OP.PARAGRAPH_FORM);
             message.put("noteId",noteId);
             message.put("paragraphId",paragraphId);
-            Map<String,String> formObject = new HashMap<>();
-            Input updatedForm = updatedSettings.getForms().get(formId);
-            Object updatedValue = updatedSettings.getParams().get(formId);
-            formObject.put("type",updatedForm.inputType());
-            formObject.put("name",updatedForm.getName());
-            formObject.put("value",updatedValue.toString());
-            message.put("form",formObject);
+            List<Map> formArray = new ArrayList<>();
+            for (Input form: updatedSettings.getForms().values()) {
+              Map<String,String> formObject = new HashMap<>();
+              formObject.put("type",form.inputType());
+              formObject.put("name",form.getName());
+              formObject.put("value",form.toString());
+              formArray.add(formObject);
+            }
+            message.put("forms",formArray);
             getConnectionManager().broadcast(noteId,message);
           }
         });
