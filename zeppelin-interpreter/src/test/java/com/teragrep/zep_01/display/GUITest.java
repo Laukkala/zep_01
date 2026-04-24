@@ -252,7 +252,7 @@ public class GUITest {
     params.put("paramBoolean",true);
     final Map<String, Input> forms = new HashMap<>();
     forms.put("checkBox",new CheckBox());
-    forms.put("input",new Input());
+    forms.put("textBox",new TextBox());
     gui.setParams(params);
     gui.setForms(forms);
     final JsonObject json = gui.asJson();
