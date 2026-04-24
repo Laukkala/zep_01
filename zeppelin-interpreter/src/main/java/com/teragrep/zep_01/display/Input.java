@@ -45,7 +45,7 @@ import java.util.regex.Pattern;
  *
  * @param <T>
  */
-public class Input<T> implements Serializable, Jsonable {
+public abstract class Input<T> implements Serializable, Jsonable {
 
   // @TODO(zjffdu). Use gson's RuntimeTypeAdapterFactory and remove the old input form support
   // in future.
@@ -69,6 +69,7 @@ public class Input<T> implements Serializable, Jsonable {
   public Input() {
   }
 
+  public abstract String inputType();
   public boolean isHidden() {
     return hidden;
   }

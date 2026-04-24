@@ -2165,12 +2165,25 @@ public class NotebookServer extends WebSocketServlet
                           ServiceContext context,
                           Message fromMessage) throws IOException {
     String noteId = (String) fromMessage.get("noteId");
-    Map<String, Object> noteParams = (Map<String, Object>) fromMessage.get("form");
-    getNotebookService().putNoteForm(noteId, noteParams, context,
-        new WebSocketServiceCallback<Note>(conn) {
+    String paragraphId = (String) fromMessage.get("paragraphId");
+    Map<String, Object> form = (Map<String, Object>) fromMessage.get("form");
+    String formId = (String) form.get("formId");
+    Object formValue = form.get("value");
+    getNotebookService().submitForm(noteId, paragraphId, formId,formValue, context,
+        new WebSocketServiceCallback<GUI>(conn) {
           @Override
-          public void onSuccess(Note note, ServiceContext context) {
-            // broadcasting of SAVE_NOTE_FORMS removed
+          public void onSuccess(GUI updatedSettings, ServiceContext context) {
+            Message message = new Message(OP.PARAGRAPH_FORM);
+            message.put("noteId",noteId);
+            message.put("paragraphId",paragraphId);
+            Map<String,String> formObject = new HashMap<>();
+            Input updatedForm = updatedSettings.getForms().get(formId);
+            Object updatedValue = updatedSettings.getParams().get(formId);
+            formObject.put("type",updatedForm.inputType());
+            formObject.put("name",updatedForm.getName());
+            formObject.put("value",updatedValue.toString());
+            message.put("form",formObject);
+            getConnectionManager().broadcast(noteId,message);
           }
         });
   }
