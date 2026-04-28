@@ -389,6 +389,10 @@ public class Notebook {
     fireNoteUpdateEvent(note, subject);
   }
 
+  public boolean trashContainsNote(String notePath) {
+    return noteManager.trashContainsNote(notePath);
+  }
+
   public boolean containsNote(String notePath) {
     return noteManager.containsNote(notePath);
   }

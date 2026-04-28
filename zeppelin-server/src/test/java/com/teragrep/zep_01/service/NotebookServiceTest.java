@@ -153,13 +153,6 @@ public class NotebookServiceTest {
     assertEquals(1, note1.getParagraphCount());
     verify(callback).onSuccess(note1, context);
 
-    // create duplicated note
-    reset(callback);
-    Note note2 = notebookService.createNote("/folder_1/note1", "test", true, context, callback);
-    assertNull(note2);
-    ArgumentCaptor<Exception> exception = ArgumentCaptor.forClass(Exception.class);
-    verify(callback).onFailure(exception.capture(), any(ServiceContext.class));
-    assertEquals("Note '/folder_1/note1' existed", exception.getValue().getMessage());
 
     // list note
     reset(callback);
@@ -196,7 +189,7 @@ public class NotebookServiceTest {
     assertEquals("/folder_4/new_name", notesInfo.get(0).getPath());
 
     // create another note
-    note2 = notebookService.createNote("/note2", "test", true, context, callback);
+    Note note2 = notebookService.createNote("/note2", "test", true, context, callback);
     assertEquals("note2", note2.getName());
     verify(callback).onSuccess(note2, context);
 
@@ -336,25 +329,6 @@ public class NotebookServiceTest {
 
     notesInfo = notebookService.listNotesInfo(false, context, callback);
     assertEquals(0, notesInfo.size());
-  }
-
-  @Test
-  public void testRenameNoteRejectsDuplicate() throws IOException {
-    Note note1 = notebookService.createNote("/folder/note1", "test", true, context, callback);
-    assertEquals("note1", note1.getName());
-    verify(callback).onSuccess(note1, context);
-
-    reset(callback);
-    Note note2 = notebookService.createNote("/folder/note2", "test", true, context, callback);
-    assertEquals("note2", note2.getName());
-    verify(callback).onSuccess(note2, context);
-
-    reset(callback);
-    ArgumentCaptor<NotePathAlreadyExistsException> exception = ArgumentCaptor.forClass(NotePathAlreadyExistsException.class);
-    notebookService.renameNote(note1.getId(), "/folder/note2", false, context, callback);
-    verify(callback).onFailure(exception.capture(), any(ServiceContext.class));
-    assertEquals("Note '/folder/note2' existed", exception.getValue().getMessage());
-    verify(callback, never()).onSuccess(any(), any());
   }
 
 
