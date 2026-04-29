@@ -27,6 +27,7 @@ import com.teragrep.zep_01.user.AuthenticationInfo;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
 
 import java.io.File;
 import java.nio.file.Files;
@@ -134,6 +135,40 @@ public class VFSNotebookRepoTest {
     Map<String, String> newSettings = ImmutableMap.of("Notebook Path", newNotebookDir);
     notebookRepo.updateSettings(newSettings, AuthenticationInfo.ANONYMOUS);
     assertEquals(0, notebookRepo.list(AuthenticationInfo.ANONYMOUS).size());
+  }
+
+
+  /**
+   * Duplicated note names should be supported
+   */
+  @Test
+  public void testDuplicateNoteNames(){
+    Assertions.assertEquals(0,Assertions.assertDoesNotThrow(()->notebookRepo.list(AuthenticationInfo.ANONYMOUS).size()));
+    // create note1
+    final Note note1 = new Note();
+    note1.setPath("/my_project/my_note1");
+    final Paragraph p1 = note1.insertNewParagraph(0, AuthenticationInfo.ANONYMOUS);
+    p1.setText("%md hello world");
+    p1.setTitle("my title");
+    Assertions.assertDoesNotThrow(()->notebookRepo.save(note1, AuthenticationInfo.ANONYMOUS));
+
+    Assertions.assertEquals(1,Assertions.assertDoesNotThrow(()->notebookRepo.list(AuthenticationInfo.ANONYMOUS).size()));
+
+    // create duplicate note (with new ID)
+    final Note note2 = new Note();
+    note2.setPath("/my_project/my_note1");
+    final Paragraph p2 = note2.insertNewParagraph(0, AuthenticationInfo.ANONYMOUS);
+    p2.setText("%md hello world");
+    p2.setTitle("my title");
+    Assertions.assertDoesNotThrow(()->notebookRepo.save(note2, AuthenticationInfo.ANONYMOUS));
+
+    // Both notes should have the same path and name.
+    Assertions.assertEquals(note1.getName(),note2.getName());
+    Assertions.assertEquals(note1.getPath(),note2.getPath());
+    Assertions.assertNotEquals(note1.getId(),note2.getId());
+
+    // Both notes should be present in NotebookRepo, even though they have the same path.
+    Assertions.assertEquals(2,Assertions.assertDoesNotThrow(()->notebookRepo.list(AuthenticationInfo.ANONYMOUS).size()));
   }
 
   private void createNewNote(String content, String noteId, String noteName) throws IOException {
