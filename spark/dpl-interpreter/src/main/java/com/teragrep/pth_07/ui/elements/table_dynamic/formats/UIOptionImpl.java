@@ -43,16 +43,28 @@
  * Teragrep, the applicable Commercial License may apply to this file if you as
  * a licensee so wish it.
  */
-package com.teragrep.pth_07.ui.elements.table_dynamic;
+package com.teragrep.pth_07.ui.elements.table_dynamic.formats;
 
-import com.teragrep.zep_01.interpreter.InterpreterException;
-import com.teragrep.zep_01.interpreter.thrift.Options;
+import jakarta.json.Json;
 import jakarta.json.JsonObject;
-import org.apache.spark.sql.Dataset;
-import org.apache.spark.sql.Row;
 
-public interface DatasetState {
-    public abstract DatasetState withDataset(final Dataset<Row> rowDataset);
-    public abstract JsonObject formatDataset(final Options options) throws InterpreterException;
-    public abstract void writeDataUpdate() throws InterpreterException;
+import java.io.StringReader;
+
+public final class UIOptionImpl implements UIOption {
+
+    private final String string;
+
+    public UIOptionImpl(final String string) {
+        this.string = string;
+    }
+
+    @Override
+    public JsonObject toJson() {
+        return Json.createReader(new StringReader(string)).readObject();
+    }
+    @Override
+    public String toString() {
+        return string;
+    }
 }
+

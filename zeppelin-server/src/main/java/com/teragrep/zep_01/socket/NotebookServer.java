@@ -1141,7 +1141,7 @@ public class NotebookServer extends WebSocketServlet
     final String msgId = fromMessage.messageId();
     final String noteId = fromMessage.noteId();
     final String paragraphId = fromMessage.paragraphId();
-    final Options options = fromMessage.options();
+    final String options = fromMessage.options();
 
     // Get interpreterGroup
     Note note = getNotebook().getNote(noteId);
