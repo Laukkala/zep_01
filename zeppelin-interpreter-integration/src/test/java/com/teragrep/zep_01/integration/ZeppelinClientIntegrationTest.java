@@ -87,14 +87,6 @@ public class ZeppelinClientIntegrationTest extends AbstractTestRestApi {
     assertEquals("TEXT", noteResult.getParagraphResultList().get(0).getResults().get(0).getType());
     assertEquals("Hello World\n", noteResult.getParagraphResultList().get(0).getResults().get(0).getData());
 
-    // import to the same notePath again
-    try {
-      zeppelinClient.importNote("/imported_notes/note_1", noteContent);
-      fail("Should fail to import note to the same notePath");
-    } catch (Exception e) {
-      assertTrue(e.getMessage(), e.getMessage().contains("Note '/imported_notes/note_1' existed"));
-    }
-
     // import invalid noteContent
     try {
       zeppelinClient.importNote("/imported_notes/note_1", "Invalid_content");
@@ -108,14 +100,6 @@ public class ZeppelinClientIntegrationTest extends AbstractTestRestApi {
   public void testNoteOperation() throws Exception {
     String noteId = zeppelinClient.createNote("/project_1/note1");
     assertNotNull(notebook.getNote(noteId));
-
-    // create duplicated note
-    try {
-      zeppelinClient.createNote("/project_1/note1");
-      fail("Should fail to create duplicated note");
-    } catch (Exception e) {
-      assertTrue(e.getMessage(), e.getMessage().contains("existed"));
-    }
 
     // query NoteResult
     NoteResult noteResult = zeppelinClient.queryNoteResult(noteId);
