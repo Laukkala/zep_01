@@ -44,7 +44,9 @@
  * a licensee so wish it.
  */
 package com.teragrep.pth_07.ui.elements.table_dynamic.formats;
+import com.teragrep.zep_01.interpreter.InterpreterException;
 import com.teragrep.zep_01.interpreter.InterpreterResult;
+import com.teragrep.zep_01.interpreter.thrift.UPlotOptions;
 import jakarta.json.*;
 import org.apache.spark.sql.*;
 import org.apache.spark.sql.types.*;
@@ -55,20 +57,22 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-public final class UPlotFormat implements  RenderFormat{
+public final class UPlotFormat{
 
-    private final UIOption option;
-    private final Dataset<Row> dataset;
+    private final UPlotData data;
+    private final UPlotMetadata metadata;
     private static final Logger LOGGER = LoggerFactory.getLogger(UPlotFormat.class);
     /**
      * Formats a given Dataset to expected format for uPlot visualization library.
      */
-
-    public UPlotFormat(UIOption option, Dataset<Row> rowDataset){
-        this.dataset = rowDataset;
-        this.option = option;
+    public UPlotFormat(){
+        this(new UPlotData(new ArrayList<>(),false), new UPlotMetadata(new StructType(),new ArrayList<>(),"line",false));
     }
 
+    public UPlotFormat(final UPlotData data, final UPlotMetadata metadata){
+        this.data = data;
+        this.metadata = metadata;
+    }
 
     /**
      * Create a new instance of UPlotFormat with an updated Dataset. This function calculates any required transformations UPlot format might need for the dataset and caches a UPlotData and UPlotMetadata objects for later use in formatting.
@@ -152,7 +156,9 @@ public final class UPlotFormat implements  RenderFormat{
             }
             transformedDataset = pivotedDataset;
         }
-        return new UPlotFormat(option,transformedDataset);
+
+        final List<Row> collectedData = transformedDataset.collectAsList();
+        return new UPlotFormat(new UPlotData(collectedData,aggsUsed),new UPlotMetadata(transformedDataset.schema(),collectedData,"line",aggsUsed));
     }
 
     /**
@@ -182,29 +188,15 @@ public final class UPlotFormat implements  RenderFormat{
                     .drop(groupByColumnNames.toArray(new String[0]))
                     .withMetadata("label",new MetadataBuilder().putBoolean("dpl_internal_isGroupByColumn",true).build());
         }
-        return new UPlotFormat(option,transformedDataset);
+        final List<Row> collectedData = transformedDataset.collectAsList();
+        return new UPlotFormat(new UPlotData(collectedData,aggsUsed),new UPlotMetadata(transformedDataset.schema(),collectedData,"line",aggsUsed));
     }
 
 
-    public JsonObject format(){
-        List<Row> rows = dataset.collectAsList();
-        final List<String> groupByColumnNames = new ArrayList<>();
-        final List<String> valueColumnNames = new ArrayList<>();
-        for (final StructField field:dataset.schema().fields()) {
-            // We detect grouping columns by metadata instead of LogicalPlan because StreamingQueries created in batches have their LogicalPlans overwritten.
-            if (field.metadata().contains("dpl_internal_isGroupByColumn")) {
-                groupByColumnNames.add(field.name());
-            }
-            else {
-                valueColumnNames.add(field.name());
-            }
-        }
-        final boolean aggsUsed = !groupByColumnNames.isEmpty();
-        final UPlotMetadata updatedMetadata = new UPlotMetadata(dataset.schema(),rows,"line",aggsUsed);
-        UPlotData data1 = new UPlotData(rows,aggsUsed);
-
+    public JsonObject format(final UPlotOptions options) throws InterpreterException{
+        final UPlotMetadata updatedMetadata = metadata.withOptions(options);
         final JsonObjectBuilder builder = Json.createObjectBuilder()
-                .add("data",data1.asJson())
+                .add("data",data.asJson())
                 .add("options",updatedMetadata.asJson())
                 .add("isAggregated",updatedMetadata.isAggregated())
                 .add("type", InterpreterResult.Type.UPLOT.label);
@@ -212,18 +204,8 @@ public final class UPlotFormat implements  RenderFormat{
         return json;
     }
 
-    public InterpreterResult.Type type(){
-        return InterpreterResult.Type.UPLOT;
-    }
-
-    @Override
-    public JsonObject toJson() {
-        return format();
-    }
-
-    @Override
-    public boolean isStub() {
-        return false;
+    public String type(){
+        return InterpreterResult.Type.UPLOT.label;
     }
 
     @Override
@@ -231,11 +213,11 @@ public final class UPlotFormat implements  RenderFormat{
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         UPlotFormat format = (UPlotFormat) o;
-        return Objects.equals(option, format.option) && Objects.equals(dataset, format.dataset);
+        return Objects.equals(data, format.data) && Objects.equals(metadata, format.metadata);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(option, dataset);
+        return Objects.hash(data, metadata);
     }
 }

@@ -18,6 +18,7 @@
 package com.teragrep.zep_01.interpreter;
 
 
+import com.teragrep.zep_01.interpreter.thrift.Options;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.reflect.FieldUtils;
 import com.teragrep.zep_01.annotation.Experimental;
@@ -467,7 +468,7 @@ public abstract class Interpreter {
     FIFO, PARALLEL
   }
 
-  public String formatDataset(final String noteId, final String paragraphId, final String options) throws InterpreterException{
+  public String formatDataset(final String noteId, final String paragraphId, final Options options) throws InterpreterException{
     throw new InterpreterException("Interpreter "+ getClassName() +" has no dataset!");
   }
 }
