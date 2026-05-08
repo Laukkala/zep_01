@@ -53,11 +53,9 @@ import jakarta.json.JsonValue;
 import nl.jqno.equalsverifier.EqualsVerifier;
 import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
+import org.apache.spark.sql.RowFactory;
 import org.apache.spark.sql.SparkSession;
-import org.apache.spark.sql.types.DataTypes;
-import org.apache.spark.sql.types.MetadataBuilder;
-import org.apache.spark.sql.types.StructField;
-import org.apache.spark.sql.types.StructType;
+import org.apache.spark.sql.types.*;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
@@ -691,9 +689,15 @@ class UPlotFormatTest {
 
         Assertions.assertEquals(InterpreterResult.Type.UPLOT.label,formatted.getString("type"));
     }
-    //@Test
-    //void equalsVerifier() {
-    //    EqualsVerifier.forClass(UPlotFormat.class)
-    //            .verify();
-    //}
-}
+    @Test
+    void equalsVerifier() {
+        Dataset<Row> redDataset = sparkSession.emptyDataFrame();
+        List<Row> blueRows = new ArrayList<>();
+        blueRows.add(RowFactory.create("stringValue"));
+        StructType blueSchema = new StructType().add(new StructField("column", DataTypes.StringType, false, Metadata.empty()));
+        Dataset<Row> blueDataset = sparkSession.createDataFrame(blueRows, blueSchema);
+        EqualsVerifier.forClass(UPlotFormat.class)
+                .withPrefabValues(Dataset.class, redDataset, blueDataset)
+                .verify();
+        }
+    }
