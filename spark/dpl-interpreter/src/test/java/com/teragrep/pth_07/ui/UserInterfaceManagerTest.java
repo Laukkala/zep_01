@@ -45,6 +45,7 @@
  */
 package com.teragrep.pth_07.ui;
 
+import com.teragrep.pth_07.ui.elements.PerformanceIndicator;
 import com.teragrep.pth_07.ui.elements.table_dynamic.formats.*;
 import com.teragrep.pth_07.ui.elements.table_dynamic.testdata.TestDPLData;
 import com.teragrep.zep_01.display.AngularObject;
@@ -212,7 +213,12 @@ class UserInterfaceManagerTest {
     void equalsVerifier() {
         InterpreterContext redInterpreterContext = InterpreterContext.builder().setNoteId("note1").build();
         InterpreterContext blueInterpreterContext = InterpreterContext.builder().setNoteId("note2").build();
+        redInterpreterContext.setAngularObjectRegistry(new AngularObjectRegistry("note1",null));
+        blueInterpreterContext.setAngularObjectRegistry(new AngularObjectRegistry("note2",null));
+        PerformanceIndicator redPerformanceIndicator = new PerformanceIndicator(redInterpreterContext);
+        PerformanceIndicator bluePerformanceIndicator = new PerformanceIndicator(blueInterpreterContext);
         EqualsVerifier.forClass(UserInterfaceManager.class)
+                .withPrefabValues(PerformanceIndicator.class, redPerformanceIndicator, bluePerformanceIndicator)
                 .withPrefabValues(InterpreterContext.class, redInterpreterContext, blueInterpreterContext)
                 .verify();
         }
