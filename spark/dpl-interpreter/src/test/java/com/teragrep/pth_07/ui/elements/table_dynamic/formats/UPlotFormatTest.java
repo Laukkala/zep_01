@@ -769,12 +769,9 @@ class UPlotFormatTest {
     @Test
     void equalsVerifier() {
         Dataset<Row> redDataset = sparkSession.emptyDataFrame();
-        List<Row> blueRows = new ArrayList<>();
-        blueRows.add(RowFactory.create("stringValue"));
-        StructType blueSchema = new StructType().add(new StructField("column", DataTypes.StringType, false, Metadata.empty()));
-        Dataset<Row> blueDataset = sparkSession.createDataFrame(blueRows, blueSchema);
+        Dataset<Row> blueDataset = sourceData;
         EqualsVerifier.forClass(UPlotFormat.class)
-                .withPrefabValues(Dataset.class, redDataset, blueDataset)
+                .withPrefabValues(Dataset.class,redDataset,blueDataset)
                 .verify();
-        }
     }
+}

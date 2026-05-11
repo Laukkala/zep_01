@@ -88,21 +88,20 @@ class DataTablesFormatTest {
         final int draw = 1;
         final int start = 3;
         final int length = 2;
-        // Create options and Format objects to be tested
+
         final JsonObject optionsJson = Json.createObjectBuilder()
                 .add("type","dataTables")
                 .add("requestOptions",Json.createObjectBuilder()
                         .add("draw",draw)
                         .add("start",start)
-                        .add("length",length)
-                        .build())
+                        .add("length",length))
                 .build();
-        final UIOption uiOptions = new UIOptionImpl(optionsJson.toString());
-        final DataTablesFormat format = new DataTablesFormat(uiOptions, sourceData);
 
-        final JsonObject formatted = Assertions.assertDoesNotThrow(()-> format.format());
+        final UIOption formattingOptions = new UIOptionImpl(optionsJson.toString());
 
         // Get rows 3-5 of the dataset, check that every value is present
+        final DataTablesFormat format = new DataTablesFormat(formattingOptions,sourceData);
+        final JsonObject formatted = Assertions.assertDoesNotThrow(()->format.format());
         final JsonObject data = formatted.getJsonObject("data");
         final JsonObject options = formatted.getJsonObject("options");
         final JsonArray headers = options.getJsonArray("headers");
@@ -160,21 +159,21 @@ class DataTablesFormatTest {
         final int draw = 1;
         final int start = 2;
         final int length = 2;
+        final String searchString = "";
 
-        // Create options and Format objects to be tested
         final JsonObject optionsJson = Json.createObjectBuilder()
                 .add("type","dataTables")
                 .add("requestOptions",Json.createObjectBuilder()
                         .add("draw",draw)
                         .add("start",start)
-                        .add("length",length)
-                        .build())
+                        .add("length",length))
                 .build();
-        final UIOption uiOptions = new UIOptionImpl(optionsJson.toString());
-        final DataTablesFormat format = new DataTablesFormat(uiOptions, aggDataset);
 
-        final JsonObject formatted = Assertions.assertDoesNotThrow(()-> format.format());
+        final UIOption formattingOptions = new UIOptionImpl(optionsJson.toString());
 
+        // Get rows 3-5 of the dataset, check that every value is present
+        final DataTablesFormat format = new DataTablesFormat(formattingOptions,aggDataset);
+        final JsonObject formatted = Assertions.assertDoesNotThrow(()->format.format());
         final JsonObject data = formatted.getJsonObject("data");
         final JsonObject options = formatted.getJsonObject("options");
         final JsonArray headers = options.getJsonArray("headers");
@@ -229,20 +228,19 @@ class DataTablesFormatTest {
         final int length = 2;
         final String searchString = "";
 
-        // Create options and Format objects to be tested
         final JsonObject optionsJson = Json.createObjectBuilder()
                 .add("type","dataTables")
                 .add("requestOptions",Json.createObjectBuilder()
                         .add("draw",draw)
                         .add("start",start)
-                        .add("length",length)
-                        .build())
+                        .add("length",length))
                 .build();
-        final UIOption uiOptions = new UIOptionImpl(optionsJson.toString());
-        final DataTablesFormat format = new DataTablesFormat(uiOptions, aggDataset);
 
-        final JsonObject formatted = Assertions.assertDoesNotThrow(()-> format.format());
+        final UIOption formattingOptions = new UIOptionImpl(optionsJson.toString());
 
+        // Get rows 3-5 of the dataset, check that every value is present
+        final DataTablesFormat format = new DataTablesFormat(formattingOptions,aggDataset);
+        final JsonObject formatted = Assertions.assertDoesNotThrow(()->format.format());
         final JsonObject data = formatted.getJsonObject("data");
         final JsonObject options = formatted.getJsonObject("options");
         final JsonArray headers = options.getJsonArray("headers");
@@ -282,111 +280,106 @@ class DataTablesFormatTest {
         final int draw1 = 1;
         final int start1 = 0;
         final int length1 = 5;
-
-        // Create options and Format objects to be tested
-        final JsonObject optionsJson1 = Json.createObjectBuilder()
+        final String searchString1 = "";
+        final JsonObject optionsJson = Json.createObjectBuilder()
                 .add("type","dataTables")
                 .add("requestOptions",Json.createObjectBuilder()
                         .add("draw",draw1)
                         .add("start",start1)
-                        .add("length",length1)
-                        .build())
+                        .add("length",length1))
                 .build();
-        final UIOption uiOptions1 = new UIOptionImpl(optionsJson1.toString());
-        final DataTablesFormat format1 = new DataTablesFormat(uiOptions1, sourceData);
 
-        final JsonObject formatted1 = Assertions.assertDoesNotThrow(()-> format1.format());
-
-        JsonArray dataArray1 = formatted1.getJsonObject("data").getJsonArray("data");
-        Assertions.assertEquals(5,dataArray1.size());
-
-        Assertions.assertEquals("2025-01-01T12:00:00.000Z",dataArray1.getJsonObject(0).getString("_time"));
-        Assertions.assertEquals("2025-01-01T12:00:00.000Z",dataArray1.getJsonObject(1).getString("_time"));
-        Assertions.assertEquals("2025-01-01T12:00:00.000Z",dataArray1.getJsonObject(2).getString("_time"));
-        Assertions.assertEquals("2025-01-01T12:00:00.000Z",dataArray1.getJsonObject(3).getString("_time"));
-        Assertions.assertEquals("2025-01-01T12:00:00.000Z",dataArray1.getJsonObject(4).getString("_time"));
+        final UIOption formattingOptions1 = new UIOptionImpl(optionsJson.toString());
 
 
-        Assertions.assertEquals("create",dataArray1.getJsonObject(0).getString("operation"));
-        Assertions.assertEquals("delete",dataArray1.getJsonObject(1).getString("operation"));
-        Assertions.assertEquals("update",dataArray1.getJsonObject(2).getString("operation"));
-        Assertions.assertEquals("create",dataArray1.getJsonObject(3).getString("operation"));
-        Assertions.assertEquals("delete",dataArray1.getJsonObject(4).getString("operation"));
+        final DataTablesFormat format1 = new DataTablesFormat(formattingOptions1,sourceData);
+        final JsonObject formatted1 = Assertions.assertDoesNotThrow(()->format1.format());
+        final JsonObject dataJson1 = formatted1.getJsonObject("data");
+        Assertions.assertEquals(5,dataJson1.getJsonArray("data").size());
 
-        Assertions.assertEquals(true,dataArray1.getJsonObject(0).getBoolean("success"));
-        Assertions.assertEquals(true,dataArray1.getJsonObject(1).getBoolean("success"));
-        Assertions.assertEquals(true,dataArray1.getJsonObject(2).getBoolean("success"));
-        Assertions.assertEquals(true,dataArray1.getJsonObject(3).getBoolean("success"));
-        Assertions.assertEquals(true,dataArray1.getJsonObject(4).getBoolean("success"));
+        Assertions.assertEquals("2025-01-01T12:00:00.000Z",dataJson1.getJsonArray("data").getJsonObject(0).getString("_time"));
+        Assertions.assertEquals("2025-01-01T12:00:00.000Z",dataJson1.getJsonArray("data").getJsonObject(1).getString("_time"));
+        Assertions.assertEquals("2025-01-01T12:00:00.000Z",dataJson1.getJsonArray("data").getJsonObject(2).getString("_time"));
+        Assertions.assertEquals("2025-01-01T12:00:00.000Z",dataJson1.getJsonArray("data").getJsonObject(3).getString("_time"));
+        Assertions.assertEquals("2025-01-01T12:00:00.000Z",dataJson1.getJsonArray("data").getJsonObject(4).getString("_time"));
 
 
-        Assertions.assertEquals(1,dataArray1.getJsonObject(0).getInt("filesModified"));
-        Assertions.assertEquals(2,dataArray1.getJsonObject(1).getInt("filesModified"));
-        Assertions.assertEquals(1,dataArray1.getJsonObject(2).getInt("filesModified"));
-        Assertions.assertEquals(1,dataArray1.getJsonObject(3).getInt("filesModified"));
-        Assertions.assertEquals(1,dataArray1.getJsonObject(4).getInt("filesModified"));
-        Assertions.assertEquals(1,formatted1.getJsonObject("data").getInt("draw"));
+        Assertions.assertEquals("create",dataJson1.getJsonArray("data").getJsonObject(0).getString("operation"));
+        Assertions.assertEquals("delete",dataJson1.getJsonArray("data").getJsonObject(1).getString("operation"));
+        Assertions.assertEquals("update",dataJson1.getJsonArray("data").getJsonObject(2).getString("operation"));
+        Assertions.assertEquals("create",dataJson1.getJsonArray("data").getJsonObject(3).getString("operation"));
+        Assertions.assertEquals("delete",dataJson1.getJsonArray("data").getJsonObject(4).getString("operation"));
+
+        Assertions.assertEquals(true,dataJson1.getJsonArray("data").getJsonObject(0).getBoolean("success"));
+        Assertions.assertEquals(true,dataJson1.getJsonArray("data").getJsonObject(1).getBoolean("success"));
+        Assertions.assertEquals(true,dataJson1.getJsonArray("data").getJsonObject(2).getBoolean("success"));
+        Assertions.assertEquals(true,dataJson1.getJsonArray("data").getJsonObject(3).getBoolean("success"));
+        Assertions.assertEquals(true,dataJson1.getJsonArray("data").getJsonObject(4).getBoolean("success"));
+
+
+        Assertions.assertEquals(1,dataJson1.getJsonArray("data").getJsonObject(0).getInt("filesModified"));
+        Assertions.assertEquals(2,dataJson1.getJsonArray("data").getJsonObject(1).getInt("filesModified"));
+        Assertions.assertEquals(1,dataJson1.getJsonArray("data").getJsonObject(2).getInt("filesModified"));
+        Assertions.assertEquals(1,dataJson1.getJsonArray("data").getJsonObject(3).getInt("filesModified"));
+        Assertions.assertEquals(1,dataJson1.getJsonArray("data").getJsonObject(4).getInt("filesModified"));
+        Assertions.assertEquals(1,dataJson1.getInt("draw"));
 
         // Get rows 10-15 of the dataset
         final int draw2 = 2;
         final int start2 = 9;
         final int length2 = 5;
-
-        // Create options and Format objects to be tested
+        final String searchString2 = "";
         final JsonObject optionsJson2 = Json.createObjectBuilder()
                 .add("type","dataTables")
                 .add("requestOptions",Json.createObjectBuilder()
                         .add("draw",draw2)
                         .add("start",start2)
-                        .add("length",length2)
-                        .build())
+                        .add("length",length2))
                 .build();
-        final UIOption uiOptions2 = new UIOptionImpl(optionsJson2.toString());
-        final DataTablesFormat format2 = new DataTablesFormat(uiOptions2, sourceData);
 
-        final JsonObject formatted2 = Assertions.assertDoesNotThrow(()-> format2.format());
+        final UIOption formattingOptions2 = new UIOptionImpl(optionsJson2.toString());
 
+        // Get rows 3-5 of the dataset, check that every value is present
+        final DataTablesFormat format2 = new DataTablesFormat(formattingOptions2,sourceData);
+        final JsonObject formatted2 = Assertions.assertDoesNotThrow(()->format2.format());
+        final JsonObject dataJson2 = formatted2.getJsonObject("data");
 
-        JsonArray dataArray2 = formatted2.getJsonObject("data").getJsonArray("data");
-        Assertions.assertEquals(5,dataArray2.size());
-        Assertions.assertEquals("2025-01-02T12:00:00.000Z",dataArray2.getJsonObject(0).getString("_time"));
-        Assertions.assertEquals("2025-01-02T12:00:00.000Z",dataArray2.getJsonObject(1).getString("_time"));
-        Assertions.assertEquals("2025-01-03T12:00:00.000Z",dataArray2.getJsonObject(2).getString("_time"));
-        Assertions.assertEquals("2025-01-04T12:00:00.000Z",dataArray2.getJsonObject(3).getString("_time"));
-        Assertions.assertEquals("2025-01-05T12:00:00.000Z",dataArray2.getJsonObject(4).getString("_time"));
+        Assertions.assertEquals(5,dataJson2.getJsonArray("data").size());
 
-
-        Assertions.assertEquals("delete",dataArray2.getJsonObject(0).getString("operation"));
-        Assertions.assertEquals("update",dataArray2.getJsonObject(1).getString("operation"));
-        Assertions.assertEquals("update",dataArray2.getJsonObject(2).getString("operation"));
-        Assertions.assertEquals("delete",dataArray2.getJsonObject(3).getString("operation"));
-        Assertions.assertEquals("update",dataArray2.getJsonObject(4).getString("operation"));
-
-        Assertions.assertEquals(false,dataArray2.getJsonObject(0).getBoolean("success"));
-        Assertions.assertEquals(true,dataArray2.getJsonObject(1).getBoolean("success"));
-        Assertions.assertEquals(false,dataArray2.getJsonObject(2).getBoolean("success"));
-        Assertions.assertEquals(false,dataArray2.getJsonObject(3).getBoolean("success"));
-        Assertions.assertEquals(true,dataArray2.getJsonObject(4).getBoolean("success"));
+        Assertions.assertEquals("2025-01-02T12:00:00.000Z",dataJson2.getJsonArray("data").getJsonObject(0).getString("_time"));
+        Assertions.assertEquals("2025-01-02T12:00:00.000Z",dataJson2.getJsonArray("data").getJsonObject(1).getString("_time"));
+        Assertions.assertEquals("2025-01-03T12:00:00.000Z",dataJson2.getJsonArray("data").getJsonObject(2).getString("_time"));
+        Assertions.assertEquals("2025-01-04T12:00:00.000Z",dataJson2.getJsonArray("data").getJsonObject(3).getString("_time"));
+        Assertions.assertEquals("2025-01-05T12:00:00.000Z",dataJson2.getJsonArray("data").getJsonObject(4).getString("_time"));
 
 
-        Assertions.assertEquals(1,dataArray2.getJsonObject(0).getInt("filesModified"));
-        Assertions.assertEquals(1,dataArray2.getJsonObject(1).getInt("filesModified"));
-        Assertions.assertEquals(1,dataArray2.getJsonObject(2).getInt("filesModified"));
-        Assertions.assertEquals(4,dataArray2.getJsonObject(3).getInt("filesModified"));
-        Assertions.assertEquals(1,dataArray2.getJsonObject(4).getInt("filesModified"));
+        Assertions.assertEquals("delete",dataJson2.getJsonArray("data").getJsonObject(0).getString("operation"));
+        Assertions.assertEquals("update",dataJson2.getJsonArray("data").getJsonObject(1).getString("operation"));
+        Assertions.assertEquals("update",dataJson2.getJsonArray("data").getJsonObject(2).getString("operation"));
+        Assertions.assertEquals("delete",dataJson2.getJsonArray("data").getJsonObject(3).getString("operation"));
+        Assertions.assertEquals("update",dataJson2.getJsonArray("data").getJsonObject(4).getString("operation"));
 
-        Assertions.assertEquals(draw2,formatted2.getJsonObject("data").getInt("draw"));
+        Assertions.assertEquals(false,dataJson2.getJsonArray("data").getJsonObject(0).getBoolean("success"));
+        Assertions.assertEquals(true,dataJson2.getJsonArray("data").getJsonObject(1).getBoolean("success"));
+        Assertions.assertEquals(false,dataJson2.getJsonArray("data").getJsonObject(2).getBoolean("success"));
+        Assertions.assertEquals(false,dataJson2.getJsonArray("data").getJsonObject(3).getBoolean("success"));
+        Assertions.assertEquals(true,dataJson2.getJsonArray("data").getJsonObject(4).getBoolean("success"));
+
+
+        Assertions.assertEquals(1,dataJson2.getJsonArray("data").getJsonObject(0).getInt("filesModified"));
+        Assertions.assertEquals(1,dataJson2.getJsonArray("data").getJsonObject(1).getInt("filesModified"));
+        Assertions.assertEquals(1,dataJson2.getJsonArray("data").getJsonObject(2).getInt("filesModified"));
+        Assertions.assertEquals(4,dataJson2.getJsonArray("data").getJsonObject(3).getInt("filesModified"));
+        Assertions.assertEquals(1,dataJson2.getJsonArray("data").getJsonObject(4).getInt("filesModified"));
+
+        Assertions.assertEquals(2,dataJson2.getInt("draw"));
     }
 
     @Test
     void equalsVerifier() {
         Dataset<Row> redDataset = sparkSession.emptyDataFrame();
-        List<Row> blueRows = new ArrayList<>();
-        blueRows.add(RowFactory.create("stringValue"));
-        StructType blueSchema = new StructType().add(new StructField("column",DataTypes.StringType,false,Metadata.empty()));
-        Dataset<Row> blueDataset = sparkSession.createDataFrame(blueRows,blueSchema);
+        Dataset<Row> blueDataset = sourceData;
         EqualsVerifier.forClass(DataTablesFormat.class)
-                .withPrefabValues(Dataset.class,redDataset,blueDataset)
-                .verify();
+                .withPrefabValues(Dataset.class,redDataset,blueDataset).verify();
     }
 }
