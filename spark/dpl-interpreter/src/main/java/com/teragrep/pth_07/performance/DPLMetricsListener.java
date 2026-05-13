@@ -87,7 +87,6 @@ public final class DPLMetricsListener extends StreamingQueryListener {
 
     @Override
     public void onQueryProgress(final QueryProgressEvent event) {
-        try{
             if (event.progress().name().equals(queryId)) {
                 final Seq<SQLExecutionUIData> executionsList = sparkSession.sharedState().statusStore().executionsList();
                 DPLPerformanceEntry entry = new DPLPerformanceEntry();
@@ -103,29 +102,27 @@ public final class DPLMetricsListener extends StreamingQueryListener {
                             final long id = metric.accumulatorId();
                             final String value = metricValues.get(id);
                             if (metric.metricType().startsWith("v2Custom_") && value != null && !"null".equals(value)) {
-                                entry = entry.withData(metric.name(),value);
+                                // Custom metrics must be longs.
+                                entry = entry.withData(metric.name(), Long.parseLong(value));
                             }
                         }
                     }
 
                     // Add metrics from QueryProgressEvent
-                    entry = entry.withData("RowsReadFromArchive: Full table input rows read from archive",event.progress().numInputRows());
-                    entry = entry.withData("BatchId: sequence number of the batch",event.progress().batchId());
-                    entry = entry.withData("Eps: processed rows per second",event.progress().processedRowsPerSecond());
-                    entry = entry.withData("Timestamp: timestamp of when performance data was received(epochtime)",Instant.now().toEpochMilli());
+                    entry = entry.withData("RowsReadFromArchive: Full table input rows read from archive", event.progress().numInputRows());
+                    entry = entry.withData("BatchId: sequence number of the batch", event.progress().batchId());
+                    entry = entry.withData("Eps: processed rows per second", event.progress().processedRowsPerSecond());
+                    entry = entry.withData("Timestamp: timestamp of when performance data was received(epochtime)", Instant.now().toEpochMilli());
 
                     // Create a Spark Row for this performance event and add it to the list.
                     final Row row = entry.asRow();
                     rows.add(row);
                 }
                 // Take every row this Listener has encountered so far and prdouce a Dataset. Store the dataset within UserInterfaceManager as the latest performance dataset so that it can be accessed even after this Listener has been destroyed
-                final Dataset<Row> metricsDataset = sparkSession.createDataFrame(rows,entry.performanceSchema().sparkSchema());
+                final Dataset<Row> metricsDataset = sparkSession.createDataFrame(rows, entry.performanceSchema());
                 uiManager.getPerformanceIndicator().setPerformanceDataset(metricsDataset);
                 uiManager.getPerformanceIndicator().sendPerformanceUpdate();
             }
-        }catch (IncompatibleValueException incompatibleValueException){
-            LOGGER.error("Failed to process performance data of query {} due to an incompatible value being encountered",queryId,incompatibleValueException);
-        }
     }
 
     @Override

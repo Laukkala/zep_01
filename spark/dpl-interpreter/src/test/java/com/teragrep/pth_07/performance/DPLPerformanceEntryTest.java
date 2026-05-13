@@ -45,90 +45,93 @@
  */
 package com.teragrep.pth_07.performance;
 
+import com.teragrep.pth_07.performance.metric.PerformanceMetric;
+import com.teragrep.pth_07.performance.metric.value.StubMetricValue;
 import nl.jqno.equalsverifier.EqualsVerifier;
 import org.apache.spark.sql.Row;
 import org.apache.spark.sql.types.*;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
+import java.util.HashMap;
+import java.util.Map;
+
 class DPLPerformanceEntryTest {
 
     @Test
     void testWithData() {
         final String inputKey = "BytesPerSecond: processed bytes per second";
-        final String inputValue = "512";
-        final long expectedValue  = Long.parseLong(inputValue);
+        final long inputValue = 512l;
         final DPLPerformanceEntry entry = new DPLPerformanceEntry();
         final DPLPerformanceEntry modifiedEntry = Assertions.assertDoesNotThrow(()->entry.withData(inputKey,inputValue));
         final Row row = modifiedEntry.asRow();
-        final int bytesPerSecondIndex = row.fieldIndex("BytesPerSecond");
-        final int bytesProcessedindex = row.fieldIndex("BytesProcessed");
+        final int bytesPerSecondIndex = row.fieldIndex(inputKey);
+        final int bytesProcessedindex = row.fieldIndex("BytesProcessed: total bytes processed");
 
         // BytesPerSecond should have a value, BytesProcessed should contain a null.
-        Assertions.assertEquals(expectedValue,row.getLong(bytesPerSecondIndex));
+        Assertions.assertEquals(inputValue,row.getLong(bytesPerSecondIndex));
         Assertions.assertEquals(null,row.get(bytesProcessedindex));
     }
 
     @Test
     void testWithDataIgnoresUnknownKeys() {
         final String inputKey = "unknownKey: some data we want to ignore";
-        final String inputValue = "string data";
+        final long inputValue = 52l;
         final DPLPerformanceEntry entry = new DPLPerformanceEntry();
         final DPLPerformanceEntry modifiedEntry = Assertions.assertDoesNotThrow(()->entry.withData(inputKey,inputValue));
         final Row row = modifiedEntry.asRow();
+        final int expectedRowCount = 17;
 
         // Created row should be fully empty, containing only null values for each of the entries
-        Assertions.assertEquals(17,row.size());
-        for (int i = 0; i < row.size(); i++) {
+        Assertions.assertEquals(expectedRowCount,row.size());
+        int i = 0;
+        while (i < row.size()) {
             Assertions.assertTrue(row.isNullAt(i));
+            i++;
         }
+        Assertions.assertEquals(i,expectedRowCount);
     }
 
     @Test
     void testWithDataUsingCustomSchema() {
         final String bytesPerSecondInputKey = "BytesPerSecond: processed bytes per second";
-        final String bytesPerSecondInputValue = "512";
-        final long expectedBytesPersecond  = Long.parseLong(bytesPerSecondInputValue);
+        final long bytesPerSecondInputValue = 512l;
 
         final String timestampInputKey = "Timestamp: timestamp of when performance data was received(epochtime)";
         final long timestampValue = 1780000000;
+
         final String epsInputKey = "Eps: processed rows per second";
         final double epsValue = 2000.50;
 
+        // Some data that does not appear in the schema
         final String recordsProcessedInputKey = "RecordsProcessed: total processed records";
-        final String recordsProcessedInputValue = "500000";
+        final long recordsProcessedInputValue = 500000l;
 
-        final DPLPerformanceEntry entry = new DPLPerformanceEntry();
+        final Map<String, PerformanceMetric> metrics = new HashMap<>();
+        metrics.put(bytesPerSecondInputKey,new PerformanceMetric(new StubMetricValue(),bytesPerSecondInputKey,DataTypes.IntegerType,Metadata.empty(),false));
+        metrics.put(timestampInputKey,new PerformanceMetric(new StubMetricValue(),timestampInputKey,DataTypes.DoubleType,Metadata.empty(),false));
+        metrics.put(epsInputKey,new PerformanceMetric(new StubMetricValue(),epsInputKey,DataTypes.IntegerType,Metadata.empty(),false));
+        final DPLPerformanceEntry entry = new DPLPerformanceEntry(metrics);
         DPLPerformanceEntry modifiedEntry = Assertions.assertDoesNotThrow(()->entry.withData(recordsProcessedInputKey,recordsProcessedInputValue));
-        DPLPerformanceEntry finalModifiedEntry = modifiedEntry;
-        modifiedEntry = Assertions.assertDoesNotThrow(()-> finalModifiedEntry.withData(bytesPerSecondInputKey,bytesPerSecondInputValue));
-        DPLPerformanceEntry finalModifiedEntry1 = modifiedEntry;
-        modifiedEntry = Assertions.assertDoesNotThrow(()-> finalModifiedEntry1.withData(epsInputKey,epsValue));
-        DPLPerformanceEntry finalModifiedEntry2 = modifiedEntry;
-        modifiedEntry = Assertions.assertDoesNotThrow(()-> finalModifiedEntry2.withData(timestampInputKey,timestampValue));
+        final DPLPerformanceEntry modifiedEntry2 = Assertions.assertDoesNotThrow(()-> modifiedEntry.withData(bytesPerSecondInputKey,bytesPerSecondInputValue));
+        final DPLPerformanceEntry modifiedEntry3 = Assertions.assertDoesNotThrow(()-> modifiedEntry2.withData(epsInputKey,epsValue));
+        final DPLPerformanceEntry modifiedEntry4 = Assertions.assertDoesNotThrow(()-> modifiedEntry3.withData(timestampInputKey,timestampValue));
 
-        // Create a schema that contains only two of the three metrics, in different order compared to default.
-        StructType customSchema = new StructType(new StructField[]{
-                new StructField("Timestamp",DataTypes.LongType,true, new MetadataBuilder().putBoolean("dpl_internal_isGroupByColumn",true).build()),
-                new StructField("BytesPerSecond",DataTypes.LongType,true, new MetadataBuilder().build()),
-                new StructField("Eps",DataTypes.DoubleType,true, new MetadataBuilder().build()),
-        });
-
-        final Row row = modifiedEntry.asRow(customSchema);
-        final int bytesPerSecondIndex = row.fieldIndex("BytesPerSecond");
-        final int timestampIndex = row.fieldIndex("Timestamp");
-        final int epsIndex = row.fieldIndex("Eps");
+        final Row row = modifiedEntry4.asRow();
+        final int bytesPerSecondIndex = row.fieldIndex(bytesPerSecondInputKey);
+        final int timestampIndex = row.fieldIndex(timestampInputKey);
+        final int epsIndex = row.fieldIndex(epsInputKey);
 
         // As customSchema does not contain RecordsProcessed, it should not be included in the dataset.
         Assertions.assertThrows(IllegalArgumentException.class,()-> row.fieldIndex("RecordsProcessed"));
 
         // The ordering of the resulting dataset should match with the order of the given schema
-        Assertions.assertEquals(0,timestampIndex);
-        Assertions.assertEquals(1,bytesPerSecondIndex);
+        Assertions.assertEquals(0,bytesPerSecondIndex);
+        Assertions.assertEquals(1,timestampIndex);
         Assertions.assertEquals(2,epsIndex);
 
         // values should also be present
-        Assertions.assertEquals(expectedBytesPersecond,row.getLong(bytesPerSecondIndex));
+        Assertions.assertEquals(bytesPerSecondInputValue,row.getLong(bytesPerSecondIndex));
         Assertions.assertEquals(timestampValue,row.getLong(timestampIndex));
         Assertions.assertEquals(epsValue,row.getDouble(epsIndex));
     }
