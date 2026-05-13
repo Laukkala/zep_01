@@ -75,8 +75,11 @@ public final class PerformanceMetric {
         return value;
     }
 
-    public PerformanceMetric withValue(final Object value) {
-        return new PerformanceMetric(new MetricValueImpl(value),this.name,this.type,this.metadata,this.nullable);
+    public PerformanceMetric withValue(final long value) {
+        return new PerformanceMetric(new MetricValueImpl(value, DataTypes.LongType),this.name,this.type,this.metadata,this.nullable);
+    }
+    public PerformanceMetric withValue(final double value) {
+        return new PerformanceMetric(new MetricValueImpl(value, DataTypes.DoubleType),this.name,this.type,this.metadata,this.nullable);
     }
 
     public String name() {

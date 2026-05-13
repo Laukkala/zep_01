@@ -46,7 +46,9 @@
 package com.teragrep.pth_07.performance.metric.value;
 
 import com.teragrep.stb_01.Stubable;
+import org.apache.spark.sql.types.DataType;
 
 public interface MetricValue extends Stubable {
+    public abstract DataType type();
     public abstract Object value();
 }

@@ -85,7 +85,17 @@ public final class DPLPerformanceEntry {
     public DPLPerformanceEntry(final Map<String,PerformanceMetric> metrics){
         this.metrics = metrics;
     }
-    public DPLPerformanceEntry withData(final String key, final Object value) {
+    public DPLPerformanceEntry withData(final String key, final long value) {
+        if(!metrics.containsKey(key)){
+            return this;
+        }
+        PerformanceMetric metric = metrics.get(key);
+        PerformanceMetric modifiedMetric = metric.withValue(value);
+        Map<String, PerformanceMetric> modifiedMetrics = new HashMap<>(metrics);
+        modifiedMetrics.put(key,modifiedMetric);
+        return new DPLPerformanceEntry(modifiedMetrics);
+    }
+    public DPLPerformanceEntry withData(final String key, final double value) {
         if(!metrics.containsKey(key)){
             return this;
         }

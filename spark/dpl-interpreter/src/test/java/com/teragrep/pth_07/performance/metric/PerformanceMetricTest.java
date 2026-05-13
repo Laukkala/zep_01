@@ -60,11 +60,13 @@ class PerformanceMetricTest {
     @Test
     void testReplacingValue() {
         final PerformanceMetric metric = new PerformanceMetric(new StubMetricValue(),"testName", DataTypes.LongType, Metadata.empty(),false);
-        final PerformanceMetric newMetric = metric.withValue(-5l);
-        Assertions.assertEquals(-5l,newMetric.value().value());
+        final PerformanceMetric longMetric = metric.withValue(-5l);
+        Assertions.assertEquals(-5l,longMetric.value().value());
 
-        final PerformanceMetric newMetric2 = metric.withValue("-25");
-        Assertions.assertEquals("-25",newMetric2.value().value());
+        final PerformanceMetric doubleMetric = metric.withValue(-5.0);
+        Assertions.assertEquals(-5.0,doubleMetric.value().value());
+
+
     }
     @Test
     public void testContract() {
