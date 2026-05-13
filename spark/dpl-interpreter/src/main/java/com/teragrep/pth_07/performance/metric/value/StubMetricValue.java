@@ -45,6 +45,8 @@
  */
 package com.teragrep.pth_07.performance.metric.value;
 
+import org.apache.spark.sql.types.DataType;
+
 import java.util.Objects;
 
 public final class StubMetricValue implements MetricValue {
@@ -52,6 +54,11 @@ public final class StubMetricValue implements MetricValue {
     @Override
     public boolean isStub() {
         return true;
+    }
+
+    @Override
+    public DataType type() {
+        throw new UnsupportedOperationException("Stub object does not implement type()");
     }
 
     @Override

@@ -45,14 +45,18 @@
  */
 package com.teragrep.pth_07.performance.metric.value;
 
+import org.apache.spark.sql.types.DataType;
+
 import java.util.Objects;
 
 public final class MetricValueImpl implements MetricValue {
 
+    private final DataType type;
     private final Object value;
 
-    public MetricValueImpl(final Object value){
+    public MetricValueImpl(final Object value, final DataType type){
         this.value = value;
+        this.type = type;
     }
 
     @Override
@@ -66,15 +70,18 @@ public final class MetricValueImpl implements MetricValue {
     }
 
     @Override
-    public boolean equals(final java.lang.Object o) {
+    public DataType type(){ return type;}
+
+    @Override
+    public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        final MetricValueImpl that = (MetricValueImpl) o;
-        return value == that.value;
+        MetricValueImpl that = (MetricValueImpl) o;
+        return Objects.equals(type, that.type) && Objects.equals(value, that.value);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(value);
+        return Objects.hash(type, value);
     }
 }
