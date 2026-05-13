@@ -60,6 +60,12 @@ import java.util.stream.Stream;
 public final class DPLPerformanceEntry {
     private final Map<String,PerformanceMetric> metrics;
 
+    /**
+     * DPLPerformanceEntry represents a row of performance data from a DPL query. Each batch received from DPL corresponds to one DPLPerformanceEntry.
+     * DPLPerformanceEntry keeps a map of PerformanceMetrics, each of which can be updated using the withData() methods.
+     * DPLPerformanceEntry can produce a Spark schema that contains all the information for each of the PerformanceMetrics it contains.
+     * DPLPerformanceEntry is capable of turning itself into a Spark Row that can be added to a Spark Dataset.
+     */
     public DPLPerformanceEntry(){
         this(Stream.of(
                         new AbstractMap.SimpleEntry<>("ArchiveCompressedBytesProcessed: total compressed bytes processed from archive",new PerformanceMetric(new StubMetricValue(),"ArchiveCompressedBytesProcessed: total compressed bytes processed from archive",DataTypes.LongType, Metadata.empty(),false)),
@@ -85,6 +91,13 @@ public final class DPLPerformanceEntry {
     public DPLPerformanceEntry(final Map<String,PerformanceMetric> metrics){
         this.metrics = metrics;
     }
+
+    /**
+     * Creates a new instance of this entry, with an updated value for the metric identified by key. If given key does not match with any of the metrics, returns this entry without modification.
+     * @param key PerformanceMetric to update. Must match with the key of one of the PerformanceMetrics this object was initialized with.
+     * @param value new value
+     * @return a modified instance of this DPLPerformanceEntry, with the PerformanceMetric identified by key having it's value replaced by the given value.
+     */
     public DPLPerformanceEntry withData(final String key, final long value) {
         if(!metrics.containsKey(key)){
             return this;
@@ -95,6 +108,13 @@ public final class DPLPerformanceEntry {
         modifiedMetrics.put(key,modifiedMetric);
         return new DPLPerformanceEntry(modifiedMetrics);
     }
+
+    /**
+     * Creates a new instance of this entry, with an updated value for the metric identified by key. If given key does not match with any of the metrics, returns this entry without modification.
+     * @param key PerformanceMetric to update. Must match with the key of one of the PerformanceMetrics this object was initialized with.
+     * @param value new value
+     * @return a modified instance of this DPLPerformanceEntry, with the PerformanceMetric identified by key having it's value replaced by the given value.
+     */
     public DPLPerformanceEntry withData(final String key, final double value) {
         if(!metrics.containsKey(key)){
             return this;
@@ -106,10 +126,25 @@ public final class DPLPerformanceEntry {
         return new DPLPerformanceEntry(modifiedMetrics);
     }
 
+    /**
+     * Turns the PerformanceMetrics within this entry into a Spark Row.
+     * Any PerformanceMetrics containing a StubMetricValue will be represented as a null.
+     * The schema of the row corresponds to the given metrics.
+     * @return Spark Row object representing this entry
+     */
     public Row asRow(){
         return asRow(performanceSchema());
     }
-    private Row asRow(final StructType schema){
+
+    /**
+     * Turns the PerformanceMetrics within this entry that match with the given Schema into a Spark Row.
+     * Any PerformanceMetrics containing a StubMetricValue will be represented as a null
+     * Any PerformanceMetrics that do not match with the given Schema will be skipped
+     * Any Schema fields that don't have a matching PerformanceMetric will be represented as a null
+     * @param schema Schema to apply to the Row
+     * @return Spark Row object representing this entry
+     */
+    public Row asRow(final StructType schema){
         final List<Object> values = new ArrayList<>();
         for (final StructField field : schema.fields()) {
             if(metrics.containsKey(field.name()) && !metrics.get(field.name()).value().isStub()){
@@ -123,6 +158,10 @@ public final class DPLPerformanceEntry {
         return new GenericRowWithSchema(values.toArray(),schema);
     }
 
+    /**
+     * Generates a Spark Schema based on the PerformanceMetrics this object was initialized with
+     * @return Spark Schema containing information on the metrics defined in this entry
+     */
     public StructType performanceSchema(){
         StructType performanceSchema = new StructType();
         for (PerformanceMetric metric : metrics.values()) {
