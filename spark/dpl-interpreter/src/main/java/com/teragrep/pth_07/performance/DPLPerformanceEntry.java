@@ -46,49 +46,65 @@
 package com.teragrep.pth_07.performance;
 
 import com.teragrep.pth_07.performance.metric.*;
+import com.teragrep.pth_07.performance.metric.value.MetricValue;
+import com.teragrep.pth_07.performance.metric.value.StubMetricValue;
 import com.teragrep.zep_01.common.exception.IncompatibleValueException;
 import org.apache.spark.sql.Row;
 import org.apache.spark.sql.catalyst.expressions.GenericRowWithSchema;
-import org.apache.spark.sql.types.StructField;
-import org.apache.spark.sql.types.StructType;
+import org.apache.spark.sql.types.*;
 
 import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public final class DPLPerformanceEntry {
-    private final PerformanceSchema performanceSchema;
-    private final Map<String,PerformanceMetric<?>> metrics;
+    private final Map<String,PerformanceMetric> metrics;
 
     public DPLPerformanceEntry(){
-        this(new PerformanceSchema(),new HashMap<>());
+        this(Stream.of(
+                        new AbstractMap.SimpleEntry<>("ArchiveCompressedBytesProcessed: total compressed bytes processed from archive",new PerformanceMetric(new StubMetricValue(),"ArchiveCompressedBytesProcessed: total compressed bytes processed from archive",DataTypes.LongType, Metadata.empty(),false)),
+                        new AbstractMap.SimpleEntry<>("ArchiveDatabaseRowAvgLatency: average time per row in nanoseconds",new PerformanceMetric(new StubMetricValue(),"ArchiveDatabaseRowAvgLatency: average time per row in nanoseconds",DataTypes.LongType,Metadata.empty(),false)),
+                        new AbstractMap.SimpleEntry<>("ArchiveDatabaseRowCount: number of processed archive database rows",new PerformanceMetric(new StubMetricValue(),"ArchiveDatabaseRowCount: number of processed archive database rows",DataTypes.LongType,Metadata.empty(),false)),
+                        new AbstractMap.SimpleEntry<>("ArchiveDatabaseRowMaxLatency: maximum time per row in nanoseconds",new PerformanceMetric(new StubMetricValue(),"ArchiveDatabaseRowMaxLatency: maximum time per row in nanoseconds",DataTypes.LongType,Metadata.empty(),false)),
+                        new AbstractMap.SimpleEntry<>("ArchiveDatabaseRowMinLatency: minimum time per row in nanoseconds",new PerformanceMetric(new StubMetricValue(),"ArchiveDatabaseRowMinLatency: minimum time per row in nanoseconds",DataTypes.LongType,Metadata.empty(),false)),
+                        new AbstractMap.SimpleEntry<>("ArchiveObjectsProcessed: total objects processed from archive",new PerformanceMetric(new StubMetricValue(),"ArchiveObjectsProcessed: total objects processed from archive",DataTypes.LongType,Metadata.empty(),false)),
+                        new AbstractMap.SimpleEntry<>("ArchiveOffset: latest archive offset processed (epoch time)",new PerformanceMetric(new StubMetricValue(),"ArchiveOffset: latest archive offset processed (epoch time)",DataTypes.LongType,Metadata.empty(),false)),
+                        new AbstractMap.SimpleEntry<>("BatchId: sequence number of the batch",new PerformanceMetric(new StubMetricValue(),"BatchId: sequence number of the batch",DataTypes.LongType,Metadata.empty(),false)),
+                        new AbstractMap.SimpleEntry<>("BytesPerSecond: processed bytes per second",new PerformanceMetric(new StubMetricValue(),"BytesPerSecond: processed bytes per second",DataTypes.LongType,Metadata.empty(),false)),
+                        new AbstractMap.SimpleEntry<>("BytesProcessed: total bytes processed",new PerformanceMetric(new StubMetricValue(),"BytesProcessed: total bytes processed",DataTypes.LongType,Metadata.empty(),false)),
+                        new AbstractMap.SimpleEntry<>("Eps: processed rows per second",new PerformanceMetric(new StubMetricValue(),"Eps: processed rows per second",DataTypes.DoubleType,Metadata.empty(),false)),
+                        new AbstractMap.SimpleEntry<>("KafkaOffset: sum of processed kafka offsets",new PerformanceMetric(new StubMetricValue(),"KafkaOffset: sum of processed kafka offsets",DataTypes.LongType,Metadata.empty(),false)),
+                        new AbstractMap.SimpleEntry<>("LatestKafkaTimestamp: latest processed kafka records' timestamp",new PerformanceMetric(new StubMetricValue(),"LatestKafkaTimestamp: latest processed kafka records' timestamp",DataTypes.LongType,Metadata.empty(),false)),
+                        new AbstractMap.SimpleEntry<>("RecordsPerSecond: processed records per second",new PerformanceMetric(new StubMetricValue(),"RecordsPerSecond: processed records per second",DataTypes.LongType,Metadata.empty(),false)),
+                        new AbstractMap.SimpleEntry<>("RecordsProcessed: total processed records",new PerformanceMetric(new StubMetricValue(),"RecordsProcessed: total processed records",DataTypes.LongType,Metadata.empty(),false)),
+                        new AbstractMap.SimpleEntry<>("RowsReadFromArchive: Full table input rows read from arcihve",new PerformanceMetric(new StubMetricValue(),"RowsReadFromArchive: Full table input rows read from archive",DataTypes.LongType,Metadata.empty(),false)),
+                        new AbstractMap.SimpleEntry<>("Timestamp: timestamp of when performance data was received(epochtime)",new PerformanceMetric(new StubMetricValue(),"Timestamp: timestamp of when performance data was received(epochtime)",DataTypes.LongType, new MetadataBuilder().putBoolean("dpl_internal_isGroupByColumn",true).build(),false)))
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
     }
 
-    public DPLPerformanceEntry(final PerformanceSchema performanceSchema, final Map<String,PerformanceMetric<?>> metrics){
-        this.performanceSchema = performanceSchema;
+    public DPLPerformanceEntry(final Map<String,PerformanceMetric> metrics){
         this.metrics = metrics;
     }
-
-    public DPLPerformanceEntry withData(final String key, final Object value) throws IncompatibleValueException{
-        final Map<String, PerformanceMetric<?>> modifiedMetrics = new HashMap<>(metrics);
-        for (final PerformanceMetric<?> metric : performanceSchema.metrics()) {
-            if(key.equals(metric.name()+": "+metric.description())){
-                final PerformanceMetric<?> modifiedMetric = metric.withValue(value);
-                modifiedMetrics.put(metric.name(), modifiedMetric);
-                break;
-            }
+    public DPLPerformanceEntry withData(final String key, final Object value) {
+        if(!metrics.containsKey(key)){
+            return this;
         }
-        return new DPLPerformanceEntry(performanceSchema, modifiedMetrics);
+        PerformanceMetric metric = metrics.get(key);
+        PerformanceMetric modifiedMetric = metric.withValue(value);
+        Map<String, PerformanceMetric> modifiedMetrics = new HashMap<>(metrics);
+        modifiedMetrics.put(key,modifiedMetric);
+        return new DPLPerformanceEntry(modifiedMetrics);
     }
 
     public Row asRow(){
-        return asRow(performanceSchema.sparkSchema());
+        return asRow(performanceSchema());
     }
-    public Row asRow(final StructType schema){
+    private Row asRow(final StructType schema){
         final List<Object> values = new ArrayList<>();
         for (final StructField field : schema.fields()) {
-            if(metrics.containsKey(field.name())){
-                final PerformanceMetric<?> metric = metrics.get(field.name());
-                final Object value = metric.value();
-                values.add(value);
+            if(metrics.containsKey(field.name()) && !metrics.get(field.name()).value().isStub()){
+                final MetricValue metricValue = metrics.get(field.name()).value();
+                values.add(metricValue.value());
             }
             else {
                 values.add(null);
@@ -97,20 +113,25 @@ public final class DPLPerformanceEntry {
         return new GenericRowWithSchema(values.toArray(),schema);
     }
 
-    public PerformanceSchema performanceSchema(){
+    public StructType performanceSchema(){
+        StructType performanceSchema = new StructType();
+        for (PerformanceMetric metric : metrics.values()) {
+            performanceSchema = performanceSchema.add(metric.toStructField());
+        }
         return performanceSchema;
     }
 
+
     @Override
-    public boolean equals(final Object o) {
+    public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        final DPLPerformanceEntry entry = (DPLPerformanceEntry) o;
-        return Objects.equals(performanceSchema, entry.performanceSchema) && Objects.equals(metrics, entry.metrics);
+        DPLPerformanceEntry entry = (DPLPerformanceEntry) o;
+        return Objects.equals(metrics, entry.metrics);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(performanceSchema, metrics);
+        return Objects.hash(metrics);
     }
 }

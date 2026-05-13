@@ -58,39 +58,13 @@ import org.junit.jupiter.api.Test;
 class PerformanceMetricTest {
 
     @Test
-    void testWithValueLongMetric() throws IncompatibleValueException {
-        final PerformanceMetric<Long> metric = new PerformanceMetric(new StubMetricValue(),"testName","desc", DataTypes.LongType, Metadata.empty(),false);
+    void testReplacingValue() {
+        final PerformanceMetric metric = new PerformanceMetric(new StubMetricValue(),"testName", DataTypes.LongType, Metadata.empty(),false);
+        final PerformanceMetric newMetric = metric.withValue(-5l);
+        Assertions.assertEquals(-5l,newMetric.value().value());
 
-        final PerformanceMetric<Long> newMetric = metric.withValue(-5);
-        Assertions.assertEquals(-5,newMetric.metricValue().value());
-
-        final PerformanceMetric<Long> newMetric2 = metric.withValue("-25");
-        Assertions.assertEquals(-25,newMetric2.metricValue().value());
-
-        Assertions.assertThrows(IncompatibleValueException.class, ()-> metric.withValue(1.0));
-        Assertions.assertThrows(IncompatibleValueException.class, ()-> metric.withValue("one"));
-    }
-
-    @Test
-    void testWithValueDoubleMetric() throws IncompatibleValueException {
-        final PerformanceMetric<Double> metric = new PerformanceMetric(new StubMetricValue(),"testName","desc", DataTypes.DoubleType, Metadata.empty(),false);
-
-        final PerformanceMetric<Double> newMetric = metric.withValue(1.0);
-        Assertions.assertEquals(1.0,newMetric.metricValue().value());
-
-        final PerformanceMetric<Double> newMetric2 = metric.withValue("-2.5");
-        Assertions.assertEquals(-2.5,newMetric2.metricValue().value());
-
-        final PerformanceMetric<Double> newMetric3 = metric.withValue(-25);
-        Assertions.assertEquals(-25.0,newMetric3.metricValue().value());
-
-        Assertions.assertThrows(IncompatibleValueException.class, ()-> metric.withValue("one point five"));
-    }
-
-    @Test
-    public void testTest(){
-        final PerformanceMetric<Integer> metric = new PerformanceMetric<Integer>(new StubMetricValue<Integer>(),"test","desc",DataTypes.IntegerType,Metadata.empty(),true);
-        metric.metricValue();
+        final PerformanceMetric newMetric2 = metric.withValue("-25");
+        Assertions.assertEquals("-25",newMetric2.value().value());
     }
     @Test
     public void testContract() {

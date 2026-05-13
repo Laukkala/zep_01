@@ -47,11 +47,11 @@ package com.teragrep.pth_07.performance.metric.value;
 
 import java.util.Objects;
 
-public final class MetricValueImpl<T> implements MetricValue<T> {
+public final class MetricValueImpl implements MetricValue {
 
-    private final T value;
+    private final Object value;
 
-    public MetricValueImpl(final T value){
+    public MetricValueImpl(final Object value){
         this.value = value;
     }
 
@@ -61,7 +61,7 @@ public final class MetricValueImpl<T> implements MetricValue<T> {
     }
 
     @Override
-    public T value() {
+    public Object value() {
         return value;
     }
 
