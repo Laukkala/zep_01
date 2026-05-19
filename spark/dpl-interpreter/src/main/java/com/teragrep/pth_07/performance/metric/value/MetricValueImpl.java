@@ -51,12 +51,10 @@ import java.util.Objects;
 
 public final class MetricValueImpl implements MetricValue {
 
-    private final DataType type;
     private final Object value;
 
-    public MetricValueImpl(final Object value, final DataType type){
+    public MetricValueImpl(final Object value){
         this.value = value;
-        this.type = type;
     }
 
     @Override
@@ -70,18 +68,15 @@ public final class MetricValueImpl implements MetricValue {
     }
 
     @Override
-    public DataType type(){ return type;}
-
-    @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         MetricValueImpl that = (MetricValueImpl) o;
-        return Objects.equals(type, that.type) && Objects.equals(value, that.value);
+        return Objects.equals(value, that.value);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(type, value);
+        return Objects.hash(value);
     }
 }

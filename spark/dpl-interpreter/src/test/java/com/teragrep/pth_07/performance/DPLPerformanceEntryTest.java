@@ -48,12 +48,16 @@ package com.teragrep.pth_07.performance;
 import com.teragrep.pth_07.performance.metric.PerformanceMetric;
 import com.teragrep.pth_07.performance.metric.value.StubMetricValue;
 import nl.jqno.equalsverifier.EqualsVerifier;
+import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
+import org.apache.spark.sql.SparkSession;
 import org.apache.spark.sql.types.*;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 class DPLPerformanceEntryTest {
@@ -108,9 +112,9 @@ class DPLPerformanceEntryTest {
         final long recordsProcessedInputValue = 500000l;
 
         final Map<String, PerformanceMetric> metrics = new HashMap<>();
-        metrics.put(bytesPerSecondInputKey,new PerformanceMetric(new StubMetricValue(),bytesPerSecondInputKey,DataTypes.IntegerType,Metadata.empty(),false));
-        metrics.put(timestampInputKey,new PerformanceMetric(new StubMetricValue(),timestampInputKey,DataTypes.DoubleType,Metadata.empty(),false));
-        metrics.put(epsInputKey,new PerformanceMetric(new StubMetricValue(),epsInputKey,DataTypes.IntegerType,Metadata.empty(),false));
+        metrics.put(bytesPerSecondInputKey,new PerformanceMetric(new StubMetricValue(), DataTypes.LongType,bytesPerSecondInputKey, Metadata.empty(),false));
+        metrics.put(timestampInputKey,new PerformanceMetric(new StubMetricValue(), DataTypes.LongType,timestampInputKey, Metadata.empty(),false));
+        metrics.put(epsInputKey,new PerformanceMetric(new StubMetricValue(), DataTypes.DoubleType, epsInputKey, Metadata.empty(),false));
         final DPLPerformanceEntry entry = new DPLPerformanceEntry(metrics);
         DPLPerformanceEntry modifiedEntry = Assertions.assertDoesNotThrow(()->entry.withData(recordsProcessedInputKey,recordsProcessedInputValue));
         final DPLPerformanceEntry modifiedEntry2 = Assertions.assertDoesNotThrow(()-> modifiedEntry.withData(bytesPerSecondInputKey,bytesPerSecondInputValue));
@@ -134,6 +138,42 @@ class DPLPerformanceEntryTest {
         Assertions.assertEquals(bytesPerSecondInputValue,row.getLong(bytesPerSecondIndex));
         Assertions.assertEquals(timestampValue,row.getLong(timestampIndex));
         Assertions.assertEquals(epsValue,row.getDouble(epsIndex));
+    }
+
+    @Test
+    public void createDatasetTest(){
+        final String bytesPerSecondInputKey = "BytesPerSecond: processed bytes per second";
+        final long bytesPerSecondInputValue = 512l;
+
+        final String timestampInputKey = "Timestamp: timestamp of when performance data was received(epochtime)";
+        final long timestampValue = 1780000000;
+
+        final String epsInputKey = "Eps: processed rows per second";
+        final double epsValue = 2000.50;
+
+        final String recordsProcessedInputKey = "RecordsProcessed: total processed records";
+        final long recordsProcessedInputValue = 500000l;
+
+        DPLPerformanceEntry entry1 = new DPLPerformanceEntry();
+        entry1 = entry1.withData(bytesPerSecondInputKey,bytesPerSecondInputValue);
+        DPLPerformanceEntry entry2 = new DPLPerformanceEntry();
+        entry2 = entry2.withData(timestampInputKey,timestampValue);
+        DPLPerformanceEntry entry3 = new DPLPerformanceEntry();
+        entry3 = entry3.withData(epsInputKey,epsValue);
+        entry3 = entry3.withData(recordsProcessedInputKey,recordsProcessedInputValue);
+        entry3 = entry3.withData(bytesPerSecondInputKey,bytesPerSecondInputValue);
+
+        final SparkSession sparkSession = SparkSession.builder()
+                .master("local[*]")
+                .getOrCreate();
+
+        List<Row> rows = new ArrayList<Row>();
+        rows.add(entry1.asRow(entry1.performanceSchema()));
+        rows.add(entry2.asRow(entry1.performanceSchema()));
+        rows.add(entry3.asRow(entry1.performanceSchema()));
+
+        Dataset<Row> dataset = sparkSession.createDataFrame(rows,entry1.performanceSchema());
+        System.out.println("dataset");
     }
 
     @Test
