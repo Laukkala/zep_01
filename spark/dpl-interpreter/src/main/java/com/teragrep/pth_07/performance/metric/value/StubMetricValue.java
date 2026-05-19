@@ -57,11 +57,6 @@ public final class StubMetricValue implements MetricValue {
     }
 
     @Override
-    public DataType type() {
-        throw new UnsupportedOperationException("Stub object does not implement type()");
-    }
-
-    @Override
     public Object value() {
         throw new UnsupportedOperationException("Stub object does not implement value()");
     }

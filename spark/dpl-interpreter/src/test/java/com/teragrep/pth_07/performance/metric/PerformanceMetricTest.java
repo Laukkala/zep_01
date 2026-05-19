@@ -59,12 +59,10 @@ class PerformanceMetricTest {
 
     @Test
     void testReplacingValue() {
-        final PerformanceMetric metric = new PerformanceMetric(new StubMetricValue(),"testName", DataTypes.LongType, Metadata.empty(),false);
-        final PerformanceMetric longMetric = metric.withValue(-5l);
+        final PerformanceMetric metric = new PerformanceMetric(new StubMetricValue(), DataTypes.LongType,"testName", Metadata.empty(),false);
+        final PerformanceMetric longMetric = Assertions.assertDoesNotThrow(()->metric.withValue(-5l));
         Assertions.assertEquals(-5l,longMetric.value().value());
-
-        final PerformanceMetric doubleMetric = metric.withValue(-5.0);
-        Assertions.assertEquals(-5.0,doubleMetric.value().value());
+        Assertions.assertThrows(IncompatibleValueException.class,()->metric.withValue(-5.0));
 
 
     }

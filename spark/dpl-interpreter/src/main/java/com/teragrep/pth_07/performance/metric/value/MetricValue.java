@@ -49,6 +49,5 @@ import com.teragrep.stb_01.Stubable;
 import org.apache.spark.sql.types.DataType;
 
 public interface MetricValue extends Stubable {
-    public abstract DataType type();
     public abstract Object value();
 }
