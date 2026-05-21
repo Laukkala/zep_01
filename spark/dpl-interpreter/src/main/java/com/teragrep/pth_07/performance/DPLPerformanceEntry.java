@@ -102,20 +102,20 @@ public final class DPLPerformanceEntry {
      * @return a modified instance of this DPLPerformanceEntry, with the PerformanceMetric identified by key having it's value replaced by the given value.
      */
     public DPLPerformanceEntry withData(final String key, final long value) {
-        if(!metrics.containsKey(key)){
-            return this;
+        DPLPerformanceEntry rv = this;
+        if(metrics.containsKey(key)) {
+            try {
+                PerformanceMetric metric = metrics.get(key);
+                PerformanceMetric modifiedMetric = metric.withValue(value);
+                Map<String, PerformanceMetric> modifiedMetrics = new HashMap<>(metrics);
+                modifiedMetrics.put(key, modifiedMetric);
+                rv = new DPLPerformanceEntry(modifiedMetrics);
+            } catch (IncompatibleValueException incompatibleValueException) {
+                LOGGER.warn("Failed to update Query performance data for metric <[{}]> due to mismatched data type ", key, incompatibleValueException);
+                rv = this;
+            }
         }
-        try{
-            PerformanceMetric metric = metrics.get(key);
-            PerformanceMetric modifiedMetric = metric.withValue(value);
-            Map<String, PerformanceMetric> modifiedMetrics = new HashMap<>(metrics);
-            modifiedMetrics.put(key,modifiedMetric);
-            return new DPLPerformanceEntry(modifiedMetrics);
-        }
-        catch (IncompatibleValueException incompatibleValueException){
-            LOGGER.warn("Failed to update Query performance data for metric <[{}]> due to mismatched data type ",key,incompatibleValueException);
-            return this;
-        }
+        return rv;
     }
 
     /**
@@ -125,20 +125,21 @@ public final class DPLPerformanceEntry {
      * @return a modified instance of this DPLPerformanceEntry, with the PerformanceMetric identified by key having it's value replaced by the given value.
      */
     public DPLPerformanceEntry withData(final String key, final double value) {
-        if(!metrics.containsKey(key)){
-            return this;
+        DPLPerformanceEntry rv = this;
+        if(metrics.containsKey(key)){
+            try{
+                PerformanceMetric metric = metrics.get(key);
+                PerformanceMetric modifiedMetric = metric.withValue(value);
+                Map<String, PerformanceMetric> modifiedMetrics = new HashMap<>(metrics);
+                modifiedMetrics.put(key,modifiedMetric);
+                rv = new DPLPerformanceEntry(modifiedMetrics);
+            }
+            catch (IncompatibleValueException incompatibleValueException){
+                LOGGER.warn("Failed to update Query performance data for metric <[{}]> due to mismatched data type ",key,incompatibleValueException);
+                rv = this;
+            }
         }
-        try{
-            PerformanceMetric metric = metrics.get(key);
-            PerformanceMetric modifiedMetric = metric.withValue(value);
-            Map<String, PerformanceMetric> modifiedMetrics = new HashMap<>(metrics);
-            modifiedMetrics.put(key,modifiedMetric);
-            return new DPLPerformanceEntry(modifiedMetrics);
-        }
-        catch (IncompatibleValueException incompatibleValueException){
-            LOGGER.warn("Failed to update Query performance data for metric <[{}]> due to mismatched data type ",key,incompatibleValueException);
-            return this;
-        }
+        return rv;
     }
 
     /**
