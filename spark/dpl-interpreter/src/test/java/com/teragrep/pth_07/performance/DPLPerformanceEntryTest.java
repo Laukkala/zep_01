@@ -141,7 +141,8 @@ class DPLPerformanceEntryTest {
     }
 
     @Test
-    public void createDatasetTest(){
+    public void datasetSchemaTest(){
+        // Create some dummy data
         final String bytesPerSecondInputKey = "BytesPerSecond: processed bytes per second";
         final long bytesPerSecondInputValue = 512l;
 
@@ -154,6 +155,7 @@ class DPLPerformanceEntryTest {
         final String recordsProcessedInputKey = "RecordsProcessed: total processed records";
         final long recordsProcessedInputValue = 500000l;
 
+        // Create entries with default schemas and apply some values.
         DPLPerformanceEntry entry1 = new DPLPerformanceEntry();
         entry1 = entry1.withData(bytesPerSecondInputKey,bytesPerSecondInputValue);
         DPLPerformanceEntry entry2 = new DPLPerformanceEntry();
@@ -169,11 +171,17 @@ class DPLPerformanceEntryTest {
 
         List<Row> rows = new ArrayList<Row>();
         rows.add(entry1.asRow(entry1.performanceSchema()));
-        rows.add(entry2.asRow(entry1.performanceSchema()));
-        rows.add(entry3.asRow(entry1.performanceSchema()));
+        rows.add(entry2.asRow(entry2.performanceSchema()));
+        rows.add(entry3.asRow(entry3.performanceSchema()));
 
-        Dataset<Row> dataset = sparkSession.createDataFrame(rows,entry1.performanceSchema());
-        System.out.println("dataset");
+        // All rows should have indentical schemas, regardless of their assigned values
+        Assertions.assertEquals(entry1.performanceSchema(),entry2.performanceSchema());
+        Assertions.assertEquals(entry2.performanceSchema(),entry3.performanceSchema());
+
+        // Dataset should be created successfully from the list of rows. If schemas don't match between rows, an Exception is thrown.
+        StructType performanceSchema = entry1.performanceSchema();
+        Dataset<Row> dataset = Assertions.assertDoesNotThrow(()->sparkSession.createDataFrame(rows, performanceSchema));
+        Assertions.assertEquals(performanceSchema,dataset.schema());
     }
 
     @Test
