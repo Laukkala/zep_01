@@ -49,16 +49,16 @@ import nl.jqno.equalsverifier.EqualsVerifier;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-class StubMetricValueTest {
+class MetricValueStubTest {
 
     @Test
     public void testValue(){
-        StubMetricValue stub = new StubMetricValue();
+        final MetricValueStub stub = new MetricValueStub();
         Assertions.assertThrows(UnsupportedOperationException.class, ()-> stub.value());
     }
 
     @Test
     public void testContract() {
-        EqualsVerifier.forClass(StubMetricValue.class).verify();
+        EqualsVerifier.forClass(MetricValueStub.class).verify();
     }
 }

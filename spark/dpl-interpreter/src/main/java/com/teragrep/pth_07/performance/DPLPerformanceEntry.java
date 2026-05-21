@@ -47,7 +47,7 @@ package com.teragrep.pth_07.performance;
 
 import com.teragrep.pth_07.performance.metric.*;
 import com.teragrep.pth_07.performance.metric.value.MetricValue;
-import com.teragrep.pth_07.performance.metric.value.StubMetricValue;
+import com.teragrep.pth_07.performance.metric.value.MetricValueStub;
 import com.teragrep.zep_01.common.exception.IncompatibleValueException;
 import org.apache.spark.sql.Row;
 import org.apache.spark.sql.catalyst.expressions.GenericRowWithSchema;
@@ -71,23 +71,23 @@ public final class DPLPerformanceEntry {
      */
     public DPLPerformanceEntry(){
         this(Stream.of(
-                        new AbstractMap.SimpleEntry<>("ArchiveCompressedBytesProcessed: total compressed bytes processed from archive",new PerformanceMetric(new StubMetricValue(), DataTypes.LongType,"ArchiveCompressedBytesProcessed: total compressed bytes processed from archive", Metadata.empty(),false)),
-                        new AbstractMap.SimpleEntry<>("ArchiveDatabaseRowAvgLatency: average time per row in nanoseconds",new PerformanceMetric(new StubMetricValue(), DataTypes.LongType,"ArchiveDatabaseRowAvgLatency: average time per row in nanoseconds", Metadata.empty(),false)),
-                        new AbstractMap.SimpleEntry<>("ArchiveDatabaseRowCount: number of processed archive database rows",new PerformanceMetric(new StubMetricValue(), DataTypes.LongType,"ArchiveDatabaseRowCount: number of processed archive database rows", Metadata.empty(),false)),
-                        new AbstractMap.SimpleEntry<>("ArchiveDatabaseRowMaxLatency: maximum time per row in nanoseconds",new PerformanceMetric(new StubMetricValue(), DataTypes.LongType,"ArchiveDatabaseRowMaxLatency: maximum time per row in nanoseconds", Metadata.empty(),false)),
-                        new AbstractMap.SimpleEntry<>("ArchiveDatabaseRowMinLatency: minimum time per row in nanoseconds",new PerformanceMetric(new StubMetricValue(), DataTypes.LongType,"ArchiveDatabaseRowMinLatency: minimum time per row in nanoseconds", Metadata.empty(),false)),
-                        new AbstractMap.SimpleEntry<>("ArchiveObjectsProcessed: total objects processed from archive",new PerformanceMetric(new StubMetricValue(), DataTypes.LongType,"ArchiveObjectsProcessed: total objects processed from archive", Metadata.empty(),false)),
-                        new AbstractMap.SimpleEntry<>("ArchiveOffset: latest archive offset processed (epoch time)",new PerformanceMetric(new StubMetricValue(), DataTypes.LongType,"ArchiveOffset: latest archive offset processed (epoch time)", Metadata.empty(),false)),
-                        new AbstractMap.SimpleEntry<>("BatchId: sequence number of the batch",new PerformanceMetric(new StubMetricValue(), DataTypes.LongType,"BatchId: sequence number of the batch", Metadata.empty(),false)),
-                        new AbstractMap.SimpleEntry<>("BytesPerSecond: processed bytes per second",new PerformanceMetric(new StubMetricValue(), DataTypes.LongType,"BytesPerSecond: processed bytes per second", Metadata.empty(),false)),
-                        new AbstractMap.SimpleEntry<>("BytesProcessed: total bytes processed",new PerformanceMetric(new StubMetricValue(), DataTypes.LongType,"BytesProcessed: total bytes processed", Metadata.empty(),false)),
-                        new AbstractMap.SimpleEntry<>("Eps: processed rows per second",new PerformanceMetric(new StubMetricValue(), DataTypes.DoubleType,"Eps: processed rows per second", Metadata.empty(),false)),
-                        new AbstractMap.SimpleEntry<>("KafkaOffset: sum of processed kafka offsets",new PerformanceMetric(new StubMetricValue(), DataTypes.LongType,"KafkaOffset: sum of processed kafka offsets", Metadata.empty(),false)),
-                        new AbstractMap.SimpleEntry<>("LatestKafkaTimestamp: latest processed kafka records' timestamp",new PerformanceMetric(new StubMetricValue(), DataTypes.LongType,"LatestKafkaTimestamp: latest processed kafka records' timestamp", Metadata.empty(),false)),
-                        new AbstractMap.SimpleEntry<>("RecordsPerSecond: processed records per second",new PerformanceMetric(new StubMetricValue(), DataTypes.LongType,"RecordsPerSecond: processed records per second", Metadata.empty(),false)),
-                        new AbstractMap.SimpleEntry<>("RecordsProcessed: total processed records",new PerformanceMetric(new StubMetricValue(), DataTypes.LongType,"RecordsProcessed: total processed records", Metadata.empty(),false)),
-                        new AbstractMap.SimpleEntry<>("RowsReadFromArchive: Full table input rows read from arcihve",new PerformanceMetric(new StubMetricValue(), DataTypes.LongType,"RowsReadFromArchive: Full table input rows read from archive", Metadata.empty(),false)),
-                        new AbstractMap.SimpleEntry<>("Timestamp: timestamp of when performance data was received(epochtime)",new PerformanceMetric(new StubMetricValue(), DataTypes.LongType,"Timestamp: timestamp of when performance data was received(epochtime)", new MetadataBuilder().putBoolean("dpl_internal_isGroupByColumn",true).build(),false)))
+                        new AbstractMap.SimpleEntry<>("ArchiveCompressedBytesProcessed: total compressed bytes processed from archive",new PerformanceMetric(new MetricValueStub(), DataTypes.LongType,"ArchiveCompressedBytesProcessed: total compressed bytes processed from archive", Metadata.empty(),false)),
+                        new AbstractMap.SimpleEntry<>("ArchiveDatabaseRowAvgLatency: average time per row in nanoseconds",new PerformanceMetric(new MetricValueStub(), DataTypes.LongType,"ArchiveDatabaseRowAvgLatency: average time per row in nanoseconds", Metadata.empty(),false)),
+                        new AbstractMap.SimpleEntry<>("ArchiveDatabaseRowCount: number of processed archive database rows",new PerformanceMetric(new MetricValueStub(), DataTypes.LongType,"ArchiveDatabaseRowCount: number of processed archive database rows", Metadata.empty(),false)),
+                        new AbstractMap.SimpleEntry<>("ArchiveDatabaseRowMaxLatency: maximum time per row in nanoseconds",new PerformanceMetric(new MetricValueStub(), DataTypes.LongType,"ArchiveDatabaseRowMaxLatency: maximum time per row in nanoseconds", Metadata.empty(),false)),
+                        new AbstractMap.SimpleEntry<>("ArchiveDatabaseRowMinLatency: minimum time per row in nanoseconds",new PerformanceMetric(new MetricValueStub(), DataTypes.LongType,"ArchiveDatabaseRowMinLatency: minimum time per row in nanoseconds", Metadata.empty(),false)),
+                        new AbstractMap.SimpleEntry<>("ArchiveObjectsProcessed: total objects processed from archive",new PerformanceMetric(new MetricValueStub(), DataTypes.LongType,"ArchiveObjectsProcessed: total objects processed from archive", Metadata.empty(),false)),
+                        new AbstractMap.SimpleEntry<>("ArchiveOffset: latest archive offset processed (epoch time)",new PerformanceMetric(new MetricValueStub(), DataTypes.LongType,"ArchiveOffset: latest archive offset processed (epoch time)", Metadata.empty(),false)),
+                        new AbstractMap.SimpleEntry<>("BatchId: sequence number of the batch",new PerformanceMetric(new MetricValueStub(), DataTypes.LongType,"BatchId: sequence number of the batch", Metadata.empty(),false)),
+                        new AbstractMap.SimpleEntry<>("BytesPerSecond: processed bytes per second",new PerformanceMetric(new MetricValueStub(), DataTypes.LongType,"BytesPerSecond: processed bytes per second", Metadata.empty(),false)),
+                        new AbstractMap.SimpleEntry<>("BytesProcessed: total bytes processed",new PerformanceMetric(new MetricValueStub(), DataTypes.LongType,"BytesProcessed: total bytes processed", Metadata.empty(),false)),
+                        new AbstractMap.SimpleEntry<>("Eps: processed rows per second",new PerformanceMetric(new MetricValueStub(), DataTypes.DoubleType,"Eps: processed rows per second", Metadata.empty(),false)),
+                        new AbstractMap.SimpleEntry<>("KafkaOffset: sum of processed kafka offsets",new PerformanceMetric(new MetricValueStub(), DataTypes.LongType,"KafkaOffset: sum of processed kafka offsets", Metadata.empty(),false)),
+                        new AbstractMap.SimpleEntry<>("LatestKafkaTimestamp: latest processed kafka records' timestamp",new PerformanceMetric(new MetricValueStub(), DataTypes.LongType,"LatestKafkaTimestamp: latest processed kafka records' timestamp", Metadata.empty(),false)),
+                        new AbstractMap.SimpleEntry<>("RecordsPerSecond: processed records per second",new PerformanceMetric(new MetricValueStub(), DataTypes.LongType,"RecordsPerSecond: processed records per second", Metadata.empty(),false)),
+                        new AbstractMap.SimpleEntry<>("RecordsProcessed: total processed records",new PerformanceMetric(new MetricValueStub(), DataTypes.LongType,"RecordsProcessed: total processed records", Metadata.empty(),false)),
+                        new AbstractMap.SimpleEntry<>("RowsReadFromArchive: Full table input rows read from arcihve",new PerformanceMetric(new MetricValueStub(), DataTypes.LongType,"RowsReadFromArchive: Full table input rows read from archive", Metadata.empty(),false)),
+                        new AbstractMap.SimpleEntry<>("Timestamp: timestamp of when performance data was received(epochtime)",new PerformanceMetric(new MetricValueStub(), DataTypes.LongType,"Timestamp: timestamp of when performance data was received(epochtime)", new MetadataBuilder().putBoolean("dpl_internal_isGroupByColumn",true).build(),false)))
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
     }
 
