@@ -45,33 +45,20 @@
  */
 package com.teragrep.pth_07.performance.metric.value;
 
-import org.apache.spark.sql.types.DataType;
+import nl.jqno.equalsverifier.EqualsVerifier;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
-import java.util.Objects;
+class MetricValueStubTest {
 
-public final class StubMetricValue implements MetricValue {
-
-    @Override
-    public boolean isStub() {
-        return true;
+    @Test
+    public void testValue(){
+        final MetricValueStub stub = new MetricValueStub();
+        Assertions.assertThrows(UnsupportedOperationException.class, ()-> stub.value());
     }
 
-    @Override
-    public Object value() {
-        throw new UnsupportedOperationException("Stub object does not implement value()");
-    }
-
-    @Override
-    public boolean equals(final java.lang.Object o) {
-        boolean equals = true;
-        if (o == null || getClass() != o.getClass()) {
-            equals = false;
-        }
-        return equals;
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hashCode(getClass().getName());
+    @Test
+    public void testContract() {
+        EqualsVerifier.forClass(MetricValueStub.class).verify();
     }
 }

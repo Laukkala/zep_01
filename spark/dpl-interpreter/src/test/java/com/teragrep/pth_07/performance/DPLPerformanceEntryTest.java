@@ -46,7 +46,7 @@
 package com.teragrep.pth_07.performance;
 
 import com.teragrep.pth_07.performance.metric.PerformanceMetric;
-import com.teragrep.pth_07.performance.metric.value.StubMetricValue;
+import com.teragrep.pth_07.performance.metric.value.MetricValueStub;
 import nl.jqno.equalsverifier.EqualsVerifier;
 import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
@@ -112,9 +112,9 @@ class DPLPerformanceEntryTest {
         final long recordsProcessedInputValue = 500000l;
 
         final Map<String, PerformanceMetric> metrics = new HashMap<>();
-        metrics.put(bytesPerSecondInputKey,new PerformanceMetric(new StubMetricValue(), DataTypes.LongType,bytesPerSecondInputKey, Metadata.empty(),false));
-        metrics.put(timestampInputKey,new PerformanceMetric(new StubMetricValue(), DataTypes.LongType,timestampInputKey, Metadata.empty(),false));
-        metrics.put(epsInputKey,new PerformanceMetric(new StubMetricValue(), DataTypes.DoubleType, epsInputKey, Metadata.empty(),false));
+        metrics.put(bytesPerSecondInputKey,new PerformanceMetric(new MetricValueStub(), DataTypes.LongType,bytesPerSecondInputKey, Metadata.empty(),false));
+        metrics.put(timestampInputKey,new PerformanceMetric(new MetricValueStub(), DataTypes.LongType,timestampInputKey, Metadata.empty(),false));
+        metrics.put(epsInputKey,new PerformanceMetric(new MetricValueStub(), DataTypes.DoubleType, epsInputKey, Metadata.empty(),false));
         final DPLPerformanceEntry entry = new DPLPerformanceEntry(metrics);
         DPLPerformanceEntry modifiedEntry = Assertions.assertDoesNotThrow(()->entry.withData(recordsProcessedInputKey,recordsProcessedInputValue));
         final DPLPerformanceEntry modifiedEntry2 = Assertions.assertDoesNotThrow(()-> modifiedEntry.withData(bytesPerSecondInputKey,bytesPerSecondInputValue));

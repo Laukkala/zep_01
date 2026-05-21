@@ -45,20 +45,31 @@
  */
 package com.teragrep.pth_07.performance.metric.value;
 
-import nl.jqno.equalsverifier.EqualsVerifier;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
+import java.util.Objects;
 
-class StubMetricValueTest {
+public final class MetricValueStub implements MetricValue {
 
-    @Test
-    public void testValue(){
-        final StubMetricValue stub = new StubMetricValue();
-        Assertions.assertThrows(UnsupportedOperationException.class, ()-> stub.value());
+    @Override
+    public boolean isStub() {
+        return true;
     }
 
-    @Test
-    public void testContract() {
-        EqualsVerifier.forClass(StubMetricValue.class).verify();
+    @Override
+    public Object value() {
+        throw new UnsupportedOperationException("Stub object does not implement value()");
+    }
+
+    @Override
+    public boolean equals(final java.lang.Object o) {
+        boolean equals = true;
+        if (o == null || getClass() != o.getClass()) {
+            equals = false;
+        }
+        return equals;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(getClass().getName());
     }
 }

@@ -45,7 +45,7 @@
  */
 package com.teragrep.pth_07.performance.metric;
 
-import com.teragrep.pth_07.performance.metric.value.StubMetricValue;
+import com.teragrep.pth_07.performance.metric.value.MetricValueStub;
 import com.teragrep.zep_01.common.exception.IncompatibleValueException;
 import nl.jqno.equalsverifier.EqualsVerifier;
 import org.apache.spark.sql.types.DataTypes;
@@ -59,7 +59,7 @@ class PerformanceMetricTest {
 
     @Test
     void testReplacingValue() {
-        final PerformanceMetric metric = new PerformanceMetric(new StubMetricValue(), DataTypes.LongType,"testName", Metadata.empty(),false);
+        final PerformanceMetric metric = new PerformanceMetric(new MetricValueStub(), DataTypes.LongType,"testName", Metadata.empty(),false);
         final PerformanceMetric longMetric = Assertions.assertDoesNotThrow(()->metric.withValue(-5l));
         Assertions.assertEquals(-5l,longMetric.value().value());
         Assertions.assertThrows(IncompatibleValueException.class,()->metric.withValue(-5.0));
