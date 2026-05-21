@@ -113,7 +113,7 @@ public final class DPLPerformanceEntry {
             return new DPLPerformanceEntry(modifiedMetrics);
         }
         catch (IncompatibleValueException incompatibleValueException){
-            LOGGER.warn("Failed to update Query performance data for metric [{}] due to mismatched data type ",key,incompatibleValueException);
+            LOGGER.warn("Failed to update Query performance data for metric <[{}]> due to mismatched data type ",key,incompatibleValueException);
             return this;
         }
     }
@@ -136,7 +136,7 @@ public final class DPLPerformanceEntry {
             return new DPLPerformanceEntry(modifiedMetrics);
         }
         catch (IncompatibleValueException incompatibleValueException){
-            LOGGER.warn("Failed to update Query performance data for metric [{}] due to mismatched data type ",key,incompatibleValueException);
+            LOGGER.warn("Failed to update Query performance data for metric <[{}]> due to mismatched data type ",key,incompatibleValueException);
             return this;
         }
     }
