@@ -88,7 +88,7 @@ public final class DPLMetricsListener extends StreamingQueryListener {
     public void onQueryProgress(final QueryProgressEvent event) {
             if (event.progress().name().equals(queryId)) {
                 final Seq<SQLExecutionUIData> executionsList = sparkSession.sharedState().statusStore().executionsList();
-                DPLPerformanceEntry entry = new DPLPerformanceEntry();
+                DPLPerformanceEntry entry = new DPLPerformanceEntry(new DefaultMetricsSchema());
                 if (!executionsList.isEmpty()) {
                     final Iterator<SQLExecutionUIData> executionDataIterator = executionsList.iterator();
 

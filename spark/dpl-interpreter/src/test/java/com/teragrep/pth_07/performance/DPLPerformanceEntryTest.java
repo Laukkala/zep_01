@@ -66,7 +66,7 @@ class DPLPerformanceEntryTest {
     void testWithData() {
         final String inputKey = "BytesPerSecond: processed bytes per second";
         final long inputValue = 512l;
-        final DPLPerformanceEntry entry = new DPLPerformanceEntry();
+        final DPLPerformanceEntry entry = new DPLPerformanceEntry(new DefaultMetricsSchema());
         final DPLPerformanceEntry modifiedEntry = Assertions.assertDoesNotThrow(()->entry.withData(inputKey,inputValue));
         final Row row = modifiedEntry.asRow();
         final int bytesPerSecondIndex = row.fieldIndex(inputKey);
@@ -81,7 +81,7 @@ class DPLPerformanceEntryTest {
     void testWithDataIgnoresUnknownKeys() {
         final String inputKey = "unknownKey: some data we want to ignore";
         final long inputValue = 52l;
-        final DPLPerformanceEntry entry = new DPLPerformanceEntry();
+        final DPLPerformanceEntry entry = new DPLPerformanceEntry(new DefaultMetricsSchema());
         final DPLPerformanceEntry modifiedEntry = Assertions.assertDoesNotThrow(()->entry.withData(inputKey,inputValue));
         final Row row = modifiedEntry.asRow();
         final int expectedRowCount = 17;
@@ -156,11 +156,11 @@ class DPLPerformanceEntryTest {
         final long recordsProcessedInputValue = 500000l;
 
         // Create entries with default schemas and apply some values.
-        DPLPerformanceEntry entry1 = new DPLPerformanceEntry();
+        DPLPerformanceEntry entry1 = new DPLPerformanceEntry(new DefaultMetricsSchema());
         entry1 = entry1.withData(bytesPerSecondInputKey,bytesPerSecondInputValue);
-        DPLPerformanceEntry entry2 = new DPLPerformanceEntry();
+        DPLPerformanceEntry entry2 = new DPLPerformanceEntry(new DefaultMetricsSchema());
         entry2 = entry2.withData(timestampInputKey,timestampValue);
-        DPLPerformanceEntry entry3 = new DPLPerformanceEntry();
+        DPLPerformanceEntry entry3 = new DPLPerformanceEntry(new DefaultMetricsSchema());
         entry3 = entry3.withData(epsInputKey,epsValue);
         entry3 = entry3.withData(recordsProcessedInputKey,recordsProcessedInputValue);
         entry3 = entry3.withData(bytesPerSecondInputKey,bytesPerSecondInputValue);
