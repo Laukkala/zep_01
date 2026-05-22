@@ -588,6 +588,16 @@ public class RemoteInterpreterServer extends Thread
       LOGGER.info("Shutting down...");
       LOGGER.info("Shutdown initialized by {}", cause);
 
+      // Try to unregister the interpreter process in case the interpreter process exit unpredictable via ShutdownHook
+      if (intpEventClient != null && CAUSE_SHUTDOWN_HOOK.equals(cause)) {
+        try {
+          LOGGER.info("Unregister interpreter process");
+          intpEventClient.unRegisterInterpreterProcess();
+        } catch (Exception e) {
+          LOGGER.error("Fail to unregister remote interpreter process", e);
+        }
+      }
+
       if (interpreterGroup != null) {
         synchronized (interpreterGroup) {
           for (List<Interpreter> session : interpreterGroup.values()) {
@@ -611,15 +621,6 @@ public class RemoteInterpreterServer extends Thread
           YarnUtils.unregister(true, "");
         } catch (Exception e) {
           LOGGER.error("Fail to unregister yarn app", e);
-        }
-      }
-      // Try to unregister the interpreter process in case the interpreter process exit unpredictable via ShutdownHook
-      if (intpEventClient != null && CAUSE_SHUTDOWN_HOOK.equals(cause)) {
-        try {
-          LOGGER.info("Unregister interpreter process");
-          intpEventClient.unRegisterInterpreterProcess();
-        } catch (Exception e) {
-          LOGGER.error("Fail to unregister remote interpreter process", e);
         }
       }
 
