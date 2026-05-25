@@ -17,12 +17,9 @@
 
 package com.teragrep.zep_01.interpreter.remote;
 
+import com.teragrep.zep_01.fakes.FakeRemoteInterpreterEventClient;
+import com.teragrep.zep_01.interpreter.*;
 import org.apache.thrift.TException;
-import com.teragrep.zep_01.interpreter.Interpreter;
-import com.teragrep.zep_01.interpreter.InterpreterContext;
-import com.teragrep.zep_01.interpreter.InterpreterException;
-import com.teragrep.zep_01.interpreter.InterpreterResult;
-import com.teragrep.zep_01.interpreter.LazyOpenInterpreter;
 import com.teragrep.zep_01.interpreter.thrift.RemoteInterpreterContext;
 import com.teragrep.zep_01.interpreter.thrift.RemoteInterpreterResult;
 import org.junit.Ignore;
@@ -201,10 +198,10 @@ public class RemoteInterpreterServerTest {
     final RemoteInterpreterServer server = new RemoteInterpreterServer("localhost",
             RemoteInterpreterUtils.findRandomAvailablePortOnAllLocalInterfaces(), ":", "groupId", true);
     server.init(new HashMap<>());
-    RemoteInterpreterEventClient eventClient = mock(RemoteInterpreterEventClient.class);
+    final FakeRemoteInterpreterEventClient eventClient = new FakeRemoteInterpreterEventClient("localhost",8080,100);
     server.intpEventClient = eventClient;
-    RemoteInterpreterServer.ShutdownThread shutdownThread = server.new ShutdownThread(RemoteInterpreterServer.ShutdownThread.CAUSE_SHUTDOWN_HOOK);
-    Thread serverThread = new Thread(new Runnable() {
+    final RemoteInterpreterServer.ShutdownThread shutdownThread = server.new ShutdownThread(RemoteInterpreterServer.ShutdownThread.CAUSE_SHUTDOWN_HOOK);
+    final Thread serverThread = new Thread(new Runnable() {
       @Override
       public void run() {
         server.start();
@@ -212,16 +209,19 @@ public class RemoteInterpreterServerTest {
     });
     serverThread.start();
 
+    // Wait for server to be initialized
+    Thread.sleep(50);
+
     // Simulate a SIGTERM by calling shutdown in another thread
     shutdownThread.start();
 
     // Wait for 250 ms before SIGKILL is sent
-    Thread.sleep(2050);
+    Thread.sleep(250);
 
     // Assert that shutdown hook has finished in time and that the server has been closed properly
     Assertions.assertEquals(false,shutdownThread.isAlive());
     Assertions.assertEquals(false,serverThread.isAlive());
-    verify(eventClient, times(1)).unRegisterInterpreterProcess();
+    Assertions.assertTrue(eventClient.unregistered());
       }
 
   public static class Test1Interpreter extends Interpreter {
