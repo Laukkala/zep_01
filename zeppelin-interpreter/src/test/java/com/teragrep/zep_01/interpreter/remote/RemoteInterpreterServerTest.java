@@ -27,6 +27,7 @@ import com.teragrep.zep_01.interpreter.thrift.RemoteInterpreterContext;
 import com.teragrep.zep_01.interpreter.thrift.RemoteInterpreterResult;
 import org.junit.Ignore;
 import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -39,7 +40,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
-import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.*;
 
 @Ignore("Contains bunch of sleeps and timeouts")
 public class RemoteInterpreterServerTest {
@@ -194,6 +195,34 @@ public class RemoteInterpreterServerTest {
     server.close("session_1", Test1Interpreter.class.getName());
     assertTrue(interpreter1.closed.get());
   }
+  @Test
+  public void testShutdownHook() throws Exception {
+    // Start a server
+    final RemoteInterpreterServer server = new RemoteInterpreterServer("localhost",
+            RemoteInterpreterUtils.findRandomAvailablePortOnAllLocalInterfaces(), ":", "groupId", true);
+    server.init(new HashMap<>());
+    RemoteInterpreterEventClient eventClient = mock(RemoteInterpreterEventClient.class);
+    server.intpEventClient = eventClient;
+    RemoteInterpreterServer.ShutdownThread shutdownThread = server.new ShutdownThread(RemoteInterpreterServer.ShutdownThread.CAUSE_SHUTDOWN_HOOK);
+    Thread serverThread = new Thread(new Runnable() {
+      @Override
+      public void run() {
+        server.start();
+      }
+    });
+    serverThread.start();
+
+    // Simulate a SIGTERM by calling shutdown in another thread
+    shutdownThread.start();
+
+    // Wait for 250 ms before SIGKILL is sent
+    Thread.sleep(2050);
+
+    // Assert that shutdown hook has finished in time and that the server has been closed properly
+    Assertions.assertEquals(false,shutdownThread.isAlive());
+    Assertions.assertEquals(false,serverThread.isAlive());
+    verify(eventClient, times(1)).unRegisterInterpreterProcess();
+      }
 
   public static class Test1Interpreter extends Interpreter {
 
