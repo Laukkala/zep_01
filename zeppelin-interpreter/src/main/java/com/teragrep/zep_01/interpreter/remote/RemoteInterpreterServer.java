@@ -634,7 +634,7 @@ public class RemoteInterpreterServer extends Thread
       while (System.currentTimeMillis() - startTime < (DEFAULT_SHUTDOWN_TIMEOUT + 100) &&
               server.isServing()) {
         try {
-          Thread.sleep(300);
+          Thread.sleep(25);
         } catch (InterruptedException e) {
           LOGGER.info("Exception in RemoteInterpreterServer while shutdown, Thread.sleep", e);
           Thread.currentThread().interrupt();
