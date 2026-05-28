@@ -200,15 +200,8 @@ public class RemoteInterpreterServerTest {
     server.init(new HashMap<>());
     final FakeRemoteInterpreterEventClient eventClient = new FakeRemoteInterpreterEventClient("localhost",8080,100);
     server.intpEventClient = eventClient;
+    final Thread serverThread = new Thread(server::start);
     final RemoteInterpreterServer.ShutdownThread shutdownThread = server.new ShutdownThread(RemoteInterpreterServer.ShutdownThread.CAUSE_SHUTDOWN_HOOK);
-    final Thread serverThread = new Thread(new Runnable() {
-      @Override
-      public void run() {
-        server.start();
-      }
-    });
-    serverThread.start();
-
     // Wait for server to be initialized
     Thread.sleep(50);
 
@@ -232,13 +225,7 @@ public class RemoteInterpreterServerTest {
     final FakeRemoteInterpreterEventClient eventClient = new FakeRemoteInterpreterEventClient("localhost",8080,100);
     server.intpEventClient = eventClient;
     final RemoteInterpreterServer.ShutdownThread shutdownThread = server.new ShutdownThread(RemoteInterpreterServer.ShutdownThread.CAUSE_SHUTDOWN_CALL);
-    final Thread serverThread = new Thread(new Runnable() {
-      @Override
-      public void run() {
-        server.start();
-      }
-    });
-    serverThread.start();
+    final Thread serverThread = new Thread(server::start);
 
     // Wait for server to be initialized
     Thread.sleep(50);
