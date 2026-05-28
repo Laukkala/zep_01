@@ -94,6 +94,7 @@ class UPlotFormatTest {
 
         // Create options and Format objects to be tested
         final String graphType = "graph";
+        final String xAxisLabel = "";
         final JsonObject optionsJson = Json.createObjectBuilder()
                 .add("type","uPlot")
                 .add("requestOptions",Json.createObjectBuilder()
@@ -130,9 +131,13 @@ class UPlotFormatTest {
         Assertions.assertTrue(formatted.getJsonObject("options").containsKey("series"));
         Assertions.assertTrue(formatted.getJsonObject("options").containsKey("labels"));
         Assertions.assertTrue(formatted.getJsonObject("options").containsKey("graphType"));
+        Assertions.assertTrue(formatted.getJsonObject("options").containsKey("xAxisLabel"));
 
         // GraphType must match with what's given in the UI request
         Assertions.assertEquals(graphType, formatted.getJsonObject("options").getString("graphType"));
+
+        // X Axis label must be correct
+        Assertions.assertEquals(xAxisLabel, formatted.getJsonObject("options").getString("xAxisLabel"));
 
         // Labels size must match with size of first array of Data so that each index is mapped to a label.
         Assertions.assertEquals(formatted.getJsonArray("data").getJsonArray(0).size(), formatted.getJsonObject("options").getJsonArray("labels").size());
@@ -162,6 +167,7 @@ class UPlotFormatTest {
 
         // Create options and Format objects to be tested
         final String graphType = "graph";
+        final String xAxisLabel = "success";
         final JsonObject optionsJson = Json.createObjectBuilder()
                 .add("type","uPlot")
                 .add("requestOptions",Json.createObjectBuilder()
@@ -198,9 +204,13 @@ class UPlotFormatTest {
         Assertions.assertTrue(formatted.getJsonObject("options").containsKey("series"));
         Assertions.assertTrue(formatted.getJsonObject("options").containsKey("labels"));
         Assertions.assertTrue(formatted.getJsonObject("options").containsKey("graphType"));
+        Assertions.assertTrue(formatted.getJsonObject("options").containsKey("xAxisLabel"));
 
         // GraphType must match with what's given in the UI request
         Assertions.assertEquals(graphType, formatted.getJsonObject("options").getString("graphType"));
+
+        // X Axis label must be correct
+        Assertions.assertEquals(xAxisLabel, formatted.getJsonObject("options").getString("xAxisLabel"));
 
         // Labels size must match with size of first array of Data so that each index is mapped to a label.
         Assertions.assertEquals(formatted.getJsonArray("data").getJsonArray(0).size(), formatted.getJsonObject("options").getJsonArray("labels").size());
@@ -230,6 +240,7 @@ class UPlotFormatTest {
 
         // Create options and Format objects to be tested
         final String graphType = "graph";
+        final String xAxisLabel = "_time";
         final JsonObject optionsJson = Json.createObjectBuilder()
                 .add("type","uPlot")
                 .add("requestOptions",Json.createObjectBuilder()
@@ -265,9 +276,13 @@ class UPlotFormatTest {
         Assertions.assertTrue(formatted.getJsonObject("options").containsKey("series"));
         Assertions.assertTrue(formatted.getJsonObject("options").containsKey("labels"));
         Assertions.assertTrue(formatted.getJsonObject("options").containsKey("graphType"));
+        Assertions.assertTrue(formatted.getJsonObject("options").containsKey("xAxisLabel"));
 
         // GraphType must match with what's given in the UI request
         Assertions.assertEquals(graphType, formatted.getJsonObject("options").getString("graphType"));
+
+        // X Axis label must be correct
+        Assertions.assertEquals(xAxisLabel, formatted.getJsonObject("options").getString("xAxisLabel"));
 
         // Labels size must match with size of first array of Data so that each index is mapped to a label.
         Assertions.assertEquals(formatted.getJsonArray("data").getJsonArray(0).size(), formatted.getJsonObject("options").getJsonArray("labels").size());
@@ -298,6 +313,7 @@ class UPlotFormatTest {
         // Create options and Format objects to be tested
         // Create options and Format objects to be tested
         final String graphType = "graph";
+        final String xAxisLabel = "_time";
         final JsonObject optionsJson = Json.createObjectBuilder()
                 .add("type","uPlot")
                 .add("requestOptions",Json.createObjectBuilder()
@@ -338,9 +354,14 @@ class UPlotFormatTest {
         Assertions.assertTrue(formatted.getJsonObject("options").containsKey("series"));
         Assertions.assertTrue(formatted.getJsonObject("options").containsKey("labels"));
         Assertions.assertTrue(formatted.getJsonObject("options").containsKey("graphType"));
+        Assertions.assertTrue(formatted.getJsonObject("options").containsKey("xAxisLabel"));
 
         // GraphType must match with what's given in the UI request
         Assertions.assertEquals(graphType, formatted.getJsonObject("options").getString("graphType"));
+
+
+        // X Axis label must be correct
+        Assertions.assertEquals(xAxisLabel, formatted.getJsonObject("options").getString("xAxisLabel"));
 
         // Labels size must match with size of first array of Data so that each index is mapped to a label.
         Assertions.assertEquals(formatted.getJsonArray("data").getJsonArray(0).size(), formatted.getJsonObject("options").getJsonArray("labels").size());
@@ -370,6 +391,7 @@ class UPlotFormatTest {
 
         // Create options and Format objects to be tested
         final String graphType = "graph";
+        final String xAxisLabel = "operation.success";
         final JsonObject optionsJson = Json.createObjectBuilder()
                 .add("type","uPlot")
                 .add("requestOptions",Json.createObjectBuilder()
@@ -407,9 +429,13 @@ class UPlotFormatTest {
         Assertions.assertTrue(formatted.getJsonObject("options").containsKey("series"));
         Assertions.assertTrue(formatted.getJsonObject("options").containsKey("labels"));
         Assertions.assertTrue(formatted.getJsonObject("options").containsKey("graphType"));
+        Assertions.assertTrue(formatted.getJsonObject("options").containsKey("xAxisLabel"));
 
         // GraphType must match with what's given in the UI request
         Assertions.assertEquals(graphType, formatted.getJsonObject("options").getString("graphType"));
+
+        // X Axis label must be correct
+        Assertions.assertEquals(xAxisLabel, formatted.getJsonObject("options").getString("xAxisLabel"));
 
         // Labels size must match with size of first array of Data so that each index is mapped to a label.
         Assertions.assertEquals(formatted.getJsonArray("data").getJsonArray(0).size(), formatted.getJsonObject("options").getJsonArray("labels").size());
@@ -441,6 +467,7 @@ class UPlotFormatTest {
 
         // Create options and Format objects to be tested
         final String graphType = "graph";
+        final String xAxisLabel = "_time.operation";
         final JsonObject optionsJson = Json.createObjectBuilder()
                 .add("type","uPlot")
                 .add("requestOptions",Json.createObjectBuilder()
@@ -482,9 +509,13 @@ class UPlotFormatTest {
         Assertions.assertTrue(formatted.getJsonObject("options").containsKey("series"));
         Assertions.assertTrue(formatted.getJsonObject("options").containsKey("labels"));
         Assertions.assertTrue(formatted.getJsonObject("options").containsKey("graphType"));
+        Assertions.assertTrue(formatted.getJsonObject("options").containsKey("xAxisLabel"));
 
         // GraphType must match with what's given in the UI request
         Assertions.assertEquals(graphType, formatted.getJsonObject("options").getString("graphType"));
+
+        // X Axis label must be correct
+        Assertions.assertEquals(xAxisLabel, formatted.getJsonObject("options").getString("xAxisLabel"));
 
         // Labels size must match with size of first array of Data so that each index is mapped to a label.
         Assertions.assertEquals(formatted.getJsonArray("data").getJsonArray(0).size(), formatted.getJsonObject("options").getJsonArray("labels").size());
@@ -516,6 +547,7 @@ class UPlotFormatTest {
 
         // Create options and Format objects to be tested
         final String graphType = "graph";
+        final String xAxisLabel = "_time";
         final JsonObject optionsJson = Json.createObjectBuilder()
                 .add("type","uPlot")
                 .add("requestOptions",Json.createObjectBuilder()
@@ -556,9 +588,13 @@ class UPlotFormatTest {
         Assertions.assertTrue(formatted.getJsonObject("options").containsKey("series"));
         Assertions.assertTrue(formatted.getJsonObject("options").containsKey("labels"));
         Assertions.assertTrue(formatted.getJsonObject("options").containsKey("graphType"));
+        Assertions.assertTrue(formatted.getJsonObject("options").containsKey("xAxisLabel"));
 
         // GraphType must match with what's given in the UI request
         Assertions.assertEquals(graphType, formatted.getJsonObject("options").getString("graphType"));
+
+        // X Axis label must be correct
+        Assertions.assertEquals(xAxisLabel, formatted.getJsonObject("options").getString("xAxisLabel"));
 
         // Labels size must match with size of first array of Data so that each index is mapped to a label.
         Assertions.assertEquals(formatted.getJsonArray("data").getJsonArray(0).size(), formatted.getJsonObject("options").getJsonArray("labels").size());
@@ -589,6 +625,7 @@ class UPlotFormatTest {
 
         // Create options and Format objects to be tested
         final String graphType = "graph";
+        final String xAxisLabel = "operation.success";
         final JsonObject optionsJson = Json.createObjectBuilder()
                 .add("type","uPlot")
                 .add("requestOptions",Json.createObjectBuilder()
@@ -625,9 +662,13 @@ class UPlotFormatTest {
         Assertions.assertTrue(formatted.getJsonObject("options").containsKey("series"));
         Assertions.assertTrue(formatted.getJsonObject("options").containsKey("labels"));
         Assertions.assertTrue(formatted.getJsonObject("options").containsKey("graphType"));
+        Assertions.assertTrue(formatted.getJsonObject("options").containsKey("xAxisLabel"));
 
         // GraphType must match with what's given in the UI request
         Assertions.assertEquals(graphType, formatted.getJsonObject("options").getString("graphType"));
+
+        // X Axis label must be correct
+        Assertions.assertEquals(xAxisLabel, formatted.getJsonObject("options").getString("xAxisLabel"));
 
         // Labels size must match with size of first array of Data so that each index is mapped to a label.
         Assertions.assertEquals(formatted.getJsonArray("data").getJsonArray(0).size(), formatted.getJsonObject("options").getJsonArray("labels").size());
@@ -717,6 +758,7 @@ class UPlotFormatTest {
 
         // Create options and Format objects to be tested
         final String graphType = "graph";
+        final String xAxisLabel = "";
         final JsonObject optionsJson = Json.createObjectBuilder()
                 .add("type","uPlot")
                 .add("requestOptions",Json.createObjectBuilder()
@@ -752,12 +794,17 @@ class UPlotFormatTest {
         Assertions.assertTrue(formatted.getJsonObject("options").containsKey("series"));
         Assertions.assertTrue(formatted.getJsonObject("options").containsKey("labels"));
         Assertions.assertTrue(formatted.getJsonObject("options").containsKey("graphType"));
+        Assertions.assertTrue(formatted.getJsonObject("options").containsKey("xAxisLabel"));
+
 
         // GraphType must match with what's given in the UI request
         Assertions.assertEquals(graphType, formatted.getJsonObject("options").getString("graphType"));
 
         // Labels size must match with size of first array of Data so that each index is mapped to a label.
         Assertions.assertEquals(formatted.getJsonArray("data").getJsonArray(0).size(), formatted.getJsonObject("options").getJsonArray("labels").size());
+
+        // X Axis label must be correct
+        Assertions.assertEquals(xAxisLabel, formatted.getJsonObject("options").getString("xAxisLabel"));
 
         // Series size must match with the size of second array of Data and the number of columns in the result dataset schema (minus number of group by fields used)
         Assertions.assertEquals(formatted.getJsonArray("data").size()-1, formatted.getJsonObject("options").getJsonArray("series").size());

@@ -87,9 +87,9 @@ class UPlotMetadataTest {
     @Test
     void asJsonTest(){
         final List<Row> rows = sourceData.collectAsList();
-        final UPlotMetadata metaData = new UPlotMetadata(sourceData.schema(),rows,"line",false);
+        final UPlotMetadata metaData = new UPlotMetadata(sourceData.schema(),rows,"","line",false);
         final JsonObject json = Assertions.assertDoesNotThrow(()->metaData.asJson().asJsonObject());
-        Assertions.assertEquals(3,json.size());
+        Assertions.assertEquals(4,json.size());
         final JsonArray series = Assertions.assertDoesNotThrow(()->json.getJsonArray("series"));
         final JsonArray labels = Assertions.assertDoesNotThrow(()->json.getJsonArray("labels"));
         final String graphType = Assertions.assertDoesNotThrow(()->json.getString("graphType"));
@@ -104,17 +104,19 @@ class UPlotMetadataTest {
     void aggregatedAsJsonTest() {
         final List<Row> rows = sourceData.groupBy("_time").agg(functions.max("filesModified")).withMetadata("_time", new MetadataBuilder().putBoolean("dpl_internal_isGroupByColumn", true).build()).collectAsList();
         final StructType aggSchema = rows.get(0).schema();
-        final UPlotMetadata metaData = new UPlotMetadata(aggSchema,rows,"line",true);
+        final UPlotMetadata metaData = new UPlotMetadata(aggSchema,rows,"_time","line",true);
         final JsonObject json = Assertions.assertDoesNotThrow(()->metaData.asJson().asJsonObject());
-        Assertions.assertEquals(3,json.size());
+        Assertions.assertEquals(4,json.size());
         final JsonArray series = Assertions.assertDoesNotThrow(()->json.getJsonArray("series"));
         final JsonArray labels = Assertions.assertDoesNotThrow(()->json.getJsonArray("labels"));
         final String graphType = Assertions.assertDoesNotThrow(()->json.getString("graphType"));
+        final String xAxisLabel = Assertions.assertDoesNotThrow(()->json.getString("xAxisLabel"));
 
         // Data is aggregated, so there should be a label for each row in the dataset. Series count should be one as there is only one aggregation (max) used.
         Assertions.assertEquals(rows.size(), labels.size());
         Assertions.assertEquals(1, series.size());
         Assertions.assertEquals("line", graphType);
+        Assertions.assertEquals("_time", xAxisLabel);
     }
 
     @Test
