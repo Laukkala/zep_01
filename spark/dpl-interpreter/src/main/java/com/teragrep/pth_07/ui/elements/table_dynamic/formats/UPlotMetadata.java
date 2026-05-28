@@ -58,12 +58,14 @@ public final class UPlotMetadata {
     private final List<Row> collectedData;
     private final String graphType;
     private final boolean isAggregated;
+    private final String xAxisLabel;
 
-    public UPlotMetadata(final StructType schema, final List<Row> collectedData, final String graphType, final boolean isAggregated){
+    public UPlotMetadata(final StructType schema, final List<Row> collectedData, final String xAxisLabel, final String graphType, final boolean isAggregated){
         this.schema = schema;
         this.collectedData = collectedData;
         this.graphType = graphType;
         this.isAggregated = isAggregated;
+        this.xAxisLabel = xAxisLabel;
     }
 
     /**
@@ -105,6 +107,14 @@ public final class UPlotMetadata {
         return builder.build();
     }
 
+    /**
+     * Builds a String containing the column name which represents the X-axis in the table. For example X-axis with dates as values might have the label "_time"
+     * @return String with the label of the X-axis.
+     */
+    private String xAxisLabel() {
+        return xAxisLabel;
+    }
+
     public boolean isAggregated(){
         return isAggregated;
     }
@@ -115,19 +125,20 @@ public final class UPlotMetadata {
                 .add("labels",labels())
                 .add("series",series())
                 .add("graphType", graphType)
+                .add("xAxisLabel",xAxisLabel())
                 .build();
     }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         UPlotMetadata that = (UPlotMetadata) o;
-        return isAggregated == that.isAggregated && Objects.equals(schema, that.schema) && Objects.equals(collectedData, that.collectedData) && Objects.equals(graphType, that.graphType);
+        return isAggregated == that.isAggregated && Objects.equals(schema, that.schema) && Objects.equals(collectedData, that.collectedData) && Objects.equals(graphType, that.graphType) && Objects.equals(xAxisLabel, that.xAxisLabel);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(schema, collectedData, graphType, isAggregated);
+        return Objects.hash(schema, collectedData, graphType, isAggregated, xAxisLabel);
     }
-
 }

@@ -150,14 +150,14 @@ class UserInterfaceManagerTest {
         final Dataset<Row> testDs2 = testDataset.createDataset(2,1L,1L);
         Assertions.assertDoesNotThrow(()->userInterfaceManager.updateDataset(testDs2));
 
-        String expectedUplotOutput = "%uplot {\"data\":[[],[1,1],[1,1]],\"options\":{\"labels\":[],\"series\":[\"id\",\"offset\"],\"graphType\":\"line\"},\"isAggregated\":false,\"type\":\"uPlot\"}";
+        String expectedUplotOutput = "%uplot {\"data\":[[],[1,1],[1,1]],\"options\":{\"labels\":[],\"series\":[\"id\",\"offset\"],\"graphType\":\"line\",\"xAxisLabel\":\"\"},\"isAggregated\":false,\"type\":\"uPlot\"}";
 
         Assertions.assertEquals(1,testOutput.size());
         Assertions.assertEquals(2,outputList.size());
         Assertions.assertEquals(expectedUplotOutput,outputList.get(1).toString());
 
         final Dataset<Row> testDs3 = testDataset.createDataset(5,1L,1L);
-        expectedUplotOutput = "%uplot {\"data\":[[],[1,1,1,1,1],[1,1,1,1,1]],\"options\":{\"labels\":[],\"series\":[\"id\",\"offset\"],\"graphType\":\"line\"},\"isAggregated\":false,\"type\":\"uPlot\"}";
+        expectedUplotOutput = "%uplot {\"data\":[[],[1,1,1,1,1],[1,1,1,1,1]],\"options\":{\"labels\":[],\"series\":[\"id\",\"offset\"],\"graphType\":\"line\",\"xAxisLabel\":\"\"},\"isAggregated\":false,\"type\":\"uPlot\"}";
         Assertions.assertDoesNotThrow(()->userInterfaceManager.updateDataset(testDs3));
 
 
@@ -180,7 +180,7 @@ class UserInterfaceManagerTest {
         Assertions.assertDoesNotThrow(()->userInterfaceManager.updateDataset(testDs));
 
         final String formatted = Assertions.assertDoesNotThrow(()->userInterfaceManager.formatDataset(uPlotUIOption));
-        final String expectedOutput = "{\"data\":[[],[0,0],[0,0]],\"options\":{\"labels\":[],\"series\":[\"id\",\"offset\"],\"graphType\":\"line\"},\"isAggregated\":false,\"type\":\"uPlot\"}";
+        final String expectedOutput = "{\"data\":[[],[0,0],[0,0]],\"options\":{\"labels\":[],\"series\":[\"id\",\"offset\"],\"graphType\":\"line\",\"xAxisLabel\":\"\"},\"isAggregated\":false,\"type\":\"uPlot\"}";
         Assertions.assertEquals(expectedOutput,formatted);
     }
 
