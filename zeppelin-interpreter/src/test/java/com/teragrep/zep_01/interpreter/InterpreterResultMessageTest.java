@@ -124,4 +124,17 @@ class InterpreterResultMessageTest {
         Assertions.assertEquals(InterpreterResult.Type.TEXT.label,resultJson.getString("type"));
         Assertions.assertEquals(resultJsonString,resultJson.getString("data"));
     }
+
+    /**
+     * If the InterpreterResult contains a null type, the result should be handled as plain text.
+     */
+    @Test
+    void testNullTypetextResultAsJson() {
+        final String resultJsonString = "{\"data\":\"plain text result\"}";
+        final InterpreterResultMessage testMessage = new InterpreterResultMessage(null,resultJsonString);
+        final JsonObject resultJson = Assertions.assertDoesNotThrow(()->testMessage.asJson());
+        Assertions.assertEquals(false,resultJson.getBoolean("isAggregated"));
+        Assertions.assertEquals(InterpreterResult.Type.TEXT.label,resultJson.getString("type"));
+        Assertions.assertEquals(resultJsonString,resultJson.getString("data"));
+    }
 }
