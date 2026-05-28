@@ -51,16 +51,17 @@ public class InterpreterResultMessage implements Serializable, Jsonable {
     // If the data within this resultMessage is in a JSON formatted type, read the String into a JSON object.
     // If the data is in some other format, create a JSON object with the keys expected by UI, and the data as a simple String.
     final JsonObject rv;
-    if(type.equals(InterpreterResult.Type.DATATABLES) || type.equals(InterpreterResult.Type.UPLOT)){
-      rv = Json.createReader(new StringReader(data)).readObject();
-    }
-    else {
-      JsonObjectBuilder builder = Json.createObjectBuilder();
-      builder.add("data",data);
-      builder.add("type",type.label);
-      builder.add("isAggregated",false);
-      rv = builder.build();
-    }
+      if(type != null && (type.equals(InterpreterResult.Type.DATATABLES) || type.equals(InterpreterResult.Type.UPLOT))){
+        rv = Json.createReader(new StringReader(data)).readObject();
+      }
+      else {
+        JsonObjectBuilder builder = Json.createObjectBuilder();
+        builder.add("data",data);
+        builder.add("type", type != null ? type.label : InterpreterResult.Type.TEXT.label);
+        builder.add("isAggregated",false);
+        rv = builder.build();
+      }
+
     return rv;
   }
 }
