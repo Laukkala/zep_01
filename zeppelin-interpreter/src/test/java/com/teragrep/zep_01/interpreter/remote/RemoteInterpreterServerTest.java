@@ -193,7 +193,7 @@ public class RemoteInterpreterServerTest {
     assertTrue(interpreter1.closed.get());
   }
   @Test
-  public void testShutdownHook() throws Exception {
+  public void testUngracefulShutdownHook() throws Exception {
     // Start a server
     final RemoteInterpreterServer server = new RemoteInterpreterServer("localhost",
             RemoteInterpreterUtils.findRandomAvailablePortOnAllLocalInterfaces(), ":", "groupId", true);
@@ -222,8 +222,38 @@ public class RemoteInterpreterServerTest {
     Assertions.assertEquals(false,shutdownThread.isAlive());
     Assertions.assertEquals(false,serverThread.isAlive());
     Assertions.assertTrue(eventClient.unregistered());
+    }
+  @Test
+  public void testGracefulShutdownHook() throws Exception {
+    // Start a server
+    final RemoteInterpreterServer server = new RemoteInterpreterServer("localhost",
+            RemoteInterpreterUtils.findRandomAvailablePortOnAllLocalInterfaces(), ":", "groupId", true);
+    server.init(new HashMap<>());
+    final FakeRemoteInterpreterEventClient eventClient = new FakeRemoteInterpreterEventClient("localhost",8080,100);
+    server.intpEventClient = eventClient;
+    final RemoteInterpreterServer.ShutdownThread shutdownThread = server.new ShutdownThread(RemoteInterpreterServer.ShutdownThread.CAUSE_SHUTDOWN_CALL);
+    final Thread serverThread = new Thread(new Runnable() {
+      @Override
+      public void run() {
+        server.start();
       }
+    });
+    serverThread.start();
 
+    // Wait for server to be initialized
+    Thread.sleep(50);
+
+    // Simulate a SIGTERM by calling shutdown in another thread
+    shutdownThread.start();
+
+    // Wait for 250 ms before SIGKILL is sent
+    Thread.sleep(250);
+
+    // Assert that shutdown hook has finished in time and that the server has been closed properly
+    Assertions.assertEquals(false,shutdownThread.isAlive());
+    Assertions.assertEquals(false,serverThread.isAlive());
+    Assertions.assertFalse(eventClient.unregistered());
+  }
   public static class Test1Interpreter extends Interpreter {
 
     AtomicBoolean cancelled = new AtomicBoolean();
