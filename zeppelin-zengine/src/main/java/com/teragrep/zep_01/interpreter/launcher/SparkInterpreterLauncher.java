@@ -146,11 +146,9 @@ public class SparkInterpreterLauncher extends StandardInterpreterLauncher {
 
         // Upload file to hadoop shared folder.
         Configuration hadoopConf = new Configuration();
-        LOGGER.info("Hadoop conf dir: <[{}]>",getEnv("HADOOP_CONF_DIR")+"/core-site.xml");
-        hadoopConf.addResource(new org.apache.hadoop.fs.Path(getEnv("HADOOP_CONF_DIR")+"/core-site.xml"));
+        hadoopConf.addResource(new org.apache.hadoop.fs.Path(getEnv("HADOOP_CONF_DIR/core-site.xml")));
         org.apache.hadoop.fs.Path localPTH_10 = new org.apache.hadoop.fs.Path("/opt/teragrep/pth_10/lib/pth_10-shaded.jar");
         org.apache.hadoop.fs.Path hdfsPTH_10 = new org.apache.hadoop.fs.Path("/common-jars/pth_10-shaded.jar");
-        LOGGER.info("Moving PTH_10 file from: [{}] to [{}]",localPTH_10.toString(), hdfsPTH_10.toString());
         FileSystem fileSystem = FileSystem.get(hadoopConf);
         fileSystem.copyFromLocalFile(localPTH_10,hdfsPTH_10);
 
