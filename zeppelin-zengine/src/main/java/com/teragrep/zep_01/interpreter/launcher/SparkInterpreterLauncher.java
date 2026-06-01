@@ -44,7 +44,6 @@ import com.teragrep.zep_01.interpreter.recovery.RecoveryStorage;
 import com.teragrep.zep_01.interpreter.remote.RemoteInterpreterUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
-import org.apache.hadoop.fs.permission.FsPermission;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -150,11 +149,10 @@ public class SparkInterpreterLauncher extends StandardInterpreterLauncher {
         LOGGER.info("Hadoop conf dir: <[{}]>",getEnv("HADOOP_CONF_DIR")+"/core-site.xml");
         hadoopConf.addResource(new org.apache.hadoop.fs.Path(getEnv("HADOOP_CONF_DIR")+"/core-site.xml"));
         org.apache.hadoop.fs.Path localPTH_10 = new org.apache.hadoop.fs.Path("/opt/teragrep/pth_10/lib/pth_10-shaded.jar");
-        org.apache.hadoop.fs.Path hdfsPTH_10 = new org.apache.hadoop.fs.Path("/user/zeppelin/common-jars/pth_10-shaded.jar");
+        org.apache.hadoop.fs.Path hdfsPTH_10 = new org.apache.hadoop.fs.Path("/common-jars/pth_10-shaded.jar");
         LOGGER.info("Moving PTH_10 file from: [{}] to [{}]",localPTH_10.toString(), hdfsPTH_10.toString());
         FileSystem fileSystem = FileSystem.get(hadoopConf);
         fileSystem.copyFromLocalFile(localPTH_10,hdfsPTH_10);
-        fileSystem.setPermission(hdfsPTH_10,new FsPermission(755));
 
         // add zeppelin-interpreter-shaded
         Path interpreterFolder = Paths.get(zConf.getZeppelinHome(), "/interpreter");
