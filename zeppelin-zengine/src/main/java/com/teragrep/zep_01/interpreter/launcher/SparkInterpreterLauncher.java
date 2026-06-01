@@ -154,7 +154,7 @@ public class SparkInterpreterLauncher extends StandardInterpreterLauncher {
         LOGGER.info("Moving PTH_10 file from: [{}] to [{}]",localPTH_10.toString(), hdfsPTH_10.toString());
         FileSystem fileSystem = FileSystem.get(hadoopConf);
         fileSystem.copyFromLocalFile(localPTH_10,hdfsPTH_10);
-        fileSystem.setPermission(hdfsPTH_10,new FsPermission(755));
+        fileSystem.setPermission(hdfsPTH_10,new FsPermission("755"));
 
         // add zeppelin-interpreter-shaded
         Path interpreterFolder = Paths.get(zConf.getZeppelinHome(), "/interpreter");
