@@ -40,9 +40,9 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.Mockito.mock;
 
-@Ignore("Contains bunch of sleeps and timeouts")
 public class RemoteInterpreterServerTest {
 
+  @Ignore("Contains bunch of sleeps and timeouts")
   @Test
   public void testStartStop() throws Exception {
     RemoteInterpreterServer server = new RemoteInterpreterServer("localhost",
@@ -52,6 +52,7 @@ public class RemoteInterpreterServerTest {
     stopRemoteInterpreterServer(server, 10 * 10000);
   }
 
+  @Ignore("Contains bunch of sleeps and timeouts")
   @Test
   public void testStartStopWithQueuedEvents() throws Exception {
     RemoteInterpreterServer server = new RemoteInterpreterServer("localhost",
@@ -98,6 +99,7 @@ public class RemoteInterpreterServerTest {
               server.getPort()));
   }
 
+  @Ignore("Contains bunch of sleeps and timeouts")
   @Test
   public void testInterpreter() throws Exception {
     final RemoteInterpreterServer server = new RemoteInterpreterServer("localhost",
