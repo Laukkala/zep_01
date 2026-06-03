@@ -195,6 +195,8 @@ public class RemoteInterpreterServerTest {
     server.close("session_1", Test1Interpreter.class.getName());
     assertTrue(interpreter1.closed.get());
   }
+
+  // Shutdownhook should stop the server and unregister InterpreterProcess in case of ungraceful exit
   @Test
   public void testUngracefulShutdownHook() {
     // Start a server
@@ -233,8 +235,9 @@ public class RemoteInterpreterServerTest {
     Assertions.assertTrue(eventClient.unregistered());
     }
 
+  // Shutdownhook should stop the server even if InterpreterEventClient is not assigned in case of ungraceful exit
   @Test
-  public void testUngracefulShutdownHookWithNoEventClient() {
+  public void testShutdownHookWithNoEventClient() {
     // Start a server
     final RemoteInterpreterServer server = Assertions.assertDoesNotThrow(()->new RemoteInterpreterServer("localhost",
             RemoteInterpreterUtils.findRandomAvailablePortOnAllLocalInterfaces(), ":", "groupId", true));
@@ -269,43 +272,7 @@ public class RemoteInterpreterServerTest {
     Assertions.assertFalse(serverThread.isAlive());
   }
 
-  @Test
-  public void testShutdownHookWithGracefulShutdownCause() {
-    // Start a server
-    final RemoteInterpreterServer server = Assertions.assertDoesNotThrow(()->new RemoteInterpreterServer("localhost",
-            RemoteInterpreterUtils.findRandomAvailablePortOnAllLocalInterfaces(), ":", "groupId", true));
-    Assertions.assertDoesNotThrow(()->server.init(new HashMap<>()));
-    final FakeRemoteInterpreterEventClient eventClient = new FakeRemoteInterpreterEventClient("localhost",8080,100);
-    server.intpEventClient = eventClient;
-    final Thread serverThread = new Thread(server::start);
-    serverThread.start();
-
-    // Assert that server was started
-    Assertions.assertTrue(serverThread.isAlive());
-    final RemoteInterpreterServer.ShutdownThread shutdownThread = server.new ShutdownThread(RemoteInterpreterServer.ShutdownThread.CAUSE_SHUTDOWN_CALL);
-    Assertions.assertFalse(eventClient.unregistered());
-    // Wait for server to be initialized. Timeout after 0.5s
-    long timeout = System.currentTimeMillis() + 500;
-    while(!server.isRunning()){
-      if(System.currentTimeMillis() > timeout){
-        Assertions.fail("Timeout was reached before server startup was finished!");
-        break;
-      }
-      // This empty synchronized block stops the compiler from caching the result of server.isRunning() in the while loop, which caused the loop to always reach the timeout regardless of if the server was actually started.
-      synchronized (this){}
-    }
-    // Simulate a SIGTERM by calling shutdown in another thread
-    shutdownThread.start();
-
-    // Wait for 250 ms before SIGKILL is sent
-    Assertions.assertDoesNotThrow(()->Thread.sleep(250));;
-
-    // Assert that shutdown hook has finished in time and that the server has been closed properly
-    Assertions.assertFalse(shutdownThread.isAlive());
-    Assertions.assertFalse(serverThread.isAlive());
-    Assertions.assertFalse(eventClient.unregistered());
-  }
-
+  // Failing to unregister interpreterProcess should throw an Exception, but server should still be shut down.
   @Test
   public void testFailedUnregister() {
     // Start a server
@@ -343,6 +310,7 @@ public class RemoteInterpreterServerTest {
     Assertions.assertEquals(exception, eventClient.exception());
   }
 
+  // Shutdownhook should stop the server, but registration should not be done in case of graceful exit
   @Test
   public void testGracefulShutdownHook() {
     // Start a server
@@ -357,8 +325,8 @@ public class RemoteInterpreterServerTest {
     // Assert that server was started
     Assertions.assertTrue(serverThread.isAlive());
     final RemoteInterpreterServer.ShutdownThread shutdownThread = server.new ShutdownThread(RemoteInterpreterServer.ShutdownThread.CAUSE_SHUTDOWN_CALL);
-
-
+    // Assert that unregisterInterpreterProcess has not been called.
+    Assertions.assertFalse(eventClient.unregistered());
     // Wait for server to be initialized. Timeout after 0.5s
     long timeout = System.currentTimeMillis() + 500;
     while(!server.isRunning()){
@@ -378,6 +346,7 @@ public class RemoteInterpreterServerTest {
     // Assert that shutdown hook has finished in time and that the server has been closed properly
     Assertions.assertFalse(shutdownThread.isAlive());
     Assertions.assertFalse(serverThread.isAlive());
+    // Assert that unregisterInterpreterProcess has still not been called.
     Assertions.assertFalse(eventClient.unregistered());
   }
   public static class Test1Interpreter extends Interpreter {
