@@ -194,24 +194,24 @@ public class RemoteInterpreterServerTest {
     assertTrue(interpreter1.closed.get());
   }
   @Test
-  public void testUngracefulShutdownHook() throws Exception {
+  public void testUngracefulShutdownHook() {
     // Start a server
-    final RemoteInterpreterServer server = new RemoteInterpreterServer("localhost",
-            RemoteInterpreterUtils.findRandomAvailablePortOnAllLocalInterfaces(), ":", "groupId", true);
-    server.init(new HashMap<>());
+    final RemoteInterpreterServer server = Assertions.assertDoesNotThrow(()->new RemoteInterpreterServer("localhost",
+            RemoteInterpreterUtils.findRandomAvailablePortOnAllLocalInterfaces(), ":", "groupId", true));
+    Assertions.assertDoesNotThrow(()->server.init(new HashMap<>()));
     final FakeRemoteInterpreterEventClient eventClient = new FakeRemoteInterpreterEventClient("localhost",8080,100);
     server.intpEventClient = eventClient;
     final Thread serverThread = new Thread(server::start);
     final RemoteInterpreterServer.ShutdownThread shutdownThread = server.new ShutdownThread(RemoteInterpreterServer.ShutdownThread.CAUSE_SHUTDOWN_HOOK);
     Assertions.assertFalse(eventClient.unregistered());
     // Wait for server to be initialized
-    Thread.sleep(50);
+    Assertions.assertDoesNotThrow(()->Thread.sleep(50));;
 
     // Simulate a SIGTERM by calling shutdown in another thread
     shutdownThread.start();
 
     // Wait for 250 ms before SIGKILL is sent
-    Thread.sleep(250);
+    Assertions.assertDoesNotThrow(()->Thread.sleep(250));;
 
     // Assert that shutdown hook has finished in time and that the server has been closed properly
     Assertions.assertFalse(shutdownThread.isAlive());
@@ -220,24 +220,24 @@ public class RemoteInterpreterServerTest {
     }
 
   @Test
-  public void testUngracefulShutdownHookWithNoEventClient() throws Exception {
+  public void testUngracefulShutdownHookWithNoEventClient() {
     // Start a server
-    final RemoteInterpreterServer server = new RemoteInterpreterServer("localhost",
-            RemoteInterpreterUtils.findRandomAvailablePortOnAllLocalInterfaces(), ":", "groupId", true);
-    server.init(new HashMap<>());
+    final RemoteInterpreterServer server = Assertions.assertDoesNotThrow(()->new RemoteInterpreterServer("localhost",
+            RemoteInterpreterUtils.findRandomAvailablePortOnAllLocalInterfaces(), ":", "groupId", true));
+    Assertions.assertDoesNotThrow(()->server.init(new HashMap<>()));
 
     // If intpEventClient is not assigned, the server should still be shut down.
     server.intpEventClient = null;
     final Thread serverThread = new Thread(server::start);
     final RemoteInterpreterServer.ShutdownThread shutdownThread = server.new ShutdownThread(RemoteInterpreterServer.ShutdownThread.CAUSE_SHUTDOWN_HOOK);
     // Wait for server to be initialized
-    Thread.sleep(50);
+    Assertions.assertDoesNotThrow(()->Thread.sleep(50));;
 
     // Simulate a SIGTERM by calling shutdown in another thread
     shutdownThread.start();
 
     // Wait for 250 ms before SIGKILL is sent
-    Thread.sleep(250);
+    Assertions.assertDoesNotThrow(()->Thread.sleep(250));;
 
     // Assert that shutdown hook has finished in time and that the server has been closed properly
     Assertions.assertFalse(shutdownThread.isAlive());
@@ -245,24 +245,24 @@ public class RemoteInterpreterServerTest {
   }
 
   @Test
-  public void testShutdownHookWithGracefulShutdownCause() throws Exception {
+  public void testShutdownHookWithGracefulShutdownCause() {
     // Start a server
-    final RemoteInterpreterServer server = new RemoteInterpreterServer("localhost",
-            RemoteInterpreterUtils.findRandomAvailablePortOnAllLocalInterfaces(), ":", "groupId", true);
-    server.init(new HashMap<>());
+    final RemoteInterpreterServer server = Assertions.assertDoesNotThrow(()->new RemoteInterpreterServer("localhost",
+            RemoteInterpreterUtils.findRandomAvailablePortOnAllLocalInterfaces(), ":", "groupId", true));
+    Assertions.assertDoesNotThrow(()->server.init(new HashMap<>()));
     final FakeRemoteInterpreterEventClient eventClient = new FakeRemoteInterpreterEventClient("localhost",8080,100);
     server.intpEventClient = eventClient;
     final Thread serverThread = new Thread(server::start);
     final RemoteInterpreterServer.ShutdownThread shutdownThread = server.new ShutdownThread(RemoteInterpreterServer.ShutdownThread.CAUSE_SHUTDOWN_CALL);
     Assertions.assertFalse(eventClient.unregistered());
     // Wait for server to be initialized
-    Thread.sleep(50);
+    Assertions.assertDoesNotThrow(()->Thread.sleep(50));;
 
     // Simulate a SIGTERM by calling shutdown in another thread
     shutdownThread.start();
 
     // Wait for 250 ms before SIGKILL is sent
-    Thread.sleep(250);
+    Assertions.assertDoesNotThrow(()->Thread.sleep(250));;
 
     // Assert that shutdown hook has finished in time and that the server has been closed properly
     Assertions.assertFalse(shutdownThread.isAlive());
@@ -271,24 +271,24 @@ public class RemoteInterpreterServerTest {
   }
 
   @Test
-  public void testFailedUnregister() throws Exception {
+  public void testFailedUnregister() {
     // Start a server
-    final RemoteInterpreterServer server = new RemoteInterpreterServer("localhost",
-            RemoteInterpreterUtils.findRandomAvailablePortOnAllLocalInterfaces(), ":", "groupId", true);
-    server.init(new HashMap<>());
+    final RemoteInterpreterServer server = Assertions.assertDoesNotThrow(()->new RemoteInterpreterServer("localhost",
+            RemoteInterpreterUtils.findRandomAvailablePortOnAllLocalInterfaces(), ":", "groupId", true));
+    Assertions.assertDoesNotThrow(()->server.init(new HashMap<>()));
     final RuntimeException exception = new RuntimeException("Failed to unregister Interpreter!");
     final FakeFailingRemoteInterpreterEventClient eventClient = new FakeFailingRemoteInterpreterEventClient("localhost",8080,100, exception);
     server.intpEventClient = eventClient;
     final Thread serverThread = new Thread(server::start);
     final RemoteInterpreterServer.ShutdownThread shutdownThread = server.new ShutdownThread(RemoteInterpreterServer.ShutdownThread.CAUSE_SHUTDOWN_HOOK);
     // Wait for server to be initialized
-    Thread.sleep(50);
+    Assertions.assertDoesNotThrow(()->Thread.sleep(50));;
 
     // Simulate a SIGTERM by calling shutdown in another thread
     shutdownThread.start();
 
     // Wait for 250 ms before SIGKILL is sent
-    Thread.sleep(250);
+    Assertions.assertDoesNotThrow(()->Thread.sleep(250));;
 
     // Assert that shutdown hook has finished in time and that the server has been closed properly
     Assertions.assertFalse(shutdownThread.isAlive());
@@ -297,24 +297,24 @@ public class RemoteInterpreterServerTest {
   }
 
   @Test
-  public void testGracefulShutdownHook() throws Exception {
+  public void testGracefulShutdownHook() {
     // Start a server
-    final RemoteInterpreterServer server = new RemoteInterpreterServer("localhost",
-            RemoteInterpreterUtils.findRandomAvailablePortOnAllLocalInterfaces(), ":", "groupId", true);
-    server.init(new HashMap<>());
+    final RemoteInterpreterServer server = Assertions.assertDoesNotThrow(()->new RemoteInterpreterServer("localhost",
+            RemoteInterpreterUtils.findRandomAvailablePortOnAllLocalInterfaces(), ":", "groupId", true));
+    Assertions.assertDoesNotThrow(()->server.init(new HashMap<>()));
     final FakeRemoteInterpreterEventClient eventClient = new FakeRemoteInterpreterEventClient("localhost",8080,100);
     server.intpEventClient = eventClient;
     final RemoteInterpreterServer.ShutdownThread shutdownThread = server.new ShutdownThread(RemoteInterpreterServer.ShutdownThread.CAUSE_SHUTDOWN_CALL);
     final Thread serverThread = new Thread(server::start);
 
     // Wait for server to be initialized
-    Thread.sleep(50);
+    Assertions.assertDoesNotThrow(()->Thread.sleep(50));;
 
     // Simulate a SIGTERM by calling shutdown in another thread
     shutdownThread.start();
 
     // Wait for 250 ms before SIGKILL is sent
-    Thread.sleep(250);
+    Assertions.assertDoesNotThrow(()->Thread.sleep(250));;
 
     // Assert that shutdown hook has finished in time and that the server has been closed properly
     Assertions.assertFalse(shutdownThread.isAlive());
