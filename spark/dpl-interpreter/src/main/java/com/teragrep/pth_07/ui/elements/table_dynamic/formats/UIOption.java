@@ -45,9 +45,11 @@
  */
 package com.teragrep.pth_07.ui.elements.table_dynamic.formats;
 
+import com.teragrep.zep_01.common.Jsonable;
 import jakarta.json.JsonObject;
 
-public interface UIOption {
-    JsonObject toJson();
+public interface UIOption extends Jsonable {
+    @Override
+    JsonObject asJson();
     String toString();
 }

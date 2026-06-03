@@ -51,10 +51,8 @@ import com.teragrep.pth_07.ui.elements.table_dynamic.DatasetStore;
 import com.teragrep.pth_07.ui.elements.table_dynamic.formats.AvailableFormat;
 import com.teragrep.pth_07.ui.elements.table_dynamic.formats.RenderFormat;
 import com.teragrep.pth_07.ui.elements.table_dynamic.formats.UIOption;
-import com.teragrep.pth_07.ui.elements.table_dynamic.formats.UIOptionImpl;
 import com.teragrep.zep_01.interpreter.InterpreterContext;
 import com.teragrep.zep_01.interpreter.InterpreterException;
-import jakarta.json.JsonObject;
 import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
 import org.slf4j.Logger;
@@ -111,7 +109,7 @@ public final class UserInterfaceManager {
     public String formatDataset(UIOption uiOption){
         datasetStore.updateUIOptions(uiOption);
         RenderFormat renderFormat = datasetStore.toRenderFormat(uiOption);
-        return renderFormat.toJson().toString();
+        return renderFormat.asJson().toString();
     }
 
     public void updateUIOption(UIOption uiOption){

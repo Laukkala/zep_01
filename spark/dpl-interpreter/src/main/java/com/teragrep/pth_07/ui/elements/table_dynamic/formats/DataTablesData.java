@@ -45,6 +45,7 @@
  */
 package com.teragrep.pth_07.ui.elements.table_dynamic.formats;
 
+import com.teragrep.zep_01.common.Jsonable;
 import jakarta.json.*;
 import org.apache.spark.sql.Row;
 import org.apache.spark.sql.types.DataType;
@@ -58,7 +59,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicReference;
 
-public final class DataTablesData {
+public final class DataTablesData implements Jsonable {
 
     private final List<String> collectedData;
     private final long draw;
@@ -125,7 +126,8 @@ public final class DataTablesData {
         return collectedData.size();
     }
 
-    public JsonValue asJson() {
+    @Override
+    public JsonObject asJson() {
         final JsonObject json = Json.createObjectBuilder()
                         .add("data", data())
                         .add("draw", draw())

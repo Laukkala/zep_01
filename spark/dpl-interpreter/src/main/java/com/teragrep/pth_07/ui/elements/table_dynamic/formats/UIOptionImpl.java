@@ -60,7 +60,7 @@ public final class UIOptionImpl implements UIOption {
     }
 
     @Override
-    public JsonObject toJson() {
+    public JsonObject asJson() {
         return Json.createReader(new StringReader(string)).readObject();
     }
     @Override

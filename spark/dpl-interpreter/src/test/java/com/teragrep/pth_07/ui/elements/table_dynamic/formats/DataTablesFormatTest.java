@@ -100,7 +100,7 @@ class DataTablesFormatTest {
 
         // Get rows 3-5 of the dataset, check that every value is present
         final DataTablesFormat format = new DataTablesFormat(formattingOptions,sourceData);
-        final JsonObject formatted = Assertions.assertDoesNotThrow(()->format.toJson());
+        final JsonObject formatted = Assertions.assertDoesNotThrow(()->format.asJson());
         final JsonObject data = formatted.getJsonObject("data");
         final JsonObject options = formatted.getJsonObject("options");
         final JsonArray headers = options.getJsonArray("headers");
@@ -172,7 +172,7 @@ class DataTablesFormatTest {
 
         // Get rows 3-5 of the dataset, check that every value is present
         final DataTablesFormat format = new DataTablesFormat(formattingOptions,aggDataset);
-        final JsonObject formatted = Assertions.assertDoesNotThrow(()->format.toJson());
+        final JsonObject formatted = Assertions.assertDoesNotThrow(()->format.asJson());
         final JsonObject data = formatted.getJsonObject("data");
         final JsonObject options = formatted.getJsonObject("options");
         final JsonArray headers = options.getJsonArray("headers");
@@ -239,7 +239,7 @@ class DataTablesFormatTest {
 
         // Get rows 3-5 of the dataset, check that every value is present
         final DataTablesFormat format = new DataTablesFormat(formattingOptions,aggDataset);
-        final JsonObject formatted = Assertions.assertDoesNotThrow(()->format.toJson());
+        final JsonObject formatted = Assertions.assertDoesNotThrow(()->format.asJson());
         final JsonObject data = formatted.getJsonObject("data");
         final JsonObject options = formatted.getJsonObject("options");
         final JsonArray headers = options.getJsonArray("headers");
@@ -292,7 +292,7 @@ class DataTablesFormatTest {
 
 
         final DataTablesFormat format1 = new DataTablesFormat(formattingOptions1,sourceData);
-        final JsonObject formatted1 = Assertions.assertDoesNotThrow(()->format1.toJson());
+        final JsonObject formatted1 = Assertions.assertDoesNotThrow(()->format1.asJson());
         final JsonObject dataJson1 = formatted1.getJsonObject("data");
         Assertions.assertEquals(5,dataJson1.getJsonArray("data").size());
 
@@ -340,7 +340,7 @@ class DataTablesFormatTest {
 
         // Get rows 3-5 of the dataset, check that every value is present
         final DataTablesFormat format2 = new DataTablesFormat(formattingOptions2,sourceData);
-        final JsonObject formatted2 = Assertions.assertDoesNotThrow(()->format2.toJson());
+        final JsonObject formatted2 = Assertions.assertDoesNotThrow(()->format2.asJson());
         final JsonObject dataJson2 = formatted2.getJsonObject("data");
 
         Assertions.assertEquals(5,dataJson2.getJsonArray("data").size());

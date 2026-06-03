@@ -45,10 +45,8 @@
  */
 package com.teragrep.pth_07.ui.elements.table_dynamic.formats;
 
-import jakarta.json.Json;
-import jakarta.json.JsonArray;
-import jakarta.json.JsonArrayBuilder;
-import jakarta.json.JsonValue;
+import com.teragrep.zep_01.common.Jsonable;
+import jakarta.json.*;
 import org.apache.spark.sql.Row;
 import org.apache.spark.sql.types.StructField;
 import org.apache.spark.sql.types.StructType;
@@ -56,7 +54,7 @@ import org.apache.spark.sql.types.StructType;
 import java.util.List;
 import java.util.Objects;
 
-public final class DataTablesMetadata {
+public final class DataTablesMetadata implements Jsonable {
     private final StructType schema;
 
     @Override
@@ -86,7 +84,8 @@ public final class DataTablesMetadata {
     }
 
 
-    public JsonValue asJson() {
+    @Override
+    public JsonObject asJson() {
         return Json.createObjectBuilder()
                 .add("headers", headers())
                 .build();

@@ -70,8 +70,8 @@ public final class UPlotFormat implements RenderFormat{
     }
 
     @Override
-    public JsonObject toJson(){
-        final JsonObject requestOptions = option.toJson().getJsonObject("requestOptions");
+    public JsonObject asJson(){
+        final JsonObject requestOptions = option.asJson().getJsonObject("requestOptions");
         final StructType schema = dataset.schema();
         final List<String> groupByColumnNames = new ArrayList<>();
         final List<String> valueColumnNames = new ArrayList<>();

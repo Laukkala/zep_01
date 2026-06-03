@@ -87,7 +87,7 @@ public final class DatasetStore {
         // Prepend "%{InterpreterResult.Type}\n so that InterpreterOutput.write() parses the type correctly instead of treating the output as TEXT
         output.append("%"+renderFormat.type().label.toLowerCase());
         output.append("\n");
-        output.append(renderFormat.toJson().toString());
+        output.append(renderFormat.asJson().toString());
         try{
             writeToDisk(output.toString());
         }

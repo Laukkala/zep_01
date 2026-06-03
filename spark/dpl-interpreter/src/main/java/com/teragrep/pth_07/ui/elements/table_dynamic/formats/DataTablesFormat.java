@@ -54,8 +54,6 @@ import org.apache.spark.sql.types.StructType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.StringReader;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
@@ -84,8 +82,8 @@ public final class DataTablesFormat implements RenderFormat{
      * @return JsonObject formatted to the style expected by DataTables visualization library, with requested pagination performed.
      */
     @Override
-    public JsonObject toJson(){
-        final JsonObject optionJson = option.toJson().getJsonObject("requestOptions");
+    public JsonObject asJson(){
+        final JsonObject optionJson = option.asJson().getJsonObject("requestOptions");
         final List<String> rows = dataset.toJSON().collectAsList();
         final int pageStart = optionJson.getInt("start");
         final int pageLength = optionJson.getInt("length");

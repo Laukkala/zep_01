@@ -51,7 +51,7 @@ import jakarta.json.JsonObject;
 public final class RenderFormatStub implements RenderFormat {
 
     @Override
-    public JsonObject toJson() {
+    public JsonObject asJson() {
         throw new IllegalArgumentException("No available formats found");
     }
 

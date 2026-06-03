@@ -46,15 +46,16 @@
 package com.teragrep.pth_07.ui.elements.table_dynamic.formats;
 
 import com.teragrep.stb_01.Stubable;
+import com.teragrep.zep_01.common.Jsonable;
 import com.teragrep.zep_01.interpreter.InterpreterResult;
 import jakarta.json.JsonObject;
 
 /**
  * RenderFormat represents a formatted Dataset. Implement formatting transformations in toJson() and provide an InterpreterResult.Type that matches with the format name
  */
-public interface RenderFormat extends Stubable {
+public interface RenderFormat extends Stubable, Jsonable {
 
-    JsonObject toJson();
+    JsonObject asJson();
 
     InterpreterResult.Type type();
 

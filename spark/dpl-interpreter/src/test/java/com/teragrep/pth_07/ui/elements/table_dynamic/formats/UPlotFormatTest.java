@@ -104,7 +104,7 @@ class UPlotFormatTest {
         final UIOption options = new UIOptionImpl(optionsJson.toString());
         final UPlotFormat format = new UPlotFormat(options, resultDataset);
 
-        final JsonObject formatted = Assertions.assertDoesNotThrow(()-> format.toJson());
+        final JsonObject formatted = Assertions.assertDoesNotThrow(()-> format.asJson());
 
         // Object must contain "data" array, "options" object and "isAggregated" boolean
         Assertions.assertTrue(formatted.containsKey("data"));
@@ -177,7 +177,7 @@ class UPlotFormatTest {
         final UIOption options = new UIOptionImpl(optionsJson.toString());
         final UPlotFormat format = new UPlotFormat(options, resultDataset);
 
-        final JsonObject formatted = Assertions.assertDoesNotThrow(()-> format.toJson());
+        final JsonObject formatted = Assertions.assertDoesNotThrow(()-> format.asJson());
 
         // Object must contain "data" array, "options" object and "isAggregated" boolean
         Assertions.assertTrue(formatted.containsKey("data"));
@@ -250,7 +250,7 @@ class UPlotFormatTest {
         final UIOption options = new UIOptionImpl(optionsJson.toString());
         final UPlotFormat format = new UPlotFormat(options, resultDataset);
 
-        final JsonObject formatted = Assertions.assertDoesNotThrow(()-> format.toJson());
+        final JsonObject formatted = Assertions.assertDoesNotThrow(()-> format.asJson());
 
         // Object must contain "data" array, "options" object and "isAggregated" boolean
         Assertions.assertTrue(formatted.containsKey("data"));
@@ -325,7 +325,7 @@ class UPlotFormatTest {
         final UIOption options = new UIOptionImpl(optionsJson.toString());
         final UPlotFormat format = new UPlotFormat(options, resultDataset);
 
-        final JsonObject formatted = Assertions.assertDoesNotThrow(()-> format.toJson());
+        final JsonObject formatted = Assertions.assertDoesNotThrow(()-> format.asJson());
 
         // Object must contain "data" array, "options" object and "isAggregated" boolean
         Assertions.assertTrue(formatted.containsKey("data"));
@@ -401,7 +401,7 @@ class UPlotFormatTest {
         final UIOption options = new UIOptionImpl(optionsJson.toString());
         final UPlotFormat format = new UPlotFormat(options, resultDataset);
 
-        final JsonObject formatted = Assertions.assertDoesNotThrow(()-> format.toJson());
+        final JsonObject formatted = Assertions.assertDoesNotThrow(()-> format.asJson());
 
         // Object must contain "data" array, "options" object and "isAggregated" boolean
         Assertions.assertTrue(formatted.containsKey("data"));
@@ -480,7 +480,7 @@ class UPlotFormatTest {
         final UIOption options = new UIOptionImpl(optionsJson.toString());
         final UPlotFormat format = new UPlotFormat(options, resultDataset);
 
-        final JsonObject formatted = Assertions.assertDoesNotThrow(()-> format.toJson());
+        final JsonObject formatted = Assertions.assertDoesNotThrow(()-> format.asJson());
 
         // Object must contain "data" array, "options" object and "isAggregated" boolean
         Assertions.assertTrue(formatted.containsKey("data"));
@@ -559,7 +559,7 @@ class UPlotFormatTest {
         final UIOption options = new UIOptionImpl(optionsJson.toString());
         final UPlotFormat format = new UPlotFormat(options, resultDataset);
 
-        final JsonObject formatted = Assertions.assertDoesNotThrow(()-> format.toJson());
+        final JsonObject formatted = Assertions.assertDoesNotThrow(()-> format.asJson());
 
         // Object must contain "data" array, "options" object and "isAggregated" boolean
         Assertions.assertTrue(formatted.containsKey("data"));
@@ -635,7 +635,7 @@ class UPlotFormatTest {
         final UIOption options = new UIOptionImpl(optionsJson.toString());
         final UPlotFormat format = new UPlotFormat(options, resultDataset);
 
-        final JsonObject formatted = Assertions.assertDoesNotThrow(()-> format.toJson());
+        final JsonObject formatted = Assertions.assertDoesNotThrow(()-> format.asJson());
 
         // Object must contain "data" array, "options" object and "isAggregated" boolean
         Assertions.assertTrue(formatted.containsKey("data"));
@@ -700,7 +700,7 @@ class UPlotFormatTest {
         final UIOption options = new UIOptionImpl(optionsJson.toString());
         final UPlotFormat format = new UPlotFormat(options, resultDataset);
 
-        Assertions.assertDoesNotThrow(()->format.toJson());
+        Assertions.assertDoesNotThrow(()->format.asJson());
     }
 
     @Test
@@ -723,7 +723,7 @@ class UPlotFormatTest {
         final UPlotFormat format = new UPlotFormat(options, resultDataset);
 
         // Trying to display string data (such as operation name: "create") should result in a dataset where only numerical data is shown, and string data is replaced by JSON nulls.
-        final JsonObject formatted = Assertions.assertDoesNotThrow(()-> format.toJson());
+        final JsonObject formatted = Assertions.assertDoesNotThrow(()-> format.asJson());
         final JsonArray timeColumn = formatted.getJsonArray("data").getJsonArray(1);
         final JsonArray operationColumn = formatted.getJsonArray("data").getJsonArray(2);
         final JsonArray successColumn = formatted.getJsonArray("data").getJsonArray(3);
@@ -768,7 +768,7 @@ class UPlotFormatTest {
         final UIOption options = new UIOptionImpl(optionsJson.toString());
         final UPlotFormat format = new UPlotFormat(options, resultDataset);
 
-        final JsonObject formatted = Assertions.assertDoesNotThrow(()-> format.toJson());
+        final JsonObject formatted = Assertions.assertDoesNotThrow(()-> format.asJson());
 
         // Object must contain "data" array, "options" object and "isAggregated" boolean
         Assertions.assertTrue(formatted.containsKey("data"));

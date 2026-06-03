@@ -45,6 +45,7 @@
  */
 package com.teragrep.pth_07.ui.elements.table_dynamic.formats;
 
+import com.teragrep.zep_01.common.Jsonable;
 import com.teragrep.zep_01.interpreter.InterpreterException;
 import jakarta.json.*;
 import org.apache.spark.sql.Row;
@@ -58,7 +59,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicReference;
 
-public final class UPlotData {
+public final class UPlotData implements Jsonable {
 
     private final List<Row> collectedData;
     private final boolean aggsUsed;
@@ -154,6 +155,7 @@ public final class UPlotData {
     return yAxis;
     }
 
+    @Override
     public JsonValue asJson() {
         if(cachedJson.get().getValueType().equals(JsonValue.ValueType.NULL)){
             final JsonArray xAxis = xAxis(collectedData, aggsUsed);

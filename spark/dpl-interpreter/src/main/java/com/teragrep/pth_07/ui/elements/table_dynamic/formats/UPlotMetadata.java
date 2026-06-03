@@ -45,6 +45,7 @@
  */
 package com.teragrep.pth_07.ui.elements.table_dynamic.formats;
 
+import com.teragrep.zep_01.common.Jsonable;
 import jakarta.json.*;
 import org.apache.spark.sql.Row;
 import org.apache.spark.sql.types.StructField;
@@ -53,7 +54,7 @@ import org.apache.spark.sql.types.StructType;
 import java.util.List;
 import java.util.Objects;
 
-public final class UPlotMetadata {
+public final class UPlotMetadata implements Jsonable {
     private final StructType schema;
     private final List<Row> collectedData;
     private final String graphType;
@@ -120,7 +121,8 @@ public final class UPlotMetadata {
     }
 
 
-    public JsonValue asJson() {
+    @Override
+    public JsonObject asJson() {
         return Json.createObjectBuilder()
                 .add("labels",labels())
                 .add("series",series())

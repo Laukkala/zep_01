@@ -62,7 +62,7 @@ public final class UPlotAvailableFormat implements AvailableFormat {
     @Override
     public RenderFormat asRenderFormat(final UIOption uiOption, final Dataset<Row> rowDataset) {
         RenderFormat rv = renderFormatStub;
-        JsonObject json = uiOption.toJson();
+        JsonObject json = uiOption.asJson();
         if(json.containsKey("type") && json.get("type").getValueType().equals(JsonValue.ValueType.STRING) && json.getString("type").equals("uPlot")){
             rv = new UPlotFormat(uiOption, rowDataset);
         }
