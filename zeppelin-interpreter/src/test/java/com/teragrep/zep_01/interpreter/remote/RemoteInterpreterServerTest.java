@@ -213,7 +213,7 @@ public class RemoteInterpreterServerTest {
     final RemoteInterpreterServer.ShutdownThread shutdownThread = server.new ShutdownThread(RemoteInterpreterServer.ShutdownThread.CAUSE_SHUTDOWN_HOOK);
     Assertions.assertFalse(eventClient.unregistered());
     // Wait for server to be initialized. Timeout after 0.5s
-    long timeout = System.currentTimeMillis() + 500;
+    final long timeout = System.currentTimeMillis() + 500;
     while(!server.isRunning()){
       if(System.currentTimeMillis() > timeout){
         Assertions.fail("Timeout was reached before server startup was finished!");
@@ -252,7 +252,7 @@ public class RemoteInterpreterServerTest {
     Assertions.assertTrue(serverThread.isAlive());
     final RemoteInterpreterServer.ShutdownThread shutdownThread = server.new ShutdownThread(RemoteInterpreterServer.ShutdownThread.CAUSE_SHUTDOWN_HOOK);
     // Wait for server to be initialized. Timeout after 0.5s
-    long timeout = System.currentTimeMillis() + 5000;
+    final long timeout = System.currentTimeMillis() + 5000;
     while(!server.isRunning()){
       if(System.currentTimeMillis() > timeout){
         Assertions.fail("Timeout was reached before server startup was finished!");
@@ -289,7 +289,7 @@ public class RemoteInterpreterServerTest {
     Assertions.assertTrue(serverThread.isAlive());
     final RemoteInterpreterServer.ShutdownThread shutdownThread = server.new ShutdownThread(RemoteInterpreterServer.ShutdownThread.CAUSE_SHUTDOWN_HOOK);
     // Wait for server to be initialized. Timeout after 0.5s
-    long timeout = System.currentTimeMillis() + 500;
+    final long timeout = System.currentTimeMillis() + 500;
     while(!server.isRunning()){
       if(System.currentTimeMillis() > timeout){
         Assertions.fail("Timeout was reached before server startup was finished!");
@@ -328,7 +328,7 @@ public class RemoteInterpreterServerTest {
     // Assert that unregisterInterpreterProcess has not been called.
     Assertions.assertFalse(eventClient.unregistered());
     // Wait for server to be initialized. Timeout after 0.5s
-    long timeout = System.currentTimeMillis() + 500;
+    final long timeout = System.currentTimeMillis() + 500;
     while(!server.isRunning()){
       if(System.currentTimeMillis() > timeout){
         Assertions.fail("Timeout was reached before server startup was finished!");
@@ -354,7 +354,7 @@ public class RemoteInterpreterServerTest {
     AtomicBoolean cancelled = new AtomicBoolean();
     AtomicBoolean closed = new AtomicBoolean();
 
-    public Test1Interpreter(Properties properties) {
+    public Test1Interpreter(final Properties properties) {
       super(properties);
     }
 
@@ -364,7 +364,7 @@ public class RemoteInterpreterServerTest {
     }
 
     @Override
-    public InterpreterResult interpret(String st, InterpreterContext context) {
+    public InterpreterResult interpret(final String st, final InterpreterContext context) {
       if (st.equals("SINGLE_OUTPUT_SUCCESS")) {
         return new InterpreterResult(InterpreterResult.Code.SUCCESS, "SINGLE_OUTPUT_SUCCESS");
       } else if (st.equals("SINGLE_OUTPUT_ERROR")) {
@@ -372,14 +372,14 @@ public class RemoteInterpreterServerTest {
       } else if (st.equals("COMBO_OUTPUT_SUCCESS")) {
         try {
           context.out.write("INTERPRETER_OUT");
-        } catch (IOException e) {
+        } catch (final IOException e) {
           fail("Failure happened: " + e.getMessage());
         }
         return new InterpreterResult(InterpreterResult.Code.SUCCESS, "SINGLE_OUTPUT_SUCCESS");
       } else if (st.equals("SLEEP")) {
         try {
           Thread.sleep(3 * 1000);
-        } catch (InterruptedException e) {
+        } catch (final InterruptedException e) {
           fail("Failure happened: " + e.getMessage());
         }
         return new InterpreterResult(InterpreterResult.Code.SUCCESS, "SLEEP_SUCCESS");
@@ -388,7 +388,7 @@ public class RemoteInterpreterServerTest {
     }
 
     @Override
-    public void cancel(InterpreterContext context) throws InterpreterException {
+    public void cancel(final InterpreterContext context) throws InterpreterException {
       cancelled.set(true);
     }
 
@@ -398,7 +398,7 @@ public class RemoteInterpreterServerTest {
     }
 
     @Override
-    public int getProgress(InterpreterContext context) throws InterpreterException {
+    public int getProgress(final InterpreterContext context) throws InterpreterException {
       return 10;
     }
 
@@ -412,7 +412,7 @@ public class RemoteInterpreterServerTest {
   public static class Test2Interpreter extends Interpreter {
 
 
-    public Test2Interpreter(Properties properties) {
+    public Test2Interpreter(final Properties properties) {
       super(properties);
     }
 
@@ -422,12 +422,12 @@ public class RemoteInterpreterServerTest {
     }
 
     @Override
-    public InterpreterResult interpret(String st, InterpreterContext context) {
+    public InterpreterResult interpret(final String st, final InterpreterContext context) {
       return null;
     }
 
     @Override
-    public void cancel(InterpreterContext context) throws InterpreterException {
+    public void cancel(final InterpreterContext context) throws InterpreterException {
 
     }
 
@@ -437,7 +437,7 @@ public class RemoteInterpreterServerTest {
     }
 
     @Override
-    public int getProgress(InterpreterContext context) throws InterpreterException {
+    public int getProgress(final InterpreterContext context) throws InterpreterException {
       return 0;
     }
 
