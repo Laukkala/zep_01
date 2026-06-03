@@ -45,14 +45,51 @@
  */
 package com.teragrep.pth_07.ui.elements.table_dynamic;
 
+import com.teragrep.pth_07.ui.elements.table_dynamic.formats.AvailableFormat;
 import com.teragrep.pth_07.ui.elements.table_dynamic.formats.RenderFormat;
+import com.teragrep.pth_07.ui.elements.table_dynamic.formats.RenderFormatStub;
 import com.teragrep.pth_07.ui.elements.table_dynamic.formats.UIOption;
-import com.teragrep.stb_01.Stubable;
+import org.apache.spark.sql.Dataset;
+import org.apache.spark.sql.Row;
+import org.apache.spark.storage.StorageLevel;
 
-public interface RenderableDataset extends Stubable {
+import java.util.List;
 
-    RenderFormat toRenderFormat(UIOption uiOption);
-    void persist();
-    void unpersist();
+/**
+ * Represents a Dataset that can be rendered using some RenderFormat. Available RenderFormats are to be provided as AvailableFormat objects.
+ * Must contain a Dataset.
+ */
+public final class RenderableDataset {
+
+    private static final RenderFormat renderFormatStub = new RenderFormatStub();
+    private final List<AvailableFormat> availableFormats;
+    private final Dataset<Row> rowDataset;
+
+    RenderableDataset(final List<AvailableFormat> availableFormats, Dataset<Row> rowDataset) {
+        this.availableFormats = availableFormats;
+        this.rowDataset = rowDataset;
+    }
+
+    public RenderFormat toRenderFormat(UIOption uiOption) {
+        RenderFormat rv = renderFormatStub;
+        for (AvailableFormat availableFormat : this.availableFormats) {
+            rv = availableFormat.asRenderFormat(uiOption, rowDataset);
+            if (!rv.isStub()) {
+                break;
+            }
+        }
+        return rv;
+    }
+
+    public void persist(){
+        rowDataset.persist(StorageLevel.MEMORY_AND_DISK());
+    }
+    public void unpersist(){
+        rowDataset.unpersist();
+    }
+
+    public boolean isStub() {
+        return false;
+    }
 
 }

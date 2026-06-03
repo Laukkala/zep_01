@@ -45,6 +45,7 @@
  */
 package com.teragrep.pth_07.ui;
 
+import com.teragrep.pth_07.ui.elements.table_dynamic.DatasetStore;
 import com.teragrep.pth_07.ui.elements.table_dynamic.formats.*;
 import com.teragrep.pth_07.ui.elements.table_dynamic.testdata.TestDPLData;
 import com.teragrep.zep_01.display.AngularObject;
@@ -212,8 +213,11 @@ class UserInterfaceManagerTest {
     void equalsVerifier() {
         InterpreterContext redInterpreterContext = InterpreterContext.builder().setNoteId("note1").build();
         InterpreterContext blueInterpreterContext = InterpreterContext.builder().setNoteId("note2").build();
+        DatasetStore redDatasetStore = new DatasetStore(testDs,new ArrayList<>(),redInterpreterContext,new UIOptionImpl("red"));
+        DatasetStore blueDatasetStore = new DatasetStore(testDs,new ArrayList<>(),blueInterpreterContext,new UIOptionImpl("red"));
         EqualsVerifier.forClass(UserInterfaceManager.class)
                 .withPrefabValues(InterpreterContext.class, redInterpreterContext, blueInterpreterContext)
+                .withPrefabValues(DatasetStore.class, redDatasetStore, blueDatasetStore)
                 .verify();
         }
     }

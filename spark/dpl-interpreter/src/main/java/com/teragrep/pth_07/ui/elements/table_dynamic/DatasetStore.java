@@ -48,7 +48,6 @@ package com.teragrep.pth_07.ui.elements.table_dynamic;
 import com.teragrep.pth_07.ui.elements.table_dynamic.formats.*;
 import com.teragrep.zep_01.interpreter.InterpreterContext;
 import com.teragrep.zep_01.interpreter.InterpreterException;
-import com.teragrep.zep_01.interpreter.InterpreterResult;
 import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
 
@@ -68,7 +67,7 @@ public final class DatasetStore {
             InterpreterContext interpreterContext,
             UIOption defaultUIOption
     ) {
-        this(new AtomicReference<>(new RenderableDatasetImpl(availableFormats, emptyDataset)),new AtomicReference<>(defaultUIOption), availableFormats, interpreterContext);
+        this(new AtomicReference<>(new RenderableDataset(availableFormats, emptyDataset)),new AtomicReference<>(defaultUIOption), availableFormats, interpreterContext);
     }
 
     private DatasetStore(AtomicReference<RenderableDataset> datasetRef, AtomicReference<UIOption> uiOptionsRef, List<AvailableFormat> availableFormats, InterpreterContext interpreterContext) {
@@ -80,7 +79,7 @@ public final class DatasetStore {
 
     public void updateDataset(Dataset<Row> rowDataset) throws InterpreterException {
         datasetRef.get().unpersist();
-        RenderableDataset rd = new RenderableDatasetImpl(availableFormats, rowDataset);
+        RenderableDataset rd = new RenderableDataset(availableFormats, rowDataset);
         datasetRef.set(rd);
         rd.persist();
         RenderFormat renderFormat = toRenderFormat(uiOptionsRef.get());
