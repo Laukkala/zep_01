@@ -117,57 +117,6 @@ public final class DataTablesFormat implements RenderFormat{
         return InterpreterResult.Type.DATATABLES;
     }
 
-    private List<String> search(final List<String> rows, final String searchString){
-        List<String> searchedRows = new ArrayList<>();
-        if (!searchString.isEmpty()) {
-            for (final String row : rows) {
-                try (final JsonReader reader = Json.createReader(new StringReader(row))){
-                    final JsonObject line = reader.readObject();
-                    // NOTE hard coded to _raw column
-                    final JsonString _raw = line.getJsonString("_raw");
-                    if (_raw != null) {
-                        final String _rawString = _raw.getString();
-                        if (_rawString != null) {
-                            if (_rawString.contains(searchString)) {
-                                // _raw matches, add whole row to result set
-                                searchedRows.add(row);
-                            }
-                        }
-                    }
-                }
-                catch (final JsonException e){
-                    LOGGER.error(e.toString());
-                }
-            }
-        }
-        else {
-            searchedRows = rows;
-        }
-        return searchedRows;
-    }
-
-    private List<String> paginate(final List<String> rows, final int pageStart, int pageSize){
-        if(pageSize == 0){
-            pageSize = rows.size();
-        }
-        // ranges must be greater than 0
-        int fromIndex = Math.max(pageStart, 0);
-        int toIndex = Math.max(fromIndex + pageSize, 0);
-
-        // list must end at the maximum size
-        if (toIndex > rows.size()) {
-            toIndex = rows.size();
-        }
-
-        // list range must be positive
-        if (fromIndex > toIndex) {
-            fromIndex = toIndex;
-        }
-
-        final List<String> paginatedRows = rows.subList(fromIndex, toIndex);
-        return paginatedRows;
-    }
-
     @Override
     public boolean isStub() {
         return false;
