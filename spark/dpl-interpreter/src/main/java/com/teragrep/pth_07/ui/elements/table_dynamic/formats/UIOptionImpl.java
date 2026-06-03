@@ -46,6 +46,7 @@
 package com.teragrep.pth_07.ui.elements.table_dynamic.formats;
 
 import jakarta.json.Json;
+import jakarta.json.JsonArray;
 import jakarta.json.JsonObject;
 
 import java.io.StringReader;

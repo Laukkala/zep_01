@@ -50,6 +50,10 @@ import com.teragrep.stb_01.Stubable;
 import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
 
+/**
+ * Implement this interface to declare a new RenderFormat to which a Spark Dataset may be formatted to.
+ * RenderFormats require a Spark Dataset to instantiate, but an AvailableFormat can be instantiated without one.
+ */
 public interface AvailableFormat extends Stubable {
 
     RenderFormat asRenderFormat(UIOption uiOption, Dataset<Row> rowDataset);

@@ -49,6 +49,9 @@ import com.teragrep.stb_01.Stubable;
 import com.teragrep.zep_01.interpreter.InterpreterResult;
 import jakarta.json.JsonObject;
 
+/**
+ * RenderFormat represents a formatted Dataset. Implement formatting transformations in toJson() and provide an InterpreterResult.Type that matches with the format name
+ */
 public interface RenderFormat extends Stubable {
 
     JsonObject toJson();

@@ -69,7 +69,8 @@ public final class UPlotFormat implements RenderFormat{
         this.option = option;
     }
 
-    public JsonObject format(){
+    @Override
+    public JsonObject toJson(){
         final JsonObject requestOptions = option.toJson().getJsonObject("requestOptions");
         final StructType schema = dataset.schema();
         final List<String> groupByColumnNames = new ArrayList<>();
@@ -206,11 +207,6 @@ public final class UPlotFormat implements RenderFormat{
 
     public InterpreterResult.Type type(){
         return InterpreterResult.Type.UPLOT;
-    }
-
-    @Override
-    public JsonObject toJson() {
-        return format();
     }
 
     @Override
