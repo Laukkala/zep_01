@@ -204,10 +204,22 @@ public class RemoteInterpreterServerTest {
     final FakeRemoteInterpreterEventClient eventClient = new FakeRemoteInterpreterEventClient("localhost",8080,100);
     server.intpEventClient = eventClient;
     final Thread serverThread = new Thread(server::start);
+    serverThread.start();
+
+    // Assert that server was started
+    Assertions.assertTrue(serverThread.isAlive());
     final RemoteInterpreterServer.ShutdownThread shutdownThread = server.new ShutdownThread(RemoteInterpreterServer.ShutdownThread.CAUSE_SHUTDOWN_HOOK);
     Assertions.assertFalse(eventClient.unregistered());
-    // Wait for server to be initialized
-    Assertions.assertDoesNotThrow(()->Thread.sleep(50));;
+    // Wait for server to be initialized. Timeout after 0.5s
+    long timeout = System.currentTimeMillis() + 500;
+    while(!server.isRunning()){
+      if(System.currentTimeMillis() > timeout){
+        Assertions.fail("Timeout was reached before server startup was finished!");
+        break;
+      }
+      // This empty synchronized block stops the compiler from caching the result of server.isRunning() in the while loop, which caused the loop to always reach the timeout regardless of if the server was actually started.
+      synchronized (this){}
+    }
 
     // Simulate a SIGTERM by calling shutdown in another thread
     shutdownThread.start();
@@ -231,10 +243,21 @@ public class RemoteInterpreterServerTest {
     // If intpEventClient is not assigned, the server should still be shut down.
     server.intpEventClient = null;
     final Thread serverThread = new Thread(server::start);
-    final RemoteInterpreterServer.ShutdownThread shutdownThread = server.new ShutdownThread(RemoteInterpreterServer.ShutdownThread.CAUSE_SHUTDOWN_HOOK);
-    // Wait for server to be initialized
-    Assertions.assertDoesNotThrow(()->Thread.sleep(50));;
+    serverThread.start();
 
+    // Assert that server was started
+    Assertions.assertTrue(serverThread.isAlive());
+    final RemoteInterpreterServer.ShutdownThread shutdownThread = server.new ShutdownThread(RemoteInterpreterServer.ShutdownThread.CAUSE_SHUTDOWN_HOOK);
+    // Wait for server to be initialized. Timeout after 0.5s
+    long timeout = System.currentTimeMillis() + 5000;
+    while(!server.isRunning()){
+      if(System.currentTimeMillis() > timeout){
+        Assertions.fail("Timeout was reached before server startup was finished!");
+        break;
+      }
+      // This empty synchronized block stops the compiler from caching the result of server.isRunning() in the while loop, which caused the loop to always reach the timeout regardless of if the server was actually started.
+      synchronized (this){}
+    }
     // Simulate a SIGTERM by calling shutdown in another thread
     shutdownThread.start();
 
@@ -255,11 +278,22 @@ public class RemoteInterpreterServerTest {
     final FakeRemoteInterpreterEventClient eventClient = new FakeRemoteInterpreterEventClient("localhost",8080,100);
     server.intpEventClient = eventClient;
     final Thread serverThread = new Thread(server::start);
+    serverThread.start();
+
+    // Assert that server was started
+    Assertions.assertTrue(serverThread.isAlive());
     final RemoteInterpreterServer.ShutdownThread shutdownThread = server.new ShutdownThread(RemoteInterpreterServer.ShutdownThread.CAUSE_SHUTDOWN_CALL);
     Assertions.assertFalse(eventClient.unregistered());
-    // Wait for server to be initialized
-    Assertions.assertDoesNotThrow(()->Thread.sleep(50));;
-
+    // Wait for server to be initialized. Timeout after 0.5s
+    long timeout = System.currentTimeMillis() + 500;
+    while(!server.isRunning()){
+      if(System.currentTimeMillis() > timeout){
+        Assertions.fail("Timeout was reached before server startup was finished!");
+        break;
+      }
+      // This empty synchronized block stops the compiler from caching the result of server.isRunning() in the while loop, which caused the loop to always reach the timeout regardless of if the server was actually started.
+      synchronized (this){}
+    }
     // Simulate a SIGTERM by calling shutdown in another thread
     shutdownThread.start();
 
@@ -282,10 +316,21 @@ public class RemoteInterpreterServerTest {
     final FakeFailingRemoteInterpreterEventClient eventClient = new FakeFailingRemoteInterpreterEventClient("localhost",8080,100, exception);
     server.intpEventClient = eventClient;
     final Thread serverThread = new Thread(server::start);
-    final RemoteInterpreterServer.ShutdownThread shutdownThread = server.new ShutdownThread(RemoteInterpreterServer.ShutdownThread.CAUSE_SHUTDOWN_HOOK);
-    // Wait for server to be initialized
-    Assertions.assertDoesNotThrow(()->Thread.sleep(50));;
+    serverThread.start();
 
+    // Assert that server was started
+    Assertions.assertTrue(serverThread.isAlive());
+    final RemoteInterpreterServer.ShutdownThread shutdownThread = server.new ShutdownThread(RemoteInterpreterServer.ShutdownThread.CAUSE_SHUTDOWN_HOOK);
+    // Wait for server to be initialized. Timeout after 0.5s
+    long timeout = System.currentTimeMillis() + 500;
+    while(!server.isRunning()){
+      if(System.currentTimeMillis() > timeout){
+        Assertions.fail("Timeout was reached before server startup was finished!");
+        break;
+      }
+      // This empty synchronized block stops the compiler from caching the result of server.isRunning() in the while loop, which caused the loop to always reach the timeout regardless of if the server was actually started.
+      synchronized (this){}
+    }
     // Simulate a SIGTERM by calling shutdown in another thread
     shutdownThread.start();
 
@@ -306,12 +351,24 @@ public class RemoteInterpreterServerTest {
     Assertions.assertDoesNotThrow(()->server.init(new HashMap<>()));
     final FakeRemoteInterpreterEventClient eventClient = new FakeRemoteInterpreterEventClient("localhost",8080,100);
     server.intpEventClient = eventClient;
-    final RemoteInterpreterServer.ShutdownThread shutdownThread = server.new ShutdownThread(RemoteInterpreterServer.ShutdownThread.CAUSE_SHUTDOWN_CALL);
     final Thread serverThread = new Thread(server::start);
+    serverThread.start();
 
-    // Wait for server to be initialized
-    Assertions.assertDoesNotThrow(()->Thread.sleep(50));;
+    // Assert that server was started
+    Assertions.assertTrue(serverThread.isAlive());
+    final RemoteInterpreterServer.ShutdownThread shutdownThread = server.new ShutdownThread(RemoteInterpreterServer.ShutdownThread.CAUSE_SHUTDOWN_CALL);
 
+
+    // Wait for server to be initialized. Timeout after 0.5s
+    long timeout = System.currentTimeMillis() + 500;
+    while(!server.isRunning()){
+      if(System.currentTimeMillis() > timeout){
+        Assertions.fail("Timeout was reached before server startup was finished!");
+        break;
+      }
+      // This empty synchronized block stops the compiler from caching the result of server.isRunning() in the while loop, which caused the loop to always reach the timeout regardless of if the server was actually started.
+      synchronized (this){}
+    }
     // Simulate a SIGTERM by calling shutdown in another thread
     shutdownThread.start();
 
