@@ -214,8 +214,8 @@ public class RemoteInterpreterServerTest {
     Thread.sleep(250);
 
     // Assert that shutdown hook has finished in time and that the server has been closed properly
-    Assertions.assertEquals(false,shutdownThread.isAlive());
-    Assertions.assertEquals(false,serverThread.isAlive());
+    Assertions.assertFalse(shutdownThread.isAlive());
+    Assertions.assertFalse(serverThread.isAlive());
     Assertions.assertTrue(eventClient.unregistered());
     }
 
@@ -240,8 +240,8 @@ public class RemoteInterpreterServerTest {
     Thread.sleep(250);
 
     // Assert that shutdown hook has finished in time and that the server has been closed properly
-    Assertions.assertEquals(false,shutdownThread.isAlive());
-    Assertions.assertEquals(false,serverThread.isAlive());
+    Assertions.assertFalse(shutdownThread.isAlive());
+    Assertions.assertFalse(serverThread.isAlive());
   }
 
   @Test
@@ -265,8 +265,8 @@ public class RemoteInterpreterServerTest {
     Thread.sleep(250);
 
     // Assert that shutdown hook has finished in time and that the server has been closed properly
-    Assertions.assertEquals(false,shutdownThread.isAlive());
-    Assertions.assertEquals(false,serverThread.isAlive());
+    Assertions.assertFalse(shutdownThread.isAlive());
+    Assertions.assertFalse(serverThread.isAlive());
     Assertions.assertFalse(eventClient.unregistered());
   }
 
@@ -291,8 +291,8 @@ public class RemoteInterpreterServerTest {
     Thread.sleep(250);
 
     // Assert that shutdown hook has finished in time and that the server has been closed properly
-    Assertions.assertEquals(false,shutdownThread.isAlive());
-    Assertions.assertEquals(false,serverThread.isAlive());
+    Assertions.assertFalse(shutdownThread.isAlive());
+    Assertions.assertFalse(serverThread.isAlive());
     Assertions.assertEquals(exception, eventClient.exception());
   }
 
@@ -317,8 +317,8 @@ public class RemoteInterpreterServerTest {
     Thread.sleep(250);
 
     // Assert that shutdown hook has finished in time and that the server has been closed properly
-    Assertions.assertEquals(false,shutdownThread.isAlive());
-    Assertions.assertEquals(false,serverThread.isAlive());
+    Assertions.assertFalse(shutdownThread.isAlive());
+    Assertions.assertFalse(serverThread.isAlive());
     Assertions.assertFalse(eventClient.unregistered());
   }
   public static class Test1Interpreter extends Interpreter {
