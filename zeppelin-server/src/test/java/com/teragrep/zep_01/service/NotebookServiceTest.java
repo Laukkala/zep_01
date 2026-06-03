@@ -295,9 +295,15 @@ public class NotebookServiceTest {
     // move folder to Trash
     notebookService.moveFolderToTrash("Backup", context, callback);
 
+    // create a note to a folder with identical name
+    notebookService.createNote("/Backup/note1", "test", true, context, callback);
+
+    // move folder to trash when folder with same name exists in trash already
+    notebookService.moveFolderToTrash("Backup", context, callback);
+
     reset(callback);
     notesInfo = notebookService.listNotesInfo(false, context, callback);
-    assertEquals(1, notesInfo.size());
+    assertEquals(2, notesInfo.size());
     verify(callback).onSuccess(notesInfo, context);
     moveToTrash = false;
     for (NoteInfo noteInfo : notesInfo) {
@@ -322,7 +328,7 @@ public class NotebookServiceTest {
     reset(callback);
     notebookService.removeFolder("/~Trash/Backup", context, callback);
     notesInfo = notebookService.listNotesInfo(false, context, callback);
-    assertEquals(0, notesInfo.size());
+    assertEquals(1, notesInfo.size());
 
     // empty trash
     notebookService.emptyTrash(context, callback);
