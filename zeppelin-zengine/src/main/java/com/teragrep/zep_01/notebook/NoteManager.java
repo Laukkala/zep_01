@@ -18,6 +18,7 @@
 
 package com.teragrep.zep_01.notebook;
 
+import com.teragrep.stb_01.Stubable;
 import com.teragrep.zep_01.notebook.exception.NoteNotFoundException;
 import org.apache.commons.lang3.StringUtils;
 import com.teragrep.zep_01.conf.ZeppelinConfiguration;
@@ -148,13 +149,15 @@ public class NoteManager {
   }
 
   public boolean trashContainsNote(String noteId) {
-    try{
-      getTrashFolder().getNote(noteId);
-      return true;
+    final boolean rv;
+    NoteNode noteNode = getTrashFolder().getNote(noteId);
+    if(!noteNode.isStub()){
+      rv = true;
     }
-    catch (NoteNotFoundException e) {
-      return false;
+    else {
+      rv = false;
     }
+    return rv;
   }
 
   /**
@@ -233,6 +236,9 @@ public class NoteManager {
 
     // move the old NoteNode from notePath to newNotePath
     NoteNode noteNode = getNoteNode(noteId);
+    if(noteNode.isStub()){
+      throw new NoteNotFoundException("Note with ID "+noteId+ " not found!");
+    }
     noteNode.getParent().removeNote(noteId);
     noteNode.setNotePath(newNotePath);
     String newParent = getFolderName(newNotePath);
@@ -249,7 +255,7 @@ public class NoteManager {
     String oldNoteName = getNoteName(notePath);
     String newNoteName = getNoteName(newNotePath);
     if (!StringUtils.equalsIgnoreCase(oldNoteName, newNoteName)) {
-      this.notebookRepo.save(noteNode.note, subject);
+      this.notebookRepo.save(noteNode.getRawNote(), subject);
     }
   }
 
@@ -310,6 +316,9 @@ public class NoteManager {
       return null;
     }
     NoteNode noteNode = getNoteNode(noteId);
+    if(noteNode.isStub()){
+      throw new NoteNotFoundException("No such note "+noteId+" !");
+    }
     return noteNode.getNote(reload);
   }
 
@@ -326,6 +335,9 @@ public class NoteManager {
       return null;
     }
     NoteNode noteNode = getNoteNode(noteId);
+    if(noteNode.isStub()){
+      throw new NoteNotFoundException("No such note "+noteId+" !");
+    }
     return noteNode.getNote();
   }
 
@@ -348,6 +360,9 @@ public class NoteManager {
   private NoteNode getNoteNode(String noteId) throws NoteNotFoundException {
     Folder curFolder = root;
     NoteNode noteNode = curFolder.getNote(noteId);
+    if(noteNode.isStub()){
+      throw new NoteNotFoundException("Note with id "+noteId+" not found!");
+    }
     return noteNode;
   }
 
@@ -437,29 +452,27 @@ public class NoteManager {
       return subFolders;
     }
 
-    public NoteNode getNote(String noteId) throws NoteNotFoundException {
+    public NoteNode getNote(String noteId) {
       // Search for the note within this Folder
+      NoteNode rv = new NoteNodeStub();
       if(this.notes.containsKey(noteId)){
-        return notes.get(noteId);
+        rv = notes.get(noteId);
       }
       else {
         for (Folder subfolder : subFolders.values()) {
-          try{
             // If a match is found in one of the subfolders, return it.
-            return subfolder.getNote(noteId);
-          }
-          // Carry on until every subfolder is searched.
-          catch (NoteNotFoundException noteNotFoundException){
-            continue;
+            NoteNode noteNode = subfolder.getNote(noteId);
+            if(!noteNode.isStub()){
+              rv = noteNode;
+              break;
+            }
           }
         }
-      }
-      // If the given noteId was not found in this or any of the subfolders, throw an Exception.
-      throw new NoteNotFoundException("Could not find note with id " + noteId);
+      return rv;
     }
 
     public void addNote(String noteId, Note note) {
-      notes.put(noteId, new NoteNode(note, this, notebookRepo));
+      notes.put(noteId, new NoteNodeImpl(note, this, notebookRepo));
     }
 
     /**
@@ -538,6 +551,20 @@ public class NoteManager {
     }
   }
 
+  public interface NoteNode extends Stubable {
+
+    public Note getNote() throws IOException;
+    public Note getNote(boolean reload) throws IOException;
+    public String getNoteId();
+    public String getNoteName();
+    public String getNotePath();
+    public Note getRawNote();
+    public Folder getParent();
+    public void setParent(Folder parent);
+    public void setNotePath(String notePath);
+    public void updateNotePath();
+  }
+  
   /**
    * One node in the file system tree structure which represent the note.
    * This class has 2 usage scenarios:
@@ -546,18 +573,18 @@ public class NoteManager {
    *
    * It will load note from NotebookRepo lazily until method getNote is called.
    */
-  public static class NoteNode {
+  public static class NoteNodeImpl implements NoteNode {
 
     private Folder parent;
     private Note note;
     private NotebookRepo notebookRepo;
-
-    public NoteNode(Note note, Folder parent, NotebookRepo notebookRepo) {
+    public NoteNodeImpl(Note note, Folder parent, NotebookRepo notebookRepo) {
       this.note = note;
       this.parent = parent;
       this.notebookRepo = notebookRepo;
     }
 
+    @Override
     public synchronized Note getNote() throws IOException {
         return getNote(false);
     }
@@ -568,6 +595,8 @@ public class NoteManager {
      * @return
      * @throws IOException
      */
+
+    @Override
     public synchronized Note getNote(boolean reload) throws IOException {
       if (!note.isLoaded() || reload) {
         note = notebookRepo.get(note.getId(), note.getPath(), AuthenticationInfo.ANONYMOUS);
@@ -582,14 +611,17 @@ public class NoteManager {
       return note;
     }
 
+    @Override
     public String getNoteId() {
       return this.note.getId();
     }
 
+    @Override
     public String getNoteName() {
       return this.note.getName();
     }
 
+    @Override
     public String getNotePath() {
       if (parent.getPath().equals("/")) {
         return parent.getPath() + note.getName();
@@ -604,10 +636,13 @@ public class NoteManager {
      *
      * @return
      */
+
+    @Override
     public Note getRawNote() {
       return this.note;
     }
 
+    @Override
     public Folder getParent() {
       return parent;
     }
@@ -617,10 +652,12 @@ public class NoteManager {
       return getNotePath();
     }
 
+    @Override
     public void setParent(Folder parent) {
       this.parent = parent;
     }
 
+    @Override
     public void setNotePath(String notePath) {
       this.note.setPath(notePath);
     }
@@ -628,8 +665,71 @@ public class NoteManager {
     /**
      * This is called when the ancestor folder is moved.
      */
+    @Override
     public void updateNotePath() {
       this.note.setPath(getNotePath());
+    }
+
+    @Override
+    public boolean isStub() {
+      return false;
+    }
+  }
+  
+  public static class NoteNodeStub implements NoteNode{
+
+    @Override
+    public Note getNote() throws IOException {
+      throw new RuntimeException("NoteNode is a stub!");
+    }
+
+    @Override
+    public Note getNote(boolean reload) throws IOException {
+      throw new RuntimeException("NoteNode is a stub!");
+    }
+
+    @Override
+    public String getNoteId() {
+      throw new RuntimeException("NoteNode is a stub!");
+    }
+
+    @Override
+    public String getNoteName() {
+      throw new RuntimeException("NoteNode is a stub!");
+    }
+
+    @Override
+    public String getNotePath() {
+      throw new RuntimeException("NoteNode is a stub!");
+    }
+
+    @Override
+    public Note getRawNote() {
+      throw new RuntimeException("NoteNode is a stub!");
+    }
+
+    @Override
+    public Folder getParent() {
+      throw new RuntimeException("NoteNode is a stub!");
+    }
+
+    @Override
+    public void setParent(Folder parent) {
+      throw new RuntimeException("NoteNode is a stub!");
+    }
+
+    @Override
+    public void setNotePath(String notePath) {
+      throw new RuntimeException("NoteNode is a stub!");
+    }
+
+    @Override
+    public void updateNotePath() {
+      throw new RuntimeException("NoteNode is a stub!");
+    }
+    @Override
+    public boolean isStub() {
+      return true;
     }
   }
 
