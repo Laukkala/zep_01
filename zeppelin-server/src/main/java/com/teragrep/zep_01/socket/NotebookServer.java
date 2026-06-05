@@ -442,8 +442,6 @@ public class NotebookServer extends WebSocketServlet
         case REMOVE_NOTE_FORMS:
           removeNoteForms(conn, context, receivedMessage);
           break;
-        case OPEN_INTERPRETER:
-          openInterpreter(conn, context, receivedMessage);
         case PATCH_PARAGRAPH:
           patchParagraph(conn, context, receivedMessage);
           break;
@@ -1508,28 +1506,6 @@ public class NotebookServer extends WebSocketServlet
                 new Message(OP.RUN_PARAGRAPH_USING_SPELL).put("paragraph", p), conn);
           }
         });
-  }
-
-  private void openInterpreter(NotebookSocket conn,
-                               ServiceContext context,
-                               Message fromMessage) throws IOException {
-    String noteId = (String) fromMessage.get("noteId");
-    String userId = context.getAutheInfo().getUser();
-    String interpreterName = (String) fromMessage.get("interpreter");
-    getNotebookService().openInterpreter(noteId, userId, interpreterName, context,
-    new WebSocketServiceCallback<String>(conn) {
-      @Override
-      public void onSuccess(String resultMessage, ServiceContext context) throws IOException {
-        super.onSuccess(resultMessage, context);
-        conn.send(serializeMessage(new Message(OP.INTERPRETER_OPENED).put("msg",resultMessage)));
-      }
-
-      @Override
-      public void onFailure(Exception ex, ServiceContext context) throws IOException {
-        super.onFailure(ex, context);
-        conn.send(serializeMessage(new Message(OP.INTERPRETER_ERROR).put("msg","Failed to open interpreter "+interpreterName+"! See technical logs for details.")));
-      }
-    });
   }
 
   private void runParagraph(NotebookSocket conn,

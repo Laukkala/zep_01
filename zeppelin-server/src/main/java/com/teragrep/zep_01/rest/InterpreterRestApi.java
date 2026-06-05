@@ -20,19 +20,17 @@ package com.teragrep.zep_01.rest;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
+import com.teragrep.zep_01.interpreter.*;
+import com.teragrep.zep_01.rest.message.*;
+import jakarta.json.Json;
+import jakarta.json.JsonException;
+import jakarta.json.JsonObject;
+import jakarta.json.stream.JsonParsingException;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import com.teragrep.zep_01.annotation.ZeppelinApi;
-import com.teragrep.zep_01.interpreter.InterpreterException;
-import com.teragrep.zep_01.interpreter.InterpreterPropertyType;
-import com.teragrep.zep_01.interpreter.InterpreterSetting;
-import com.teragrep.zep_01.interpreter.InterpreterSettingManager;
 import com.teragrep.zep_01.notebook.AuthorizationService;
 import com.teragrep.zep_01.common.Message;
 import com.teragrep.zep_01.common.Message.OP;
-import com.teragrep.zep_01.rest.message.InterpreterInstallationRequest;
-import com.teragrep.zep_01.rest.message.NewInterpreterSettingRequest;
-import com.teragrep.zep_01.rest.message.RestartInterpreterRequest;
-import com.teragrep.zep_01.rest.message.UpdateInterpreterSettingRequest;
 import com.teragrep.zep_01.server.JsonResponse;
 import com.teragrep.zep_01.service.AuthenticationService;
 import com.teragrep.zep_01.service.InterpreterService;
@@ -54,6 +52,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import java.io.IOException;
+import java.io.StringReader;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -186,6 +185,58 @@ public class InterpreterRestApi {
     LOGGER.info("Remove interpreterSetting {}", settingId);
     interpreterSettingManager.remove(settingId);
     return new JsonResponse<>(Status.OK).build();
+  }
+
+  /**
+   * Open interpreter setting.
+   */
+  @PUT
+  @Path("setting/open/{settingId}")
+  @ZeppelinApi
+  public Response openSetting(String message, @PathParam("settingId") String settingId) {
+    final String userName = authenticationService.getPrincipal();
+
+    final Response response;
+    InterpreterSetting setting = interpreterSettingManager.get(settingId);
+    try {
+      if (setting == null) {
+        response = new JsonResponse<>(Status.NOT_FOUND, "", settingId).build();
+      }
+      else {
+        final JsonObject json = Json.createReader(new StringReader(message)).readObject();
+        final OpenInterpreterRequest request = new OpenInterpreterRequest(json);
+        final String noteId = request.getNoteId();
+        LOGGER.info("Opening default interpreter for user <{}> of interpreterSetting <[{}]> in notebook <[{}]>, msg=<[{}]>", userName, settingId, noteId, message);
+        if (null == noteId) {
+          response = new JsonResponse<>(Status.BAD_REQUEST, "NoteId not provided")
+                  .build();
+        } else {
+          final Set<String> entities = new HashSet<>();
+          entities.add(userName);
+          entities.addAll(authenticationService.getAssociatedRoles());
+          if (authorizationService.hasRunPermission(entities, noteId) ||
+                  authorizationService.hasWritePermission(entities, noteId) ||
+                  authorizationService.isOwner(entities, noteId)) {
+            Interpreter defaultInterpreter = setting.getDefaultInterpreter(authenticationService.getPrincipal(),noteId);
+            defaultInterpreter.open();
+            response = new JsonResponse<>(Status.OK, "", setting).build();
+          } else {
+            response = new JsonResponse<>(Status.FORBIDDEN, "No privilege to open interpreter")
+                    .build();
+          }
+        }
+      }
+      return response;
+    }
+    catch (InterpreterException e) {
+      LOGGER.error("Exception in InterpreterRestApi while opening Interpreter ", e);
+      return new JsonResponse<>(Status.NOT_FOUND, e.getMessage(), ExceptionUtils.getStackTrace(e))
+              .build();
+    }
+    catch (JsonException jsonException){
+      return new JsonResponse<>(Status.BAD_REQUEST, jsonException.getMessage(), ExceptionUtils.getStackTrace(jsonException))
+              .build();
+    }
   }
 
   /**

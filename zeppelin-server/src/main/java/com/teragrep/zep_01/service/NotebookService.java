@@ -37,8 +37,6 @@ import java.util.Map;
 import java.util.Set;
 import javax.inject.Inject;
 
-import com.teragrep.zep_01.interpreter.*;
-import com.teragrep.zep_01.interpreter.remote.RemoteInterpreter;
 import jakarta.json.Json;
 import jakarta.json.JsonObject;
 import org.apache.commons.lang3.StringUtils;
@@ -403,18 +401,6 @@ public class NotebookService {
       return false;
     }
   }
-
-  public void openInterpreter(final String noteId, final String userId, final String interpreterName, final ServiceContext context, final ServiceCallback<String> callback) throws IOException {
-    try{
-      final InterpreterSetting setting = notebook.getInterpreterSettingManager().get(interpreterName);
-      final Interpreter defaultIntepreter = setting.getDefaultInterpreter(userId,noteId);
-      defaultIntepreter.open();
-      callback.onSuccess("Opened interpreter "+interpreterName+" for user "+userId+" within note "+noteId,context);
-    } catch (InterpreterException interpreterException){
-      callback.onFailure(new InterpreterException("Failed to open Interpreter", interpreterException),context);
-    }
-  }
-
 
   /**
    * Run list of paragraphs. This method runs provided paragraphs one by one, synchronously.
