@@ -366,6 +366,7 @@ public class NotebookServer extends WebSocketServlet
           break;
         case PARAGRAPH_CLEAR_ALL_OUTPUT:
           clearAllParagraphOutput(conn, context, receivedMessage);
+          openInterpreter(conn,context,receivedMessage); //TODO: revert
           break;
         case PARAGRAPH_OUTPUT_REQUEST:
           // Reading of "msg" should be done at the very top of onMessage, but refactoring every message to use their own object type is out of scope for now
@@ -1535,9 +1536,9 @@ public class NotebookServer extends WebSocketServlet
   private void openInterpreter(NotebookSocket conn,
                                ServiceContext context,
                                Message fromMessage) throws IOException {
-    String noteId = (String) fromMessage.get("noteId");
+    String noteId = (String) fromMessage.get("id"); //TODO: revert
     String userId = context.getAutheInfo().getUser();
-    String interpreterName = (String) fromMessage.get("interpreter");
+    String interpreterName = "spark"; //TODO: revert
     getNotebookService().openInterpreter(noteId, userId, interpreterName, context,
     new WebSocketServiceCallback<String>(conn) {
       @Override
