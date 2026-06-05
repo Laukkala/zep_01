@@ -443,6 +443,8 @@ public class NotebookServer extends WebSocketServlet
         case REMOVE_NOTE_FORMS:
           removeNoteForms(conn, context, receivedMessage);
           break;
+        case OPEN_INTERPRETER:
+          openInterpreter(conn, context, receivedMessage);
         case PATCH_PARAGRAPH:
           patchParagraph(conn, context, receivedMessage);
           break;
@@ -1528,6 +1530,26 @@ public class NotebookServer extends WebSocketServlet
                 new Message(OP.RUN_PARAGRAPH_USING_SPELL).put("paragraph", p), conn);
           }
         });
+  }
+
+  private void openInterpreter(NotebookSocket conn,
+                               ServiceContext context,
+                               Message fromMessage) throws IOException {
+    String noteId = (String) fromMessage.get("noteId");
+    String userId = context.getAutheInfo().getUser();
+    String interpreterName = (String) fromMessage.get("interpreter");
+    getNotebookService().openInterpreter(noteId, userId, interpreterName, context,
+    new WebSocketServiceCallback<String>(conn) {
+      @Override
+      public void onSuccess(String p, ServiceContext context) throws IOException {
+        super.onSuccess(p, context);
+      }
+
+      @Override
+      public void onFailure(Exception ex, ServiceContext context) throws IOException {
+        super.onFailure(ex, context);
+      }
+    });
   }
 
   private void runParagraph(NotebookSocket conn,
