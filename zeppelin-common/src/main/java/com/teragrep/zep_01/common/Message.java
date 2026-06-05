@@ -138,6 +138,9 @@ public class Message implements JsonSerializable {
     PARAGRAPH_OUTPUT,      // [s-c] update (replace) output
     INTERPRETER_ERROR,            //[s-c] indicates an error occurring in response to a PARAGRAPH_OUTPUT_REQUEST
     PARAGRAPH_OUTPUT_REQUEST,     // [c-s] request dataset in a given format
+    OPEN_INTERPRETER,             // [c-s] request to start an interpreter
+    INTERPRETER_OPENED,           // [s-c] response to a successful request to open an interpreter
+    PARAGRAPH_UPDATE_RESULT,      // [c-s] request JSONTABLE data using new pagination and search settings
     PING,
     PONG,
     AUTH_INFO,
@@ -207,8 +210,6 @@ public class Message implements JsonSerializable {
     PATCH_PARAGRAPH,              // [c-s][s-c] patch editor text
     NOTE_RUNNING_STATUS,        // [s-c] sequential run status will be change
     NOTICE,                        // [s-c] Notice
-
-    OPEN_INTERPRETER,        // [c-s] request to start an interpreter
     SERVER_SHUTDOWN             // Server shutdown says bye
   }
 

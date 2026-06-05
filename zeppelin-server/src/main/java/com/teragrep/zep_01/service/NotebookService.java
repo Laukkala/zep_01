@@ -409,7 +409,7 @@ public class NotebookService {
       final InterpreterSetting setting = notebook.getInterpreterSettingManager().get(interpreterName);
       final Interpreter defaultIntepreter = setting.getDefaultInterpreter(userId,noteId);
       defaultIntepreter.open();
-      callback.onSuccess("Interpreter opened",context);
+      callback.onSuccess("Opened interpreter "+interpreterName+" for user "+userId+" within note "+noteId,context);
     } catch (InterpreterException interpreterException){
       callback.onFailure(new InterpreterException("Failed to open Interpreter", interpreterException),context);
     }
