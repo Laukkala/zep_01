@@ -892,10 +892,6 @@ public class InterpreterSettingManager implements NoteEventListener {
   }
 
   public InterpreterSetting get(String id) {
-    LOGGER.info("p52u current interpreterSettingIDs:"); //TODO: revert
-    for (InterpreterSetting setting:interpreterSettings.values()) {
-      LOGGER.info(setting.getId());
-    }
     return interpreterSettings.get(id);
   }
 
