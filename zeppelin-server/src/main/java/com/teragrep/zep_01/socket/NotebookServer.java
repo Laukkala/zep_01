@@ -1519,13 +1519,15 @@ public class NotebookServer extends WebSocketServlet
     getNotebookService().openInterpreter(noteId, userId, interpreterName, context,
     new WebSocketServiceCallback<String>(conn) {
       @Override
-      public void onSuccess(String p, ServiceContext context) throws IOException {
-        super.onSuccess(p, context);
+      public void onSuccess(String resultMessage, ServiceContext context) throws IOException {
+        super.onSuccess(resultMessage, context);
+        conn.send(serializeMessage(new Message(OP.INTERPRETER_OPENED).put("msg",resultMessage)));
       }
 
       @Override
       public void onFailure(Exception ex, ServiceContext context) throws IOException {
         super.onFailure(ex, context);
+        conn.send(serializeMessage(new Message(OP.INTERPRETER_ERROR).put("msg","Failed to open interpreter "+interpreterName+"! See technical logs for details.")));
       }
     });
   }

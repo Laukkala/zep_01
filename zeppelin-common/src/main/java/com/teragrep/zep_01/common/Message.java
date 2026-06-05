@@ -136,6 +136,9 @@ public class Message implements JsonSerializable {
     PARAGRAPH_CLEAR_ALL_OUTPUT,   // [c-s] clear output of all paragraphs
     PARAGRAPH_APPEND_OUTPUT,      // [s-c] append output
     PARAGRAPH_UPDATE_OUTPUT,      // [s-c] update (replace) output
+    INTERPRETER_ERROR,            //[s-c] indicates an error occurring in response to a PARAGRAPH_OUTPUT_REQUEST
+    OPEN_INTERPRETER,             // [c-s] request to start an interpreter
+    INTERPRETER_OPENED,           // [s-c] response to a successful request to open an interpreter
     PARAGRAPH_UPDATE_RESULT,      // [c-s] request JSONTABLE data using new pagination and search settings
     PING,
     PONG,
@@ -204,8 +207,6 @@ public class Message implements JsonSerializable {
     PATCH_PARAGRAPH,              // [c-s][s-c] patch editor text
     NOTE_RUNNING_STATUS,        // [s-c] sequential run status will be change
     NOTICE,                        // [s-c] Notice
-
-    OPEN_INTERPRETER,        // [c-s] request to start an interpreter
     SERVER_SHUTDOWN             // Server shutdown says bye
   }
 
