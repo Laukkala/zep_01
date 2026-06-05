@@ -204,6 +204,8 @@ public class Message implements JsonSerializable {
     PATCH_PARAGRAPH,              // [c-s][s-c] patch editor text
     NOTE_RUNNING_STATUS,        // [s-c] sequential run status will be change
     NOTICE,                        // [s-c] Notice
+
+    OPEN_INTERPRETER,        // [c-s] request to start an interpreter
     SERVER_SHUTDOWN             // Server shutdown says bye
   }
 

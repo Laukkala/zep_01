@@ -34,10 +34,8 @@ import com.teragrep.zep_01.interpreter.InterpreterResult.Code;
 import com.teragrep.zep_01.interpreter.InterpreterSetting;
 import com.teragrep.zep_01.notebook.Note;
 import com.teragrep.zep_01.notebook.NoteInfo;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.*;
+import org.junit.jupiter.api.Assertions;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -198,6 +196,25 @@ public class RemoteInterpreterTest extends AbstractInterpreterTest {
 
     assertNull(remoteInterpreter2.getInterpreterGroup().getRemoteInterpreterProcess());
 
+  }
+
+  @Test
+  public void testOpenInterpreter() {
+    interpreterSetting.getOption().setPerUser(InterpreterOption.ISOLATED);
+
+    final Interpreter interpreter1 = interpreterSetting.getDefaultInterpreter("user1", "note1");
+    assertTrue(interpreter1 instanceof RemoteInterpreter);
+    final RemoteInterpreter remoteInterpreter1 = (RemoteInterpreter) interpreter1;
+
+    Assertions.assertDoesNotThrow(()->remoteInterpreter1.open());
+    // Interpreter should be open
+    Assertions.assertTrue(remoteInterpreter1.isOpened());
+
+    // Interpreter should be able to interpret after opening
+    final String input = "testInput";
+    final InterpreterContext context = InterpreterContext.builder().setNoteId("note1").setNoteName("testName").setParagraphId("paraId").setReplName("echo").setParagraphText(input).setParagraphTitle("title").build();
+    final InterpreterResult result = Assertions.assertDoesNotThrow(()->remoteInterpreter1.interpret(input,context));
+    Assertions.assertEquals(input,result.message().get(0).getData());
   }
 
   @Ignore(value="Seems to be using SleepInterpreter")
