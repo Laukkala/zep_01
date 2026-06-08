@@ -21,6 +21,7 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 
 import com.teragrep.zep_01.interpreter.*;
+import com.teragrep.zep_01.notebook.Note;
 import com.teragrep.zep_01.rest.message.*;
 import jakarta.json.Json;
 import jakarta.json.JsonException;
@@ -207,22 +208,29 @@ public class InterpreterRestApi {
         final OpenInterpreterRequest request = new OpenInterpreterRequest(json);
         final String noteId = request.getNoteId();
         LOGGER.info("Opening default interpreter for user <{}> of interpreterSetting <[{}]> in notebook <[{}]>, msg=<[{}]>", userName, settingId, noteId, message);
-        if (null == noteId) {
+        if (noteId == null) {
           response = new JsonResponse<>(Status.BAD_REQUEST, "NoteId not provided")
                   .build();
         } else {
-          final Set<String> entities = new HashSet<>();
-          entities.add(userName);
-          entities.addAll(authenticationService.getAssociatedRoles());
-          if (authorizationService.hasRunPermission(entities, noteId) ||
-                  authorizationService.hasWritePermission(entities, noteId) ||
-                  authorizationService.isOwner(entities, noteId)) {
-            Interpreter defaultInterpreter = setting.getDefaultInterpreter(authenticationService.getPrincipal(),noteId);
-            defaultInterpreter.open();
-            response = new JsonResponse<>(Status.OK, "", setting).build();
-          } else {
-            response = new JsonResponse<>(Status.FORBIDDEN, "No privilege to open interpreter")
+          Note note = notebookServer.getNotebook().getNote(noteId);
+          if(note == null){
+            response = new JsonResponse<>(Status.NOT_FOUND, "No such note"+noteId)
                     .build();
+          }
+          else {
+            final Set<String> entities = new HashSet<>();
+            entities.add(userName);
+            entities.addAll(authenticationService.getAssociatedRoles());
+            if (authorizationService.hasRunPermission(entities, noteId) ||
+                    authorizationService.hasWritePermission(entities, noteId) ||
+                    authorizationService.isOwner(entities, noteId)) {
+              Interpreter defaultInterpreter = setting.getDefaultInterpreter(authenticationService.getPrincipal(),noteId);
+              defaultInterpreter.open();
+              response = new JsonResponse<>(Status.OK, "", setting).build();
+            } else {
+              response = new JsonResponse<>(Status.FORBIDDEN, "No privilege to open interpreter")
+                      .build();
+            }
           }
         }
       }
@@ -235,6 +243,10 @@ public class InterpreterRestApi {
     }
     catch (JsonException jsonException){
       return new JsonResponse<>(Status.BAD_REQUEST, jsonException.getMessage(), ExceptionUtils.getStackTrace(jsonException))
+              .build();
+    } catch (IOException e) {
+      LOGGER.error("IO Exception in InterpreterRestApi while opening Interpreter ", e);
+      return new JsonResponse<>(Status.INTERNAL_SERVER_ERROR, e.getMessage(), ExceptionUtils.getStackTrace(e))
               .build();
     }
   }
