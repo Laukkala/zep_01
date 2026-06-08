@@ -43,10 +43,7 @@ import org.junit.runners.MethodSorters;
 import java.io.IOException;
 import java.io.StringReader;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
+import java.util.*;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertEquals;
@@ -55,7 +52,6 @@ import static org.junit.Assert.assertNotNull;
 /**
  * Zeppelin interpreter rest api tests.
  */
-@Ignore(value="Flaky test, shuts down JVM")
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class InterpreterRestApiTest extends AbstractTestRestApi {
   private Gson gson = new Gson();
@@ -76,6 +72,7 @@ public class InterpreterRestApiTest extends AbstractTestRestApi {
     anonymous = new AuthenticationInfo("anonymous");
   }
 
+  @Ignore(value="Flaky test, shuts down JVM")
   @Test
   public void getAvailableInterpreters() throws IOException {
     // when
@@ -89,6 +86,7 @@ public class InterpreterRestApiTest extends AbstractTestRestApi {
     get.close();
   }
 
+  @Ignore(value="Flaky test, shuts down JVM")
   @Test
   public void getSettings() throws IOException {
     // when
@@ -101,6 +99,7 @@ public class InterpreterRestApiTest extends AbstractTestRestApi {
     get.close();
   }
 
+  @Ignore(value="Flaky test, shuts down JVM")
   @Test
   public void testGetNonExistInterpreterSetting() throws IOException {
     // when
@@ -112,6 +111,7 @@ public class InterpreterRestApiTest extends AbstractTestRestApi {
     get.close();
   }
 
+  @Ignore(value="Flaky test, shuts down JVM")
   @Test
   public void testSettingsCRUD() throws IOException {
     // when: call create setting API
@@ -161,6 +161,7 @@ public class InterpreterRestApiTest extends AbstractTestRestApi {
     delete.close();
   }
 
+  @Ignore(value="Flaky test, shuts down JVM")
   @Test
   public void testSettingsCreateWithEmptyJson() throws IOException {
     // Call Create Setting REST API
@@ -170,6 +171,7 @@ public class InterpreterRestApiTest extends AbstractTestRestApi {
     post.close();
   }
 
+  @Ignore(value="Flaky test, shuts down JVM")
   @Test
   public void testSettingsCreateWithInvalidName() throws IOException {
     String reqBody = "{"
@@ -271,6 +273,7 @@ public class InterpreterRestApiTest extends AbstractTestRestApi {
             getSimulatedMarkdownResult("markdown restarted"));
   }
 
+  @Ignore(value="Flaky test, shuts down JVM")
   @Test
   public void testRestartInterpreterPerNote() throws IOException, InterruptedException {
     Note note = TestUtils.getInstance(Notebook.class).createNote("note2", anonymous);
@@ -320,8 +323,8 @@ public class InterpreterRestApiTest extends AbstractTestRestApi {
   }
 
   @Test
-  public void testOpenInterpreter() throws IOException, InterruptedException {
-    Note note = TestUtils.getInstance(Notebook.class).createNote("/testNote",AuthenticationInfo.ANONYMOUS);
+  public void testOpenInterpreter() {
+    Note note = Assertions.assertDoesNotThrow(()-> TestUtils.getInstance(Notebook.class).createNote("/testOpen",AuthenticationInfo.ANONYMOUS));
     InterpreterSetting setting = TestUtils.getInstance(Notebook.class).getInterpreterSettingManager().getDefaultInterpreterSetting();
     String jsonRequest = "{\"noteId\":\"" + note.getId() + "\"}";
 
@@ -332,16 +335,67 @@ public class InterpreterRestApiTest extends AbstractTestRestApi {
     // Interpreter should be closed by default
     Assertions.assertFalse(fakeInterpreter.isOpened());
     setting.getOrCreateInterpreterGroup(AuthenticationInfo.ANONYMOUS.getUser(),note.getId()).put("shared_session",fakeInterpreters);
-    CloseableHttpResponse put = httpPut("/interpreter/setting/open/" + setting.getId(), jsonRequest);
-    String responseString = EntityUtils.toString(put.getEntity());
+    CloseableHttpResponse put = Assertions.assertDoesNotThrow(()-> httpPut("/interpreter/setting/open/" + setting.getId(), jsonRequest));
+    String responseString = Assertions.assertDoesNotThrow(()-> EntityUtils.toString(put.getEntity()));
     jakarta.json.JsonObject response = Assertions.assertDoesNotThrow(()-> Json.createReader(new StringReader(responseString)).readObject());
     jakarta.json.JsonObject body = response.getJsonObject("body");
     Assertions.assertEquals("OK",response.getString("status"));
     Assertions.assertEquals("READY",body.getString("status"));
-    put.close();
+    Assertions.assertDoesNotThrow(()->put.close());
 
     // Interpreter should be opened after call to REST API endpoint
     Assertions.assertTrue(fakeInterpreter.isOpened());
+  }
+
+  @Test
+  public void testOpenNonexistentInterpreter() {
+    Note note = Assertions.assertDoesNotThrow(()-> TestUtils.getInstance(Notebook.class).createNote("/testNonexistentInterpreter",AuthenticationInfo.ANONYMOUS));
+    InterpreterSetting setting = TestUtils.getInstance(Notebook.class).getInterpreterSettingManager().getDefaultInterpreterSetting();
+    String jsonRequest = "{\"noteId\":\"" + note.getId() + "\"}";
+
+    List<Interpreter> fakeInterpreters = new ArrayList<>();
+    OpenableInterpreterFake fakeInterpreter = new OpenableInterpreterFake(new Properties());
+    fakeInterpreters.add(fakeInterpreter);
+
+    // Interpreter should be closed by default
+    Assertions.assertFalse(fakeInterpreter.isOpened());
+    setting.getOrCreateInterpreterGroup(AuthenticationInfo.ANONYMOUS.getUser(),note.getId()).put("shared_session",fakeInterpreters);
+    CloseableHttpResponse put = Assertions.assertDoesNotThrow(()-> httpPut("/interpreter/setting/open/IDONTEXIST", jsonRequest));
+    String responseString = Assertions.assertDoesNotThrow(()-> EntityUtils.toString(put.getEntity()));
+    jakarta.json.JsonObject response = Assertions.assertDoesNotThrow(()-> Json.createReader(new StringReader(responseString)).readObject());
+    Assertions.assertEquals("NOT_FOUND",response.getString("status"));
+    Assertions.assertDoesNotThrow(()->put.close());
+
+    // Interpreter should not be opened after call to REST API endpoint fails
+    Assertions.assertFalse(fakeInterpreter.isOpened());
+  }
+
+  @Test
+  public void testOpenInterpreterFromNonexistentNote() {
+    // Create a note and an Interpreter session for one note
+    Note note = Assertions.assertDoesNotThrow(()-> TestUtils.getInstance(Notebook.class).createNote("/testNonexistentNote",AuthenticationInfo.ANONYMOUS));
+    InterpreterSetting setting = TestUtils.getInstance(Notebook.class).getInterpreterSettingManager().getDefaultInterpreterSetting();
+
+    List<Interpreter> fakeInterpreters = new ArrayList<>();
+    OpenableInterpreterFake fakeInterpreter = new OpenableInterpreterFake(new Properties());
+    fakeInterpreters.add(fakeInterpreter);
+    setting.getOrCreateInterpreterGroup(AuthenticationInfo.ANONYMOUS.getUser(),note.getId()).put("shared_session",fakeInterpreters);
+
+    // Interpreter should be closed by default
+    Assertions.assertFalse(fakeInterpreter.isOpened());
+
+    // Request to open an instance of the test interpreter within a nonexistent note.
+    String jsonRequest = "{\"noteId\":\"I_DONT_EXIST\"}";
+    CloseableHttpResponse put = Assertions.assertDoesNotThrow(()-> httpPut("/interpreter/setting/open/"+setting.getId(), jsonRequest));
+    String responseString = Assertions.assertDoesNotThrow(()-> EntityUtils.toString(put.getEntity()));
+    jakarta.json.JsonObject response = Assertions.assertDoesNotThrow(()-> Json.createReader(new StringReader(responseString)).readObject());
+
+    // Should result in an error
+    Assertions.assertEquals("NOT_FOUND",response.getString("status"));
+    Assertions.assertDoesNotThrow(()->put.close());
+
+    // Interpreter should not be opened
+    Assertions.assertFalse(fakeInterpreter.isOpened());
   }
 
   private JsonObject getBodyFieldFromResponse(String rawResponse) {
