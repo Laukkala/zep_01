@@ -21,6 +21,9 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.reflect.TypeToken;
+import com.teragrep.zep_01.interpreter.Interpreter;
+import com.teragrep.zep_01.rest.fakes.OpenableInterpreterFake;
+import jakarta.json.Json;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.util.EntityUtils;
@@ -34,13 +37,16 @@ import com.teragrep.zep_01.server.ZeppelinServer;
 import com.teragrep.zep_01.user.AuthenticationInfo;
 import com.teragrep.zep_01.utils.TestUtils;
 import org.junit.*;
+import org.junit.jupiter.api.Assertions;
 import org.junit.runners.MethodSorters;
 
 import java.io.IOException;
+import java.io.StringReader;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertEquals;
@@ -311,6 +317,31 @@ public class InterpreterRestApiTest extends AbstractTestRestApi {
     put = httpPut("/interpreter/setting/restart/" + mdIntpSetting.getId(), jsonRequest);
     assertThat("shared interpreter restart:", put, isAllowed());
     put.close();
+  }
+
+  @Test
+  public void testOpenInterpreter() throws IOException, InterruptedException {
+    Note note = TestUtils.getInstance(Notebook.class).createNote("/testNote",AuthenticationInfo.ANONYMOUS);
+    InterpreterSetting setting = TestUtils.getInstance(Notebook.class).getInterpreterSettingManager().getDefaultInterpreterSetting();
+    String jsonRequest = "{\"noteId\":\"" + note.getId() + "\"}";
+
+    List<Interpreter> fakeInterpreters = new ArrayList<>();
+    OpenableInterpreterFake fakeInterpreter = new OpenableInterpreterFake(new Properties());
+    fakeInterpreters.add(fakeInterpreter);
+
+    // Interpreter should be closed by default
+    Assertions.assertFalse(fakeInterpreter.isOpened());
+    setting.getOrCreateInterpreterGroup(AuthenticationInfo.ANONYMOUS.getUser(),note.getId()).put("shared_session",fakeInterpreters);
+    CloseableHttpResponse put = httpPut("/interpreter/setting/open/" + setting.getId(), jsonRequest);
+    String responseString = EntityUtils.toString(put.getEntity());
+    jakarta.json.JsonObject response = Assertions.assertDoesNotThrow(()-> Json.createReader(new StringReader(responseString)).readObject());
+    jakarta.json.JsonObject body = response.getJsonObject("body");
+    Assertions.assertEquals("OK",response.getString("status"));
+    Assertions.assertEquals("READY",body.getString("status"));
+    put.close();
+
+    // Interpreter should be opened after call to REST API endpoint
+    Assertions.assertTrue(fakeInterpreter.isOpened());
   }
 
   private JsonObject getBodyFieldFromResponse(String rawResponse) {
