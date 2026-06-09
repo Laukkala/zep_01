@@ -45,8 +45,6 @@ import com.teragrep.zep_01.interpreter.InterpreterNotFoundException;
 import com.teragrep.zep_01.interpreter.InterpreterSetting;
 import com.teragrep.zep_01.interpreter.InterpreterSettingManager;
 import com.teragrep.zep_01.interpreter.ManagedInterpreterGroup;
-import com.teragrep.zep_01.notebook.NoteManager.Folder;
-import com.teragrep.zep_01.notebook.NoteManager.NoteNode;
 import com.teragrep.zep_01.notebook.repo.NotebookRepo;
 import com.teragrep.zep_01.notebook.repo.NotebookRepoSync;
 import com.teragrep.zep_01.notebook.repo.NotebookRepoWithVersionControl;
@@ -426,17 +424,17 @@ public class Notebook {
   }
 
   public void restoreAll(AuthenticationInfo subject) throws IOException {
-    NoteManager.Folder trash = noteManager.getTrashFolder();
+    Folder trash = noteManager.getTrashFolder();
     // restore notes under trash folder
     // If the value changes in the loop, a concurrent modification exception is thrown.
     // Collector implementation of collect methods to maintain immutability.
     List<NoteNode> notes = trash.getNotes().values().stream().collect(Collectors.toList());
-    for (NoteManager.NoteNode noteNode : notes) {
+    for (NoteNode noteNode : notes) {
       moveNote(noteNode.getNoteId(), noteNode.getNotePath().replace("/~Trash", ""), subject);
     }
     // restore folders under trash folder
     List<Folder> folders = trash.getFolders().values().stream().collect(Collectors.toList());
-    for (NoteManager.Folder folder : folders) {
+    for (Folder folder : folders) {
       moveFolder(folder.getPath(), folder.getPath().replace("/~Trash", ""), subject);
     }
   }
