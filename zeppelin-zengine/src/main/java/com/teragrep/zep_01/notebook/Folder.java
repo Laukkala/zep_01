@@ -13,7 +13,7 @@ import java.util.Map;
 /**
  * Represent one folder that could contains sub folders and note files.
  */
-public class Folder {
+public final class Folder {
 
     private String name;
     private Folder parent;
@@ -24,17 +24,17 @@ public class Folder {
     // folderName -> Folder
     private Map<String, Folder> subFolders = new HashMap<>();
 
-    public Folder(String name, NotebookRepo notebookRepo) {
+    public Folder(final String name, final NotebookRepo notebookRepo) {
         this.name = name;
         this.notebookRepo = notebookRepo;
     }
 
-    public Folder(String name, Folder parent, NotebookRepo notebookRepo) {
+    public Folder(final String name, final Folder parent, final NotebookRepo notebookRepo) {
         this(name, notebookRepo);
         this.parent = parent;
     }
 
-    public synchronized Folder getOrCreateFolder(String folderName) {
+    public synchronized Folder getOrCreateFolder(final String folderName) {
         if (StringUtils.isBlank(folderName)) {
             return this;
         }
@@ -48,7 +48,7 @@ public class Folder {
         return parent;
     }
 
-    public void setParent(Folder parent) {
+    public void setParent(final Folder parent) {
         this.parent = parent;
     }
 
@@ -56,11 +56,11 @@ public class Folder {
         return name;
     }
 
-    public void setName(String name) {
+    public void setName(final String name) {
         this.name = name;
     }
 
-    public Folder getFolder(String folderName) {
+    public Folder getFolder(final String folderName) {
         return subFolders.get(folderName);
     }
 
@@ -68,15 +68,15 @@ public class Folder {
         return subFolders;
     }
 
-    public NoteNode getNote(String noteId) {
+    public NoteNode getNote(final String noteId) {
         // Search for the note within this Folder
         NoteNode rv = new NoteNodeStub();
         if (this.notes.containsKey(noteId)) {
             rv = notes.get(noteId);
         } else {
-            for (Folder subfolder : subFolders.values()) {
+            for (final Folder subfolder : subFolders.values()) {
                 // If a match is found in one of the subfolders, return it.
-                NoteNode noteNode = subfolder.getNote(noteId);
+                final NoteNode noteNode = subfolder.getNote(noteId);
                 if (!noteNode.isStub()) {
                     rv = noteNode;
                     break;
@@ -86,7 +86,7 @@ public class Folder {
         return rv;
     }
 
-    public void addNote(String noteId, Note note) {
+    public void addNote(final String noteId, final Note note) {
         notes.put(noteId, new NoteNodeImpl(note, this, notebookRepo));
     }
 
@@ -94,11 +94,11 @@ public class Folder {
      * Attach another folder under this folder, this is used when moving folder.
      * The path of notes under this folder also need to be updated.
      */
-    public void addFolder(String folderName, Folder folder) throws IOException {
+    public void addFolder(final String folderName, final Folder folder) throws IOException {
         subFolders.put(folderName, folder);
         folder.setParent(this);
         folder.setName(folderName);
-        for (NoteNode noteNode : folder.getNoteNodeRecursively()) {
+        for (final NoteNode noteNode : folder.getNoteNodeRecursively()) {
             noteNode.updateNotePath();
         }
     }
@@ -109,36 +109,36 @@ public class Folder {
      *
      * @param noteNode
      */
-    public void addNoteNode(NoteNode noteNode) {
+    public void addNoteNode(final NoteNode noteNode) {
         this.notes.put(noteNode.getNoteId(), noteNode);
         noteNode.setParent(this);
     }
 
-    public void removeNote(String noteId) {
+    public void removeNote(final String noteId) {
         this.notes.remove(noteId);
     }
 
-    public List<Note> removeFolder(String folderName,
-                                   AuthenticationInfo subject) throws IOException {
-        Folder folder = this.subFolders.remove(folderName);
+    public List<Note> removeFolder(final String folderName,
+                                   final AuthenticationInfo subject) throws IOException {
+        final Folder folder = this.subFolders.remove(folderName);
         return folder.getRawNotesRecursively();
     }
 
     public List<Note> getRawNotesRecursively() {
-        List<Note> notesInfo = new ArrayList<>();
-        for (NoteNode noteNode : this.notes.values()) {
+        final List<Note> notesInfo = new ArrayList<>();
+        for (final NoteNode noteNode : this.notes.values()) {
             notesInfo.add(noteNode.getRawNote());
         }
-        for (Folder folder : subFolders.values()) {
+        for (final Folder folder : subFolders.values()) {
             notesInfo.addAll(folder.getRawNotesRecursively());
         }
         return notesInfo;
     }
 
     public List<NoteNode> getNoteNodeRecursively() {
-        List<NoteNode> noteNodeRecursively = new ArrayList<>();
+        final List<NoteNode> noteNodeRecursively = new ArrayList<>();
         noteNodeRecursively.addAll(this.notes.values());
-        for (Folder folder : subFolders.values()) {
+        for (final Folder folder : subFolders.values()) {
             noteNodeRecursively.addAll(folder.getNoteNodeRecursively());
         }
         return noteNodeRecursively;

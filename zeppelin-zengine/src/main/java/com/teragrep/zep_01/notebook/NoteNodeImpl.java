@@ -14,13 +14,13 @@ import java.io.IOException;
  * <p>
  * It will load note from NotebookRepo lazily until method getNote is called.
  */
-public class NoteNodeImpl implements NoteNode {
+public final class NoteNodeImpl implements NoteNode {
 
     private Folder parent;
     private Note note;
     private NotebookRepo notebookRepo;
 
-    public NoteNodeImpl(Note note, Folder parent, NotebookRepo notebookRepo) {
+    public NoteNodeImpl(final Note note, final Folder parent, final NotebookRepo notebookRepo) {
         this.note = note;
         this.parent = parent;
         this.notebookRepo = notebookRepo;
@@ -40,7 +40,7 @@ public class NoteNodeImpl implements NoteNode {
      */
 
     @Override
-    public synchronized Note getNote(boolean reload) throws IOException {
+    public synchronized Note getNote(final boolean reload) throws IOException {
         if (!note.isLoaded() || reload) {
             note = notebookRepo.get(note.getId(), note.getPath(), AuthenticationInfo.ANONYMOUS);
             if (parent.toString().equals("/")) {
@@ -96,12 +96,12 @@ public class NoteNodeImpl implements NoteNode {
     }
 
     @Override
-    public void setParent(Folder parent) {
+    public void setParent(final Folder parent) {
         this.parent = parent;
     }
 
     @Override
-    public void setNotePath(String notePath) {
+    public void setNotePath(final String notePath) {
         this.note.setPath(notePath);
     }
 

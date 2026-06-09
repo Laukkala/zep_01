@@ -2,7 +2,7 @@ package com.teragrep.zep_01.notebook;
 
 import java.io.IOException;
 
-public class NoteNodeStub implements NoteNode {
+public final class NoteNodeStub implements NoteNode {
 
     @Override
     public Note getNote() throws IOException {
@@ -10,7 +10,7 @@ public class NoteNodeStub implements NoteNode {
     }
 
     @Override
-    public Note getNote(boolean reload) throws IOException {
+    public Note getNote(final boolean reload) throws IOException {
         throw new RuntimeException("NoteNode is a stub!");
     }
 
@@ -40,12 +40,12 @@ public class NoteNodeStub implements NoteNode {
     }
 
     @Override
-    public void setParent(Folder parent) {
+    public void setParent(final Folder parent) {
         throw new RuntimeException("NoteNode is a stub!");
     }
 
     @Override
-    public void setNotePath(String notePath) {
+    public void setNotePath(final String notePath) {
         throw new RuntimeException("NoteNode is a stub!");
     }
 
