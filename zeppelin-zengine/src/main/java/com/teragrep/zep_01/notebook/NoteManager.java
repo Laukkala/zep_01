@@ -149,15 +149,8 @@ public class NoteManager {
   }
 
   public boolean trashContainsNote(String noteId) {
-    final boolean rv;
-    NoteNode noteNode = getTrashFolder().getNote(noteId);
-    if(!noteNode.isStub()){
-      rv = true;
-    }
-    else {
-      rv = false;
-    }
-    return rv;
+    final NoteNode noteNode = getTrashFolder().getNote(noteId);
+    return !noteNode.isStub();
   }
 
   /**
