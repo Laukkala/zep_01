@@ -361,9 +361,9 @@ public class InterpreterRestApiTest extends AbstractTestRestApi {
     Assertions.assertFalse(fakeInterpreter.isOpened());
     setting.getOrCreateInterpreterGroup(AuthenticationInfo.ANONYMOUS.getUser(),note.getId()).put("shared_session",fakeInterpreters);
     CloseableHttpResponse put = Assertions.assertDoesNotThrow(()-> httpPut("/interpreter/setting/open/IDONTEXIST", jsonRequest));
-    String responseString = Assertions.assertDoesNotThrow(()-> EntityUtils.toString(put.getEntity()));
-    jakarta.json.JsonObject response = Assertions.assertDoesNotThrow(()-> Json.createReader(new StringReader(responseString)).readObject());
-    Assertions.assertEquals("NOT_FOUND",response.getString("status"));
+
+    // Should result in an 404 error
+    Assertions.assertEquals(404,put.getStatusLine().getStatusCode());
     Assertions.assertDoesNotThrow(()->put.close());
 
     // Interpreter should not be opened after call to REST API endpoint fails
@@ -387,11 +387,9 @@ public class InterpreterRestApiTest extends AbstractTestRestApi {
     // Request to open an instance of the test interpreter within a nonexistent note.
     String jsonRequest = "{\"noteId\":\"I_DONT_EXIST\"}";
     CloseableHttpResponse put = Assertions.assertDoesNotThrow(()-> httpPut("/interpreter/setting/open/"+setting.getId(), jsonRequest));
-    String responseString = Assertions.assertDoesNotThrow(()-> EntityUtils.toString(put.getEntity()));
-    jakarta.json.JsonObject response = Assertions.assertDoesNotThrow(()-> Json.createReader(new StringReader(responseString)).readObject());
 
-    // Should result in an error
-    Assertions.assertEquals("NOT_FOUND",response.getString("status"));
+    // Should result in an 404 error
+    Assertions.assertEquals(404,put.getStatusLine().getStatusCode());
     Assertions.assertDoesNotThrow(()->put.close());
 
     // Interpreter should not be opened

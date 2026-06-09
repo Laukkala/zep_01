@@ -43,13 +43,7 @@ import org.slf4j.LoggerFactory;
 import org.eclipse.aether.repository.RemoteRepository;
 
 import javax.validation.constraints.NotNull;
-import javax.ws.rs.DELETE;
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.PUT;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
+import javax.ws.rs.*;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import java.io.IOException;
@@ -195,60 +189,47 @@ public class InterpreterRestApi {
   @Path("setting/open/{settingId}")
   @ZeppelinApi
   public Response openSetting(String message, @PathParam("settingId") String settingId) {
-    final String userName = authenticationService.getPrincipal();
-
     final Response response;
-    InterpreterSetting setting = interpreterSettingManager.get(settingId);
     try {
+      // parse message
+      final String userName = authenticationService.getPrincipal();
+      final JsonObject json = Json.createReader(new StringReader(message)).readObject();
+      final OpenInterpreterRequest request = new OpenInterpreterRequest(json);
+      final String noteId = request.getNoteId();
+      final Note note = notebookServer.getNotebook().getNote(noteId);
+      final InterpreterSetting setting = interpreterSettingManager.get(settingId);
+
+      // check permissions and nulls
+      final Set<String> entities = new HashSet<>();
+      entities.add(userName);
+      entities.addAll(authenticationService.getAssociatedRoles());
+      if (!authorizationService.hasRunPermission(entities, noteId) && !authorizationService.hasWritePermission(entities, noteId) && !authorizationService.isOwner(entities, noteId)) {
+        throw new NotAuthorizedException("No permission to open Interpreter " + settingId);
+      }
       if (setting == null) {
-        response = new JsonResponse<>(Status.NOT_FOUND, "", settingId).build();
+        throw new NotFoundException("No such InterpreterSetting " + settingId);
       }
-      else {
-        final JsonObject json = Json.createReader(new StringReader(message)).readObject();
-        final OpenInterpreterRequest request = new OpenInterpreterRequest(json);
-        final String noteId = request.getNoteId();
-        LOGGER.info("Opening default interpreter for user <{}> of interpreterSetting <[{}]> in notebook <[{}]>, msg=<[{}]>", userName, settingId, noteId, message);
-        if (noteId == null) {
-          response = new JsonResponse<>(Status.BAD_REQUEST, "NoteId not provided")
-                  .build();
-        } else {
-          Note note = notebookServer.getNotebook().getNote(noteId);
-          if(note == null){
-            response = new JsonResponse<>(Status.NOT_FOUND, "No such note"+noteId)
-                    .build();
-          }
-          else {
-            final Set<String> entities = new HashSet<>();
-            entities.add(userName);
-            entities.addAll(authenticationService.getAssociatedRoles());
-            if (authorizationService.hasRunPermission(entities, noteId) ||
-                    authorizationService.hasWritePermission(entities, noteId) ||
-                    authorizationService.isOwner(entities, noteId)) {
-              Interpreter defaultInterpreter = setting.getDefaultInterpreter(authenticationService.getPrincipal(),noteId);
-              defaultInterpreter.open();
-              response = new JsonResponse<>(Status.OK, "", setting).build();
-            } else {
-              response = new JsonResponse<>(Status.FORBIDDEN, "No privilege to open interpreter")
-                      .build();
-            }
-          }
-        }
+      if (noteId == null || note == null) {
+        throw new NotFoundException("No such note " + noteId);
       }
-      return response;
+
+      // get interpreter instance and open
+      Interpreter defaultInterpreter = setting.getDefaultInterpreter(authenticationService.getPrincipal(), noteId);
+      defaultInterpreter.open();
+      response = new JsonResponse<>(Status.OK, "", setting).build();
     }
-    catch (InterpreterException e) {
-      LOGGER.error("Exception in InterpreterRestApi while opening Interpreter ", e);
-      return new JsonResponse<>(Status.NOT_FOUND, e.getMessage(), ExceptionUtils.getStackTrace(e))
-              .build();
+    catch (JsonParsingException jsonParsingException) {
+      throw new BadRequestException("Malformed request");
     }
-    catch (JsonException jsonException){
-      return new JsonResponse<>(Status.BAD_REQUEST, jsonException.getMessage(), ExceptionUtils.getStackTrace(jsonException))
-              .build();
-    } catch (IOException e) {
-      LOGGER.error("IO Exception in InterpreterRestApi while opening Interpreter ", e);
-      return new JsonResponse<>(Status.INTERNAL_SERVER_ERROR, e.getMessage(), ExceptionUtils.getStackTrace(e))
-              .build();
+    catch (IOException ioException) {
+      LOGGER.error("Failed to get notebook while opening Interpreter <[{}]>",settingId,ioException);
+      throw new InternalServerErrorException("Internal server error while opening Interpreter "+settingId+"! Check technical logs for details.");
     }
+    catch (InterpreterException interpreterException){
+      LOGGER.error("Failed to open Interpreter <[{}]>",settingId,interpreterException);
+      throw new InternalServerErrorException("Internal server error while opening Interpreter "+settingId+"! Check technical logs for details.");
+    }
+    return response;
   }
 
   /**
