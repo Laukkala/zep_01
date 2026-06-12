@@ -24,13 +24,17 @@ import com.teragrep.zep_01.user.AuthenticationInfo;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.api.errors.NoHeadException;
+import org.eclipse.jgit.diff.DiffConfig;
 import org.eclipse.jgit.diff.DiffEntry;
 import org.eclipse.jgit.dircache.DirCache;
 import org.eclipse.jgit.internal.storage.file.FileRepository;
+import org.eclipse.jgit.lib.Config;
 import org.eclipse.jgit.lib.Constants;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.Repository;
+import org.eclipse.jgit.revwalk.FollowFilter;
 import org.eclipse.jgit.revwalk.RevCommit;
+import org.eclipse.jgit.revwalk.RevWalk;
 import org.eclipse.jgit.treewalk.filter.PathFilter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -189,25 +193,30 @@ public class GitNotebookRepo extends VFSNotebookRepo implements NotebookRepoWith
     }
     return note;
   }
-
   @Override
   public List<Revision> revisionHistory(String noteId,
                                         String notePath,
                                         AuthenticationInfo subject) throws IOException {
-    List<Revision> history = new ArrayList<>();
-    String noteFileName = buildNoteFileName(noteId, notePath);
-    LOGGER.debug("Listing history for {}:", noteFileName);
-    try {
-      Iterable<RevCommit> logs = git.log().addPath(noteFileName).call();
-      for (RevCommit log: logs) {
-        history.add(new Revision(log.getName(), log.getShortMessage(), log.getCommitTime()));
-        LOGGER.debug(" - ({},{},{})", log.getName(), log.getCommitTime(), log.getFullMessage());
+    final List<Revision> history = new ArrayList<>();
+    final String noteFileName = buildNoteFileName(noteId, notePath);
+
+    // git.log() command doesn't follow files through renames, so we use a RevWalk with a FollowFilter
+    final Repository repository = git.getRepository();
+    try (RevWalk walk = new RevWalk(repository)) {
+      final Config config = new Config();
+      final DiffConfig diffConfig = config.get(DiffConfig.KEY);
+      final FollowFilter followFilter = FollowFilter.create(noteFileName, diffConfig);
+      walk.setTreeFilter(followFilter);
+
+      // get commit from repository head if it exists and walk through every commit. FollowFilter adds commits to renamed files.
+      final ObjectId headId = repository.resolve(Constants.HEAD);
+      if (headId != null) {
+        final RevCommit startCommit = walk.parseCommit(headId);
+        walk.markStart(startCommit);
+        for (RevCommit commit : walk) {
+          history.add(new Revision(commit.getId().getName(),commit.getFullMessage(),commit.getCommitTime()));
+        }
       }
-    } catch (NoHeadException e) {
-      //when no initial commit exists
-      LOGGER.warn("No Head found for {}, {}", noteFileName, e.getMessage());
-    } catch (GitAPIException e) {
-      LOGGER.error("Failed to get logs for {}", noteFileName, e);
     }
     return history;
   }
