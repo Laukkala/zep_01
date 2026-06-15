@@ -213,6 +213,14 @@ public class InterpreterRestApi {
         throw new NotFoundException("No such note " + noteId);
       }
 
+      // check for presence of ConfInterpreter
+      for (Paragraph paragraph:note.getParagraphs()) {
+        if(paragraph.getBindedInterpreter() instanceof ConfInterpreter){
+          Response errorResponse = new JsonResponse<>(Status.BAD_REQUEST,"Cannot open Interpreter Note "+noteId+" contains a paragraph with a ConfInterpreter!","Cannot open Interpreter Note "+noteId+" contains a paragraph with a ConfInterpreter!").build();
+          throw new BadRequestException(errorResponse);
+        }
+      }
+
       // get interpreter instance and open
       Interpreter defaultInterpreter = setting.getDefaultInterpreter(authenticationService.getPrincipal(), noteId);
       defaultInterpreter.open();
