@@ -21,6 +21,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.reflect.TypeToken;
+import com.teragrep.zep_01.interpreter.ConfInterpreter;
 import com.teragrep.zep_01.interpreter.Interpreter;
 import com.teragrep.zep_01.rest.fakes.OpenableInterpreterFake;
 import jakarta.json.Json;
@@ -348,6 +349,40 @@ public class InterpreterRestApiTest extends AbstractTestRestApi {
   }
 
   @Test
+  public void testOpenInterpreterWithConfParagraph() {
+    Note note = Assertions.assertDoesNotThrow(()-> TestUtils.getInstance(Notebook.class).createNote("/testOpenWithConfIntp",AuthenticationInfo.ANONYMOUS));
+
+    InterpreterSetting setting = TestUtils.getInstance(Notebook.class).getInterpreterSettingManager().getDefaultInterpreterSetting();
+    String jsonRequest = "{\"noteId\":\"" + note.getId() + "\"}";
+
+    List<Interpreter> fakeInterpreters = new ArrayList<>();
+    OpenableInterpreterFake fakeInterpreter = new OpenableInterpreterFake(new Properties());
+    ConfInterpreter confInterpreter = new ConfInterpreter(new Properties(),"shared_session","test",setting);
+    fakeInterpreters.add(fakeInterpreter);
+    fakeInterpreters.add(confInterpreter);
+
+    // Add a paragraph with a ConfInterpreter
+    Paragraph confParagraph = new Paragraph(note, null);
+    confParagraph.setText("%test.conf");
+    note.addParagraph(confParagraph);
+
+    // Interpreter should be closed by default
+    Assertions.assertFalse(fakeInterpreter.isOpened());
+    setting.getOrCreateInterpreterGroup(AuthenticationInfo.ANONYMOUS.getUser(),note.getId()).put("shared_session",fakeInterpreters);
+    CloseableHttpResponse put = Assertions.assertDoesNotThrow(()-> httpPut("/interpreter/setting/open/" + setting.getId(), jsonRequest));
+
+    // Response should be 400 bad request
+    String responseString = Assertions.assertDoesNotThrow(()-> EntityUtils.toString(put.getEntity()));
+    jakarta.json.JsonObject response = Assertions.assertDoesNotThrow(()-> Json.createReader(new StringReader(responseString)).readObject());
+    Assertions.assertEquals("Cannot open Interpreter! Note "+note.getId()+" contains a paragraph with a ConfInterpreter!",response.getString("body"));
+    Assertions.assertEquals("BAD_REQUEST",response.getString("status"));
+    Assertions.assertDoesNotThrow(()->put.close());
+
+    // Interpreter should not be opened after call to REST API endpoint when confInterpreter is present
+    Assertions.assertFalse(fakeInterpreter.isOpened());
+  }
+
+  @Test
   public void testOpenNonexistentInterpreter() {
     Note note = Assertions.assertDoesNotThrow(()-> TestUtils.getInstance(Notebook.class).createNote("/testNonexistentInterpreter",AuthenticationInfo.ANONYMOUS));
     InterpreterSetting setting = TestUtils.getInstance(Notebook.class).getInterpreterSettingManager().getDefaultInterpreterSetting();
@@ -389,8 +424,10 @@ public class InterpreterRestApiTest extends AbstractTestRestApi {
     CloseableHttpResponse put = Assertions.assertDoesNotThrow(()-> httpPut("/interpreter/setting/open/"+setting.getId(), jsonRequest));
 
     // Should result in an 404 error
-    Assertions.assertEquals(404,put.getStatusLine().getStatusCode());
-    Assertions.assertDoesNotThrow(()->put.close());
+    String responseString = Assertions.assertDoesNotThrow(()-> EntityUtils.toString(put.getEntity()));
+    jakarta.json.JsonObject response = Assertions.assertDoesNotThrow(()-> Json.createReader(new StringReader(responseString)).readObject());
+    Assertions.assertEquals("NOT_FOUND",response.getString("status"));
+    Assertions.assertEquals("No such note I_DONT_EXIST",response.getString("body"));
 
     // Interpreter should not be opened
     Assertions.assertFalse(fakeInterpreter.isOpened());

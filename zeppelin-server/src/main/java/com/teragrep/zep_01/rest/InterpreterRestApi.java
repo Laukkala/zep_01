@@ -22,6 +22,7 @@ import javax.inject.Singleton;
 
 import com.teragrep.zep_01.interpreter.*;
 import com.teragrep.zep_01.notebook.Note;
+import com.teragrep.zep_01.notebook.Paragraph;
 import com.teragrep.zep_01.rest.message.*;
 import jakarta.json.Json;
 import jakarta.json.JsonException;
@@ -204,19 +205,22 @@ public class InterpreterRestApi {
       entities.add(userName);
       entities.addAll(authenticationService.getAssociatedRoles());
       if (!authorizationService.hasRunPermission(entities, noteId) && !authorizationService.hasWritePermission(entities, noteId) && !authorizationService.isOwner(entities, noteId)) {
-        throw new NotAuthorizedException("No permission to open Interpreter " + settingId);
+        Response errorResponse = new JsonResponse<>(Status.UNAUTHORIZED,"","No permission to open Interpreter " + settingId).build();
+        throw new NotAuthorizedException(errorResponse);
       }
       if (setting == null) {
-        throw new NotFoundException("No such InterpreterSetting " + settingId);
+        Response errorResponse = new JsonResponse<>(Status.NOT_FOUND,"","No such InterpreterSetting " + settingId).build();
+        throw new NotFoundException(errorResponse);
       }
       if (noteId == null || note == null) {
-        throw new NotFoundException("No such note " + noteId);
+        Response errorResponse = new JsonResponse<>(Status.NOT_FOUND,"","No such note " + noteId).build();
+        throw new NotFoundException(errorResponse);
       }
 
       // check for presence of ConfInterpreter
       for (Paragraph paragraph:note.getParagraphs()) {
         if(paragraph.getBindedInterpreter() instanceof ConfInterpreter){
-          Response errorResponse = new JsonResponse<>(Status.BAD_REQUEST,"Cannot open Interpreter Note "+noteId+" contains a paragraph with a ConfInterpreter!","Cannot open Interpreter Note "+noteId+" contains a paragraph with a ConfInterpreter!").build();
+          Response errorResponse = new JsonResponse<>(Status.BAD_REQUEST,"","Cannot open Interpreter! Note "+noteId+" contains a paragraph with a ConfInterpreter!").build();
           throw new BadRequestException(errorResponse);
         }
       }
@@ -227,15 +231,18 @@ public class InterpreterRestApi {
       response = new JsonResponse<>(Status.OK, "", setting).build();
     }
     catch (JsonParsingException jsonParsingException) {
-      throw new BadRequestException("Malformed request");
+      Response errorResponse = new JsonResponse<>(Status.BAD_REQUEST,"","Malformed request").build();
+      throw new BadRequestException(errorResponse);
     }
     catch (IOException ioException) {
       LOGGER.error("Failed to get notebook while opening Interpreter <[{}]>",settingId,ioException);
-      throw new InternalServerErrorException("Internal server error while opening Interpreter "+settingId+"! Check technical logs for details.");
+      Response errorResponse = new JsonResponse<>(Status.INTERNAL_SERVER_ERROR,"","Internal server error while opening Interpreter "+settingId+"! Check technical logs for details.").build();
+      throw new InternalServerErrorException(errorResponse);
     }
     catch (InterpreterException interpreterException){
       LOGGER.error("Failed to open Interpreter <[{}]>",settingId,interpreterException);
-      throw new InternalServerErrorException("Internal server error while opening Interpreter "+settingId+"! Check technical logs for details.");
+      Response errorResponse = new JsonResponse<>(Status.INTERNAL_SERVER_ERROR,"","Internal server error while opening Interpreter "+settingId+"! Check technical logs for details.").build();
+      throw new InternalServerErrorException(errorResponse);
     }
     return response;
   }
