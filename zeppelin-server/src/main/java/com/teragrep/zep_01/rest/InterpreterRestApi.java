@@ -205,44 +205,44 @@ public class InterpreterRestApi {
       entities.add(userName);
       entities.addAll(authenticationService.getAssociatedRoles());
       if (!authorizationService.hasRunPermission(entities, noteId) && !authorizationService.hasWritePermission(entities, noteId) && !authorizationService.isOwner(entities, noteId)) {
-        Response errorResponse = new JsonResponse<>(Status.UNAUTHORIZED,"","No permission to open Interpreter " + settingId).build();
-        throw new NotAuthorizedException(errorResponse);
+        OpenInterpreterResponse interpreterResponse = new OpenInterpreterResponse(Status.UNAUTHORIZED,"ERROR","No permission to open Interpreter " + settingId);
+        throw new NotAuthorizedException(interpreterResponse.toResponse());
       }
       if (setting == null) {
-        Response errorResponse = new JsonResponse<>(Status.NOT_FOUND,"","No such InterpreterSetting " + settingId).build();
-        throw new NotFoundException(errorResponse);
+        OpenInterpreterResponse errorJson = new OpenInterpreterResponse(Status.NOT_FOUND,"ERROR","No such InterpreterSetting " + settingId);
+        throw new NotFoundException(errorJson.toResponse());
       }
       if (noteId == null || note == null) {
-        Response errorResponse = new JsonResponse<>(Status.NOT_FOUND,"","No such note " + noteId).build();
-        throw new NotFoundException(errorResponse);
+        OpenInterpreterResponse errorJson = new OpenInterpreterResponse(Status.NOT_FOUND,"ERROR","No such note " + noteId);
+        throw new NotFoundException(errorJson.toResponse());
       }
 
       // check for presence of ConfInterpreter
       for (Paragraph paragraph:note.getParagraphs()) {
         if(paragraph.getBindedInterpreter() instanceof ConfInterpreter){
-          Response errorResponse = new JsonResponse<>(Status.BAD_REQUEST,"","Cannot open Interpreter! Note "+noteId+" contains a paragraph with a ConfInterpreter!").build();
-          throw new BadRequestException(errorResponse);
+          OpenInterpreterResponse errorJson = new OpenInterpreterResponse(Status.BAD_REQUEST,"ERROR","Cannot open Interpreter! Note "+noteId+" contains a paragraph with a ConfInterpreter!");
+          throw new BadRequestException(errorJson.toResponse());
         }
       }
 
       // get interpreter instance and open
       Interpreter defaultInterpreter = setting.getDefaultInterpreter(authenticationService.getPrincipal(), noteId);
       defaultInterpreter.open();
-      response = new JsonResponse<>(Status.OK, "", setting).build();
+      response = new OpenInterpreterResponse(Status.OK,setting.getStatus().toString(),"").toResponse();
     }
     catch (JsonParsingException jsonParsingException) {
-      Response errorResponse = new JsonResponse<>(Status.BAD_REQUEST,"","Malformed request").build();
-      throw new BadRequestException(errorResponse);
+      OpenInterpreterResponse errorJson = new OpenInterpreterResponse(Status.BAD_REQUEST,"ERROR","Malformed request");
+      throw new BadRequestException(errorJson.toResponse());
     }
     catch (IOException ioException) {
       LOGGER.error("Failed to get notebook while opening Interpreter <[{}]>",settingId,ioException);
-      Response errorResponse = new JsonResponse<>(Status.INTERNAL_SERVER_ERROR,"","Internal server error while opening Interpreter "+settingId+"! Check technical logs for details.").build();
-      throw new InternalServerErrorException(errorResponse);
+      OpenInterpreterResponse errorJson = new OpenInterpreterResponse(Status.INTERNAL_SERVER_ERROR,"ERROR","Internal server error while opening Interpreter "+settingId+"! Check technical logs for details.");
+      throw new InternalServerErrorException(errorJson.toResponse());
     }
     catch (InterpreterException interpreterException){
       LOGGER.error("Failed to open Interpreter <[{}]>",settingId,interpreterException);
-      Response errorResponse = new JsonResponse<>(Status.INTERNAL_SERVER_ERROR,"","Internal server error while opening Interpreter "+settingId+"! Check technical logs for details.").build();
-      throw new InternalServerErrorException(errorResponse);
+      OpenInterpreterResponse errorJson = new OpenInterpreterResponse(Status.INTERNAL_SERVER_ERROR,"ERROR","Internal server error while opening Interpreter "+settingId+"! Check technical logs for details.");
+      throw new InternalServerErrorException(errorJson.toResponse());
     }
     return response;
   }
