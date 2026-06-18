@@ -214,11 +214,13 @@ public class RemoteInterpreterServerTest {
     Assertions.assertFalse(eventClient.unregistered());
     // Wait for server to be initialized. Timeout after 0.5s
     final long timeout = System.currentTimeMillis() + 500;
-    while(!server.isRunning()){
-      if(System.currentTimeMillis() > timeout){
-        Assertions.fail("Timeout was reached before server startup was finished!");
+    while(System.currentTimeMillis() < timeout){
+      if(server.isRunning()){
         break;
       }
+    }
+    if(!server.isRunning()){
+      Assertions.fail("Timeout was reached before server startup was finished!");
     }
 
     // Simulate a SIGTERM by calling shutdown in another thread
@@ -251,11 +253,13 @@ public class RemoteInterpreterServerTest {
     final RemoteInterpreterServer.ShutdownThread shutdownThread = server.new ShutdownThread(RemoteInterpreterServer.ShutdownThread.CAUSE_SHUTDOWN_HOOK);
     // Wait for server to be initialized. Timeout after 0.5s
     final long timeout = System.currentTimeMillis() + 5000;
-    while(!server.isRunning()){
-      if(System.currentTimeMillis() > timeout){
-        Assertions.fail("Timeout was reached before server startup was finished!");
+    while(System.currentTimeMillis() < timeout){
+      if(server.isRunning()){
         break;
       }
+    }
+    if(!server.isRunning()){
+      Assertions.fail("Timeout was reached before server startup was finished!");
     }
     // Simulate a SIGTERM by calling shutdown in another thread
     shutdownThread.start();
@@ -286,11 +290,13 @@ public class RemoteInterpreterServerTest {
     final RemoteInterpreterServer.ShutdownThread shutdownThread = server.new ShutdownThread(RemoteInterpreterServer.ShutdownThread.CAUSE_SHUTDOWN_HOOK);
     // Wait for server to be initialized. Timeout after 0.5s
     final long timeout = System.currentTimeMillis() + 500;
-    while(!server.isRunning()){
-      if(System.currentTimeMillis() > timeout){
-        Assertions.fail("Timeout was reached before server startup was finished!");
+    while(System.currentTimeMillis() < timeout){
+      if(server.isRunning()){
         break;
       }
+    }
+    if(!server.isRunning()){
+      Assertions.fail("Timeout was reached before server startup was finished!");
     }
     // Simulate a SIGTERM by calling shutdown in another thread
     shutdownThread.start();
@@ -323,11 +329,13 @@ public class RemoteInterpreterServerTest {
     Assertions.assertFalse(eventClient.unregistered());
     // Wait for server to be initialized. Timeout after 0.5s
     final long timeout = System.currentTimeMillis() + 500;
-    while(!server.isRunning()){
-      if(System.currentTimeMillis() > timeout){
-        Assertions.fail("Timeout was reached before server startup was finished!");
+    while(System.currentTimeMillis() < timeout){
+      if(server.isRunning()){
         break;
       }
+    }
+    if(!server.isRunning()){
+      Assertions.fail("Timeout was reached before server startup was finished!");
     }
     // Simulate a SIGTERM by calling shutdown in another thread
     shutdownThread.start();
