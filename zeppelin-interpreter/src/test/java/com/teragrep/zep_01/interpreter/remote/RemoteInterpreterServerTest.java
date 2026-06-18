@@ -256,8 +256,6 @@ public class RemoteInterpreterServerTest {
         Assertions.fail("Timeout was reached before server startup was finished!");
         break;
       }
-      // This empty synchronized block stops the compiler from caching the result of server.isRunning() in the while loop, which caused the loop to always reach the timeout regardless of if the server was actually started.
-      synchronized (this){}
     }
     // Simulate a SIGTERM by calling shutdown in another thread
     shutdownThread.start();
@@ -293,8 +291,6 @@ public class RemoteInterpreterServerTest {
         Assertions.fail("Timeout was reached before server startup was finished!");
         break;
       }
-      // This empty synchronized block stops the compiler from caching the result of server.isRunning() in the while loop, which caused the loop to always reach the timeout regardless of if the server was actually started.
-      synchronized (this){}
     }
     // Simulate a SIGTERM by calling shutdown in another thread
     shutdownThread.start();
@@ -332,8 +328,6 @@ public class RemoteInterpreterServerTest {
         Assertions.fail("Timeout was reached before server startup was finished!");
         break;
       }
-      // This empty synchronized block stops the compiler from caching the result of server.isRunning() in the while loop, which caused the loop to always reach the timeout regardless of if the server was actually started.
-      synchronized (this){}
     }
     // Simulate a SIGTERM by calling shutdown in another thread
     shutdownThread.start();
