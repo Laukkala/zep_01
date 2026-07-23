@@ -184,7 +184,6 @@ public class SparkInterpreterLauncher extends StandardInterpreterLauncher {
           org.apache.hadoop.fs.Path destinationPath = new org.apache.hadoop.fs.Path("/common-jars/"+localPath);
           sparkJars.add(fileSystem.makeQualified(destinationPath).toString());
           fileSystem.copyFromLocalFile(false,true,sourcePath,destinationPath);
-          fileSystem.setPermission(destinationPath,new FsPermission(FsPermission.valueOf("rwxrwxrwx")));
         }
 
         if (sparkProperties.containsKey("spark.jars")) {
