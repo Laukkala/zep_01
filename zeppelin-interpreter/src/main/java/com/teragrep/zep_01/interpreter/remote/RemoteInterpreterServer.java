@@ -35,7 +35,6 @@ import com.teragrep.zep_01.interpreter.InterpreterResult.Code;
 import com.teragrep.zep_01.interpreter.thrift.InterpreterCompletion;
 import com.teragrep.zep_01.interpreter.thrift.InterpreterRPCException;
 import com.teragrep.zep_01.interpreter.thrift.RegisterInfo;
-import com.teragrep.zep_01.interpreter.thrift.RemoteApplicationResult;
 import com.teragrep.zep_01.interpreter.thrift.RemoteInterpreterContext;
 import com.teragrep.zep_01.interpreter.thrift.RemoteInterpreterResult;
 import com.teragrep.zep_01.interpreter.thrift.RemoteInterpreterResultMessage;
@@ -60,7 +59,6 @@ import java.net.URL;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -98,7 +96,7 @@ public class RemoteInterpreterServer extends Thread
   private String host;
   private int port;
   private TThreadPoolServer server;
-  RemoteInterpreterEventClient intpEventClient;
+  InterpreterEventClient intpEventClient;
   private LifecycleManager lifecycleManager;
 
 
@@ -346,7 +344,7 @@ public class RemoteInterpreterServer extends Thread
     return resourcePool;
   }
 
-  protected RemoteInterpreterEventClient getIntpEventClient() {
+  protected InterpreterEventClient getIntpEventClient() {
     return intpEventClient;
   }
 

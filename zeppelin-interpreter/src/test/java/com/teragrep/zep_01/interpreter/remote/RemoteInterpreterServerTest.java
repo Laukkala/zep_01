@@ -203,7 +203,7 @@ public class RemoteInterpreterServerTest {
     final RemoteInterpreterServer server = Assertions.assertDoesNotThrow(()->new RemoteInterpreterServer("localhost",
             RemoteInterpreterUtils.findRandomAvailablePortOnAllLocalInterfaces(), ":", "groupId", true));
     Assertions.assertDoesNotThrow(()->server.init(new HashMap<>()));
-    final FakeRemoteInterpreterEventClient eventClient = new FakeRemoteInterpreterEventClient("localhost",8080,100);
+    final FakeRemoteInterpreterEventClient eventClient = new FakeRemoteInterpreterEventClient();
     server.intpEventClient = eventClient;
     final Thread serverThread = new Thread(server::start);
     serverThread.start();
@@ -280,7 +280,7 @@ public class RemoteInterpreterServerTest {
             RemoteInterpreterUtils.findRandomAvailablePortOnAllLocalInterfaces(), ":", "groupId", true));
     Assertions.assertDoesNotThrow(()->server.init(new HashMap<>()));
     final RuntimeException exception = new RuntimeException("Failed to unregister Interpreter!");
-    final FakeFailingRemoteInterpreterEventClient eventClient = new FakeFailingRemoteInterpreterEventClient("localhost",8080,100, exception);
+    final FakeFailingRemoteInterpreterEventClient eventClient = new FakeFailingRemoteInterpreterEventClient(exception);
     server.intpEventClient = eventClient;
     final Thread serverThread = new Thread(server::start);
     serverThread.start();
@@ -317,7 +317,7 @@ public class RemoteInterpreterServerTest {
     final RemoteInterpreterServer server = Assertions.assertDoesNotThrow(()->new RemoteInterpreterServer("localhost",
             RemoteInterpreterUtils.findRandomAvailablePortOnAllLocalInterfaces(), ":", "groupId", true));
     Assertions.assertDoesNotThrow(()->server.init(new HashMap<>()));
-    final FakeRemoteInterpreterEventClient eventClient = new FakeRemoteInterpreterEventClient("localhost",8080,100);
+    final FakeRemoteInterpreterEventClient eventClient = new FakeRemoteInterpreterEventClient();
     server.intpEventClient = eventClient;
     final Thread serverThread = new Thread(server::start);
     serverThread.start();
