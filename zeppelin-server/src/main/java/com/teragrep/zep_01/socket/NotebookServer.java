@@ -1149,6 +1149,8 @@ public class NotebookServer extends WebSocketServlet
       LOG.error("Failed to retrieve output for note: {} paragraph: {} cause: {}", noteId, paragraphId, e.getCause(), e);
       final JsonObject errorJson = Json.createObjectBuilder()
               .add("message", "Failed to retrieve data from Interpreter. Please rerun the paragraph and try again or see technical log for details!")
+              .add("noteId",noteId)
+              .add("paragraphId",paragraphId)
               .build();
       final JsonMessage msg = new JsonMessage(new MessageIdImpl(msgId), OP.INTERPRETER_ERROR, errorJson);
       conn.send(msg.asJson().toString());
