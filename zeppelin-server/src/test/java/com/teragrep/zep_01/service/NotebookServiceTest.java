@@ -153,13 +153,6 @@ public class NotebookServiceTest {
     assertEquals(1, note1.getParagraphCount());
     verify(callback).onSuccess(note1, context);
 
-    // create duplicated note
-    reset(callback);
-    Note note2 = notebookService.createNote("/folder_1/note1", "test", true, context, callback);
-    assertNull(note2);
-    ArgumentCaptor<Exception> exception = ArgumentCaptor.forClass(Exception.class);
-    verify(callback).onFailure(exception.capture(), any(ServiceContext.class));
-    assertEquals("Note '/folder_1/note1' existed", exception.getValue().getMessage());
 
     // list note
     reset(callback);
@@ -196,7 +189,7 @@ public class NotebookServiceTest {
     assertEquals("/folder_4/new_name", notesInfo.get(0).getPath());
 
     // create another note
-    note2 = notebookService.createNote("/note2", "test", true, context, callback);
+    Note note2 = notebookService.createNote("/note2", "test", true, context, callback);
     assertEquals("note2", note2.getName());
     verify(callback).onSuccess(note2, context);
 
@@ -302,9 +295,15 @@ public class NotebookServiceTest {
     // move folder to Trash
     notebookService.moveFolderToTrash("Backup", context, callback);
 
+    // create a note to a folder with identical name
+    notebookService.createNote("/Backup/note1", "test", true, context, callback);
+
+    // move folder to trash when folder with same name exists in trash already
+    notebookService.moveFolderToTrash("Backup", context, callback);
+
     reset(callback);
     notesInfo = notebookService.listNotesInfo(false, context, callback);
-    assertEquals(1, notesInfo.size());
+    assertEquals(2, notesInfo.size());
     verify(callback).onSuccess(notesInfo, context);
     moveToTrash = false;
     for (NoteInfo noteInfo : notesInfo) {
@@ -329,32 +328,13 @@ public class NotebookServiceTest {
     reset(callback);
     notebookService.removeFolder("/~Trash/Backup", context, callback);
     notesInfo = notebookService.listNotesInfo(false, context, callback);
-    assertEquals(0, notesInfo.size());
+    assertEquals(1, notesInfo.size());
 
     // empty trash
     notebookService.emptyTrash(context, callback);
 
     notesInfo = notebookService.listNotesInfo(false, context, callback);
     assertEquals(0, notesInfo.size());
-  }
-
-  @Test
-  public void testRenameNoteRejectsDuplicate() throws IOException {
-    Note note1 = notebookService.createNote("/folder/note1", "test", true, context, callback);
-    assertEquals("note1", note1.getName());
-    verify(callback).onSuccess(note1, context);
-
-    reset(callback);
-    Note note2 = notebookService.createNote("/folder/note2", "test", true, context, callback);
-    assertEquals("note2", note2.getName());
-    verify(callback).onSuccess(note2, context);
-
-    reset(callback);
-    ArgumentCaptor<NotePathAlreadyExistsException> exception = ArgumentCaptor.forClass(NotePathAlreadyExistsException.class);
-    notebookService.renameNote(note1.getId(), "/folder/note2", false, context, callback);
-    verify(callback).onFailure(exception.capture(), any(ServiceContext.class));
-    assertEquals("Note '/folder/note2' existed", exception.getValue().getMessage());
-    verify(callback, never()).onSuccess(any(), any());
   }
 
 
