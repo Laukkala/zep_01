@@ -593,7 +593,7 @@ public class RemoteInterpreterServer extends Thread
         try {
           LOGGER.info("Unregister interpreter process");
           intpEventClient.unRegisterInterpreterProcess();
-        } catch (Exception e) {
+        } catch (final Exception e) {
           LOGGER.error("Fail to unregister remote interpreter process", e);
         }
       }
@@ -604,7 +604,7 @@ public class RemoteInterpreterServer extends Thread
             for (Interpreter interpreter : session) {
               try {
                 interpreter.close();
-              } catch (InterpreterException e) {
+              } catch (final InterpreterException e) {
                 LOGGER.warn("Fail to close interpreter", e);
               }
             }
