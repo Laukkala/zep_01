@@ -199,6 +199,7 @@ public class GitNotebookRepo extends VFSNotebookRepo implements NotebookRepoWith
                                         AuthenticationInfo subject) throws IOException {
     final List<Revision> history = new ArrayList<>();
     final String noteFileName = buildNoteFileName(noteId, notePath);
+    LOGGER.debug("Listing history for {}:", noteFileName);
 
     // git.log() command doesn't follow files through renames, so we use a RevWalk with a FollowFilter
     final Repository repository = git.getRepository();
@@ -215,7 +216,11 @@ public class GitNotebookRepo extends VFSNotebookRepo implements NotebookRepoWith
         walk.markStart(startCommit);
         for (RevCommit commit : walk) {
           history.add(new Revision(commit.getId().getName(),commit.getFullMessage(),commit.getCommitTime()));
+          LOGGER.debug(" - ({},{},{})", commit.getName(), commit.getCommitTime(), commit.getFullMessage());
         }
+      }
+      else {
+        LOGGER.warn("No Head found for {}", noteFileName);
       }
     }
     return history;
