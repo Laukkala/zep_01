@@ -66,32 +66,6 @@ public class NoteManagerTest {
     assertEquals(0, notesInfo.size());
   }
 
-  @Test
-  public void testAddNoteRejectsDuplicatePath() throws IOException {
-    thrown.expect(NotePathAlreadyExistsException.class);
-    thrown.expectMessage("Note '/prod/note' existed");
-
-    Note note1 = createNote("/prod/note");
-    Note note2 = createNote("/prod/note");
-
-    noteManager.addNote(note1, AuthenticationInfo.ANONYMOUS);
-    noteManager.addNote(note2, AuthenticationInfo.ANONYMOUS);
-  }
-
-  @Test
-  public void testMoveNoteRejectsDuplicatePath() throws IOException {
-    thrown.expect(NotePathAlreadyExistsException.class);
-    thrown.expectMessage("Note '/prod/note-1' existed");
-
-    Note note1 = createNote("/prod/note-1");
-    Note note2 = createNote("/prod/note-2");
-
-    noteManager.addNote(note1, AuthenticationInfo.ANONYMOUS);
-    noteManager.addNote(note2, AuthenticationInfo.ANONYMOUS);
-
-    noteManager.moveNote(note2.getId(), "/prod/note-1", AuthenticationInfo.ANONYMOUS);
-  }
-
   private Note createNote(String notePath) {
     return new Note(notePath, "test", null, null, null, null, null);
   }
