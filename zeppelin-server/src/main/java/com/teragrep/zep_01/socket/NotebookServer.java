@@ -1024,7 +1024,7 @@ public class NotebookServer extends WebSocketServlet
   private void updateParagraph(NotebookSocket conn,
                                ServiceContext context,
                                Message fromMessage) throws IOException {
-    String paragraphId = (String) fromMessage.get("id");
+    String paragraphId = (String) fromMessage.get("paragraphId");
     String noteId = getConnectionManager().getAssociatedNoteId(conn);
     if (noteId == null) {
       noteId = (String) fromMessage.get("noteId");
@@ -1239,7 +1239,7 @@ public class NotebookServer extends WebSocketServlet
                           ServiceContext context,
                           Message fromMessage) throws IOException {
     String noteId = getConnectionManager().getAssociatedNoteId(conn);
-    String paragraphId = (String) fromMessage.get("id");
+    String paragraphId = (String) fromMessage.get("paragraphId");
     String buffer = (String) fromMessage.get("buf");
     int cursor = (int) Double.parseDouble(fromMessage.get("cursor").toString());
     getNotebookService().completion(noteId, paragraphId, buffer, cursor, context,
@@ -1248,7 +1248,7 @@ public class NotebookServer extends WebSocketServlet
           public void onSuccess(List<InterpreterCompletion> completions, ServiceContext context)
               throws IOException {
             super.onSuccess(completions, context);
-            Message resp = new Message(OP.COMPLETION_LIST).put("id", paragraphId);
+            Message resp = new Message(OP.COMPLETION_LIST).put("paragraphId", paragraphId);
             resp.put("completions", completions);
             conn.send(serializeMessage(resp));
           }
