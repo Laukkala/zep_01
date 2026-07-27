@@ -96,18 +96,6 @@ public abstract class AbstractInterpreter extends Interpreter {
     }
   }
 
-  static String interpolate(String cmd, ResourcePool resourcePool) {
-    try {
-      return "";
-    }
-    catch (IllegalArgumentException e) {
-      throw new IllegalArgumentException(
-              "Failure in interpolating variables. Ensure that all variables are resolvable or escape them as $${literal}.\n" +
-              "Original error message: " + e.getMessage()
-      );
-    }
-  }
-
   public abstract ZeppelinContext getZeppelinContext();
 
   protected boolean isInterpolate() {
