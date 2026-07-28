@@ -143,7 +143,7 @@ public class InterpreterContext {
       return this;
     }
 
-    public Builder setIntpEventClient(InterpreterEventClient intpEventClient) {
+    public Builder setIntpEventClient(final InterpreterEventClient intpEventClient) {
       context.intpEventClient = intpEventClient;
       return this;
     }
@@ -278,7 +278,7 @@ public class InterpreterContext {
     return intpEventClient;
   }
 
-  public void setIntpEventClient(InterpreterEventClient intpEventClient) {
+  public void setIntpEventClient(final InterpreterEventClient intpEventClient) {
     this.intpEventClient = intpEventClient;
   }
 

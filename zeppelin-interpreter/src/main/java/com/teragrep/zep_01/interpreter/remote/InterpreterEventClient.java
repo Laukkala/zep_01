@@ -20,70 +20,70 @@ import java.util.Map;
 public interface InterpreterEventClient extends ResourcePoolConnector, AngularObjectRegistryListener, AutoCloseable {
     <R> R callRemoteFunction(PooledRemoteClient.RemoteFunction<R, RemoteInterpreterEventService.Client> func);
 
-    void setIntpGroupId(String intpGroupId);
+    void setIntpGroupId(final String intpGroupId);
 
-    void registerInterpreterProcess(RegisterInfo registerInfo);
+    void registerInterpreterProcess(final RegisterInfo registerInfo);
 
     void unRegisterInterpreterProcess();
 
-    void sendWebUrlInfo(String webUrl);
+    void sendWebUrlInfo(final String webUrl);
 
     @Override
     ResourceSet getAllResources();
 
-    List<ParagraphInfo> getParagraphList(String user, String noteId);
+    List<ParagraphInfo> getParagraphList(final String user, final String noteId);
 
-    List<LibraryMetadata> getAllLibraryMetadatas(String interpreter);
+    List<LibraryMetadata> getAllLibraryMetadatas(final String interpreter);
 
-    ByteBuffer getLibrary(String interpreter, String libraryName);
+    ByteBuffer getLibrary(final String interpreter, final String libraryName);
 
     @Override
-    Object readResource(ResourceId resourceId);
+    Object readResource(final ResourceId resourceId);
 
     @Override
     Object invokeMethod(
-            ResourceId resourceId,
-            String methodName,
-            Class[] paramTypes,
-            Object[] params);
+            final ResourceId resourceId,
+            final String methodName,
+            final Class[] paramTypes,
+            final Object[] params);
 
     @Override
     Resource invokeMethod(
-            ResourceId resourceId,
-            String methodName,
-            Class[] paramTypes,
-            Object[] params,
-            String returnResourceName);
+            final ResourceId resourceId,
+            final String methodName,
+            final Class[] paramTypes,
+            final Object[] params,
+            final String returnResourceName);
 
     void onInterpreterOutputAppend(
-            String noteId, String paragraphId, int outputIndex, String output);
+            final String noteId, final String paragraphId, final int outputIndex, final String output);
 
     void onInterpreterOutputUpdate(
-            String noteId, String paragraphId, int outputIndex,
-            InterpreterResult.Type type, String output);
+            final String noteId, final String paragraphId, final int outputIndex,
+            final InterpreterResult.Type type, final String output);
 
     void onInterpreterOutputUpdateAll(
-            String noteId, String paragraphId, List<InterpreterResultMessage> messages);
+            final String noteId, final String paragraphId, final List<InterpreterResultMessage> messages);
 
-    void runParagraphs(String noteId,
-                       List<String> paragraphIds,
-                       List<Integer> paragraphIndices,
-                       String curParagraphId);
+    void runParagraphs(final String noteId,
+                       final List<String> paragraphIds,
+                       final List<Integer> paragraphIndices,
+                       final String curParagraphId);
 
-    void checkpointOutput(String noteId, String paragraphId);
+    void checkpointOutput(final String noteId, final String paragraphId);
 
-    void onParaInfosReceived(Map<String, String> infos);
-
-    @Override
-    void onAddAngularObject(String interpreterGroupId, AngularObject angularObject);
+    void onParaInfosReceived(final Map<String, String> infos);
 
     @Override
-    void onUpdateAngularObject(String interpreterGroupId, AngularObject angularObject);
+    void onAddAngularObject(final String interpreterGroupId, final AngularObject angularObject);
 
     @Override
-    void onRemoveAngularObject(String interpreterGroupId, AngularObject angularObject);
+    void onUpdateAngularObject(final String interpreterGroupId, final AngularObject angularObject);
 
-    void updateParagraphConfig(String noteId, String paragraphId, Map<String, String> config);
+    @Override
+    void onRemoveAngularObject(final String interpreterGroupId, final AngularObject angularObject);
+
+    void updateParagraphConfig(final String noteId, final String paragraphId, final Map<String, String> config);
 
     @Override
     void close();

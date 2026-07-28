@@ -164,10 +164,10 @@ public class RemoteInterpreterEventClient implements
    */
   @Override
   public Object invokeMethod(
-          ResourceId resourceId,
-          String methodName,
-          Class[] paramTypes,
-          Object[] params) {
+          final ResourceId resourceId,
+          final String methodName,
+          final Class[] paramTypes,
+          final Object[] params) {
     LOGGER.debug("Request Invoke method {} of Resource {}", methodName, resourceId.getName());
 
     InvokeResourceMethodEventMessage invokeMethod = new InvokeResourceMethodEventMessage(
@@ -197,11 +197,11 @@ public class RemoteInterpreterEventClient implements
    */
   @Override
   public Resource invokeMethod(
-          ResourceId resourceId,
-          String methodName,
-          Class[] paramTypes,
-          Object[] params,
-          String returnResourceName) {
+          final ResourceId resourceId,
+          final String methodName,
+          final Class[] paramTypes,
+          final Object[] params,
+          final String returnResourceName) {
     LOGGER.debug("Request Invoke method {} of Resource {}", methodName, resourceId.getName());
 
     InvokeResourceMethodEventMessage invokeMethod = new InvokeResourceMethodEventMessage(
@@ -226,7 +226,7 @@ public class RemoteInterpreterEventClient implements
 
   @Override
   public void onInterpreterOutputAppend(
-          String noteId, String paragraphId, int outputIndex, String output) {
+          final String noteId, final String paragraphId, final int outputIndex, final String output) {
     try {
       callRemoteFunction(client -> {
         client.appendOutput(
@@ -240,8 +240,8 @@ public class RemoteInterpreterEventClient implements
 
   @Override
   public void onInterpreterOutputUpdate(
-          String noteId, String paragraphId, int outputIndex,
-          InterpreterResult.Type type, String output) {
+          final String noteId, final String paragraphId, final int outputIndex,
+          final InterpreterResult.Type type, final String output) {
     try {
       callRemoteFunction(client -> {
         client.updateOutput(
@@ -256,7 +256,7 @@ public class RemoteInterpreterEventClient implements
 
   @Override
   public void onInterpreterOutputUpdateAll(
-          String noteId, String paragraphId, List<InterpreterResultMessage> messages) {
+          final String noteId, final String paragraphId, final List<InterpreterResultMessage> messages) {
     try {
       callRemoteFunction(client -> {
         client.updateAllOutput(
@@ -283,9 +283,9 @@ public class RemoteInterpreterEventClient implements
 
   @Override
   public void runParagraphs(String noteId,
-                            List<String> paragraphIds,
-                            List<Integer> paragraphIndices,
-                            String curParagraphId) {
+                            final List<String> paragraphIds,
+                            final List<Integer> paragraphIndices,
+                            final String curParagraphId) {
     RunParagraphsEvent event =
         new RunParagraphsEvent(noteId, paragraphIds, paragraphIndices, curParagraphId);
     try {

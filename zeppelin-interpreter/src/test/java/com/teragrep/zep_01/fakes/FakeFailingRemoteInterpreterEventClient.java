@@ -26,17 +26,17 @@ public final class FakeFailingRemoteInterpreterEventClient implements Interprete
     }
 
     @Override
-    public <R> R callRemoteFunction(PooledRemoteClient.RemoteFunction<R, RemoteInterpreterEventService.Client> func) {
+    public <R> R callRemoteFunction(final PooledRemoteClient.RemoteFunction<R, RemoteInterpreterEventService.Client> func) {
         return null; 
     }
 
     @Override
-    public void setIntpGroupId(String intpGroupId) {
+    public void setIntpGroupId(final String intpGroupId) {
         
     }
 
     @Override
-    public void registerInterpreterProcess(RegisterInfo registerInfo) {
+    public void registerInterpreterProcess(final RegisterInfo registerInfo) {
         
     }
 
@@ -46,7 +46,7 @@ public final class FakeFailingRemoteInterpreterEventClient implements Interprete
     }
 
     @Override
-    public void sendWebUrlInfo(String webUrl) {
+    public void sendWebUrlInfo(final String webUrl) {
         
     }
 
@@ -56,82 +56,82 @@ public final class FakeFailingRemoteInterpreterEventClient implements Interprete
     }
 
     @Override
-    public List<ParagraphInfo> getParagraphList(String user, String noteId) {
+    public List<ParagraphInfo> getParagraphList(final String user, final String noteId) {
         return new ArrayList<>();
     }
 
     @Override
-    public List<LibraryMetadata> getAllLibraryMetadatas(String interpreter) {
+    public List<LibraryMetadata> getAllLibraryMetadatas(final String interpreter) {
         return new ArrayList<>();
     }
 
     @Override
-    public ByteBuffer getLibrary(String interpreter, String libraryName) {
+    public ByteBuffer getLibrary(final String interpreter, final String libraryName) {
         return ByteBuffer.allocate(0);
     }
 
     @Override
-    public Object readResource(ResourceId resourceId) {
+    public Object readResource(final ResourceId resourceId) {
         return new Object();
     }
 
     @Override
-    public Object invokeMethod(ResourceId resourceId, String methodName, Class[] paramTypes, Object[] params) {
+    public Object invokeMethod(final ResourceId resourceId, final String methodName, final Class[] paramTypes, final Object[] params) {
         return new Object();
     }
 
     @Override
-    public Resource invokeMethod(ResourceId resourceId, String methodName, Class[] paramTypes, Object[] params, String returnResourceName) {
+    public Resource invokeMethod(final ResourceId resourceId, final String methodName, final Class[] paramTypes, final Object[] params, final String returnResourceName) {
         return null; 
     }
 
     @Override
-    public void onInterpreterOutputAppend(String noteId, String paragraphId, int outputIndex, String output) {
+    public void onInterpreterOutputAppend(final String noteId, final String paragraphId, final int outputIndex, final String output) {
         
     }
 
     @Override
-    public void onInterpreterOutputUpdate(String noteId, String paragraphId, int outputIndex, InterpreterResult.Type type, String output) {
+    public void onInterpreterOutputUpdate(final String noteId, final String paragraphId, final int outputIndex, final InterpreterResult.Type type, final String output) {
         
     }
 
     @Override
-    public void onInterpreterOutputUpdateAll(String noteId, String paragraphId, List<InterpreterResultMessage> messages) {
+    public void onInterpreterOutputUpdateAll(final String noteId, final String paragraphId, final List<InterpreterResultMessage> messages) {
         
     }
 
     @Override
-    public void runParagraphs(String noteId, List<String> paragraphIds, List<Integer> paragraphIndices, String curParagraphId) {
+    public void runParagraphs(final String noteId, final List<String> paragraphIds, final List<Integer> paragraphIndices, final String curParagraphId) {
         
     }
 
     @Override
-    public void checkpointOutput(String noteId, String paragraphId) {
+    public void checkpointOutput(final String noteId, final String paragraphId) {
         
     }
 
     @Override
-    public void onParaInfosReceived(Map<String, String> infos) {
+    public void onParaInfosReceived(final Map<String, String> infos) {
         
     }
 
     @Override
-    public void onAddAngularObject(String interpreterGroupId, AngularObject angularObject) {
+    public void onAddAngularObject(final String interpreterGroupId, final AngularObject angularObject) {
         
     }
 
     @Override
-    public void onUpdateAngularObject(String interpreterGroupId, AngularObject angularObject) {
+    public void onUpdateAngularObject(final String interpreterGroupId, final AngularObject angularObject) {
         
     }
 
     @Override
-    public void onRemoveAngularObject(String interpreterGroupId, AngularObject angularObject) {
+    public void onRemoveAngularObject(final String interpreterGroupId, final AngularObject angularObject) {
         
     }
 
     @Override
-    public void updateParagraphConfig(String noteId, String paragraphId, Map<String, String> config) {
+    public void updateParagraphConfig(final String noteId, final String paragraphId, final Map<String, String> config) {
         
     }
 
@@ -145,10 +145,10 @@ public final class FakeFailingRemoteInterpreterEventClient implements Interprete
     }
 
     @Override
-    public boolean equals(Object o) {
+    public boolean equals(final Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        FakeFailingRemoteInterpreterEventClient that = (FakeFailingRemoteInterpreterEventClient) o;
+        final FakeFailingRemoteInterpreterEventClient that = (FakeFailingRemoteInterpreterEventClient) o;
         return Objects.equals(exception, that.exception);
     }
 
