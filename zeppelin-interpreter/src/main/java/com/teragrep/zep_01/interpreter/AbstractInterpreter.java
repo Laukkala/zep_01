@@ -27,6 +27,7 @@ import com.teragrep.zep_01.resource.ResourcePool;
 import com.teragrep.zep_01.resource.ResourcePoolMap;
 
 import java.util.*;
+import java.util.stream.Stream;
 
 public abstract class AbstractInterpreter extends Interpreter {
   public AbstractInterpreter(Properties properties) {
@@ -63,8 +64,13 @@ public abstract class AbstractInterpreter extends Interpreter {
 
     // Add all values from AngularObjectRegistry if it exists
     if(registry != null){
-      final List<AngularObject> angularObjects = registry.getAll(noteId, paragraphId);
-      for (AngularObject angularObject : angularObjects) {
+      final List<AngularObject> allObjects = new ArrayList<>();
+      allObjects.addAll(registry.getAll(null,null));
+      allObjects.addAll(registry.getAll(noteId,null));
+      allObjects.addAll(registry.getAll(noteId,paragraphId));
+
+      // Add each object to a Map from the List. Order of the List matters, value of a duplicated key in the Map will be the last occurrence of that key in the List.
+      for (AngularObject angularObject : allObjects) {
         replacementMap.put(angularObject.getName(),angularObject.get());
       }
     }

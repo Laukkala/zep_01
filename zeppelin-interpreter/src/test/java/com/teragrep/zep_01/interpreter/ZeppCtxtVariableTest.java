@@ -58,6 +58,7 @@ public class ZeppCtxtVariableTest {
     InterpreterContext context = InterpreterContext.builder()
             .setAngularObjectRegistry(registry)
             .setNoteId(testNoteId)
+            .setParagraphId(testParagraphId)
             .build();
     registry.add("PI",3.1415,testNoteId,null);
     String result = AbstractInterpreter.interpolate("Value of ${PI} is 3.1415", context);
