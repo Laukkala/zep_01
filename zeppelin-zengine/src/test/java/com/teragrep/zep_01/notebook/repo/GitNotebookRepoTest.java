@@ -26,6 +26,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.google.common.truth.Truth;
+import nl.jqno.equalsverifier.EqualsVerifier;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import com.teragrep.zep_01.conf.ZeppelinConfiguration;
@@ -250,11 +251,7 @@ public class GitNotebookRepoTest {
     // renamed notebook should have identical commits with the original
     final List<Revision> renamedRevisions = Assertions.assertDoesNotThrow(()->notebookRepo.revisionHistory(TEST_NOTE_ID, renamedNotePath, null));
     final List<Revision> originalRevisions = Assertions.assertDoesNotThrow(()->notebookRepo.revisionHistory(TEST_NOTE_ID, TEST_NOTE_PATH, null));
-    Assertions.assertEquals(3,renamedRevisions.size());
-    Assertions.assertEquals(3,originalRevisions.size());
-    for (int i = 0; i < 3; i++) {
-      Assertions.assertEquals(originalRevisions.get(i).id,renamedRevisions.get(i).id);
-    }
+    Assertions.assertEquals(renamedRevisions, originalRevisions);
 
     // Add a new commit to renamed note
     final Note renamedNote = Assertions.assertDoesNotThrow(()->notebookRepo.get(TEST_NOTE_ID, renamedNotePath, null));
@@ -442,5 +439,10 @@ public class GitNotebookRepoTest {
     // try failure case - set to invalid revision
     returnedNote = notebookRepo.setNoteRevision(note.getId(), note.getPath(), "nonexistent_id", null);
     assertThat(returnedNote).isNull();
+  }
+
+  @Test
+  public void testContract() {
+    EqualsVerifier.forClass(NotebookRepoWithVersionControl.Revision.class).verify();
   }
 }

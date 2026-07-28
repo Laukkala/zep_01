@@ -24,6 +24,7 @@ import com.teragrep.zep_01.user.AuthenticationInfo;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Notebook repository (persistence layer) abstraction
@@ -82,12 +83,12 @@ public interface NotebookRepoWithVersionControl extends NotebookRepo {
   /**
    * Represents the 'Revision' a point in life of the notebook
    */
-  class Revision {
+  final class Revision {
     public static final Revision EMPTY = new Revision(StringUtils.EMPTY, StringUtils.EMPTY, 0);
 
-    public String id;
-    public String message;
-    public int time;
+    public final String id;
+    public final String message;
+    public final int time;
 
     public Revision(String revId, String message, int time) {
       this.id = revId;
@@ -97,6 +98,19 @@ public interface NotebookRepoWithVersionControl extends NotebookRepo {
 
     public static boolean isEmpty(Revision revision) {
       return revision == null || EMPTY.equals(revision);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+      if (this == o) return true;
+      if (o == null || getClass() != o.getClass()) return false;
+      Revision revision = (Revision) o;
+      return time == revision.time && Objects.equals(id, revision.id) && Objects.equals(message, revision.message);
+    }
+
+    @Override
+    public int hashCode() {
+      return Objects.hash(id, message, time);
     }
   }
 
