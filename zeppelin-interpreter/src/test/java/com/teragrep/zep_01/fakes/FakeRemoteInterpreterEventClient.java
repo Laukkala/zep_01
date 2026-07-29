@@ -18,10 +18,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.concurrent.atomic.AtomicReference;
 
 public final class FakeRemoteInterpreterEventClient implements InterpreterEventClient {
-    private boolean unregistered = false;
+    private final AtomicReference<Boolean> unregistered;
     public FakeRemoteInterpreterEventClient(){
+        unregistered = new AtomicReference<>(false);
     }
 
     @Override
@@ -41,7 +43,7 @@ public final class FakeRemoteInterpreterEventClient implements InterpreterEventC
 
     @Override
     public void unRegisterInterpreterProcess() {
-        unregistered = true;
+        unregistered.set(true);
     }
 
     @Override
@@ -140,14 +142,14 @@ public final class FakeRemoteInterpreterEventClient implements InterpreterEventC
     }
 
     public boolean unregistered(){
-        return unregistered;
+        return unregistered.get();
     }
 
     @Override
-    public boolean equals(final Object o) {
+    public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        final FakeRemoteInterpreterEventClient that = (FakeRemoteInterpreterEventClient) o;
+        FakeRemoteInterpreterEventClient that = (FakeRemoteInterpreterEventClient) o;
         return unregistered == that.unregistered;
     }
 

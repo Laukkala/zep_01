@@ -145,10 +145,10 @@ public final class FakeFailingRemoteInterpreterEventClient implements Interprete
     }
 
     @Override
-    public boolean equals(final Object o) {
+    public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        final FakeFailingRemoteInterpreterEventClient that = (FakeFailingRemoteInterpreterEventClient) o;
+        FakeFailingRemoteInterpreterEventClient that = (FakeFailingRemoteInterpreterEventClient) o;
         return Objects.equals(exception, that.exception);
     }
 
