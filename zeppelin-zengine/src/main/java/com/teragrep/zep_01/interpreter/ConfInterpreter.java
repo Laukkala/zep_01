@@ -69,11 +69,25 @@ public class ConfInterpreter extends Interpreter {
       Properties newProperties = new Properties();
       newProperties.load(new StringReader(st));
       // Verify that every key to be added exists within the Interpreter's defined properties already.
-      for (Map.Entry keyValuePair : newProperties.entrySet()){
-        if(!((Map<String,InterpreterProperty>)interpreterSetting.getProperties()).containsKey(keyValuePair.getKey())){
-          throw new InterpreterException("Tried to add an unknown key to Interpreter's properties: "+ keyValuePair.getKey() + " Please make sure that the key is listed as a property in the Interpreters page.");
+      // InterpreterSetting.getProperties() might return either a Properties object or a Map of InterpreterProperties, so we fork here to check both cases.
+      Object interpreterSettingProperties = interpreterSetting.getProperties();
+      if(interpreterSettingProperties instanceof Properties){
+        Properties existingProperties = (Properties) interpreterSettingProperties;
+        for (String newPropertyName : newProperties.stringPropertyNames()){
+          if(existingProperties.getProperty(newPropertyName) == null){
+            throw new InterpreterException("Tried to add an unknown key to Interpreter's properties: "+ newPropertyName + " Please make sure that the key is listed as a property in the Interpreters page.");
+          }
         }
       }
+      else if(interpreterSettingProperties instanceof Map){
+        Map<String, InterpreterProperty> existingPropertyMap = ((Map<String, InterpreterProperty>) interpreterSettingProperties);
+        for (String newPropertyName : newProperties.stringPropertyNames()){
+          if(!existingPropertyMap.containsKey(newPropertyName)){
+            throw new InterpreterException("Tried to add an unknown key to Interpreter's properties: "+ newPropertyName + " Please make sure that the key is listed as a property in the Interpreters page.");
+          }
+        }
+      }
+
       finalProperties.putAll(newProperties);
       LOGGER.debug("Properties for InterpreterGroup: {} is {}", interpreterGroupId, finalProperties);
       interpreterSetting.setInterpreterGroupProperties(interpreterGroupId, finalProperties);
