@@ -26,6 +26,11 @@ public final class ConfInterpreterTest extends AbstractInterpreterTest {
 
   @Test
   public void testCorrectConf(){
+    // Properties should exist in the Interpreters setting before they are updated by ConfInterpreter.
+    final InterpreterSetting testSetting = interpreterSettingManager.getByName("test");
+    testSetting.setProperty("property_1","default_value");
+    testSetting.setProperty("new_property","default_value");
+
     final Interpreter confInterpreter = Assertions.assertDoesNotThrow(()->interpreterFactory.getInterpreter("test.conf", executionContext));
 
     final InterpreterContext context = InterpreterContext.builder()
@@ -33,10 +38,6 @@ public final class ConfInterpreterTest extends AbstractInterpreterTest {
               .setParagraphId("paragraphId")
               .build();
 
-    // Properties should exist in the Interpreters setting before they are updated by ConfInterpreter.
-    final InterpreterSetting testSetting = interpreterSettingManager.getByName("test");
-    testSetting.setProperty("property_1","default_value");
-    testSetting.setProperty("new_property","default_value");
 
     final InterpreterResult confResult = Assertions.assertDoesNotThrow(()->confInterpreter.interpret("property_1\tnew_value\nnew_property\tdummy_value", context));
     Assertions.assertEquals(InterpreterResult.Code.SUCCESS, confResult.code);
@@ -79,12 +80,12 @@ public final class ConfInterpreterTest extends AbstractInterpreterTest {
 
   @Test
   public void testRunningAfterOtherInterpreter(){
-    final Interpreter confInterpreter = Assertions.assertDoesNotThrow(()->interpreterFactory.getInterpreter("test.conf", executionContext));
-
-      // Properties should exist in the Interpreters setting before they are updated by ConfInterpreter.
+    // Properties should exist in the Interpreters setting before they are updated by ConfInterpreter.
     final InterpreterSetting testSetting = interpreterSettingManager.getByName("test");
     testSetting.setProperty("property_1","default_value");
     testSetting.setProperty("new_property","default_value");
+
+    final Interpreter confInterpreter = Assertions.assertDoesNotThrow(()->interpreterFactory.getInterpreter("test.conf", executionContext));
 
 
     final InterpreterContext context = InterpreterContext.builder()
@@ -109,6 +110,8 @@ public final class ConfInterpreterTest extends AbstractInterpreterTest {
             .setNoteId("noteId")
             .setParagraphId("paragraphId")
             .build();
-    Assertions.assertThrows(InterpreterException.class,()->{confInterpreter.interpret(key + "\t" + value, context);},"Tried to add an unknown key to Interpreter's properties: "+key+" Please make sure that the key is listed as a property in the Interpreters page.");
+    final InterpreterResult result = Assertions.assertDoesNotThrow(()->confInterpreter.interpret(key + "\t" + value, context));
+    Assertions.assertEquals(InterpreterResult.Code.ERROR,result.code());
+    Assertions.assertTrue(result.message().get(0).getData().contains("Tried to add an unknown key to Interpreter's properties: "+key+" Please make sure that the key is listed as a property in the Interpreters page"));
   }
 }
