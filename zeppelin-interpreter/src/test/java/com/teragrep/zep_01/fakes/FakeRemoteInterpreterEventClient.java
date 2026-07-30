@@ -149,12 +149,12 @@ public final class FakeRemoteInterpreterEventClient implements InterpreterEventC
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        FakeRemoteInterpreterEventClient that = (FakeRemoteInterpreterEventClient) o;
+        final FakeRemoteInterpreterEventClient that = (FakeRemoteInterpreterEventClient) o;
         return unregistered == that.unregistered;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(unregistered);
+        return Objects.hashCode(unregistered);
     }
 }

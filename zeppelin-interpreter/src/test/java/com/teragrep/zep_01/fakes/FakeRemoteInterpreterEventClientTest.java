@@ -6,14 +6,14 @@ import org.junit.jupiter.api.Assertions;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class FakeRemoteInterpreterEventClientTest {
+public final class FakeRemoteInterpreterEventClientTest {
 
     @Test
     public void testUnregisterInterpreter(){
         final FakeRemoteInterpreterEventClient client = new FakeRemoteInterpreterEventClient();
-        Assertions.assertEquals(false, client.unregistered());
+        Assertions.assertFalse(client.unregistered());
         client.unRegisterInterpreterProcess();
-        Assertions.assertEquals(true, client.unregistered());
+        Assertions.assertTrue(client.unregistered());
     }
 
     @Test
