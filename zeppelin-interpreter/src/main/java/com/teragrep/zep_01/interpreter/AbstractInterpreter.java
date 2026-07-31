@@ -78,10 +78,8 @@ public abstract class AbstractInterpreter extends Interpreter {
     // StringSubstitutor wants Map so convert ResourcePool if exists
     if(resourcePool != null){
       final ResourceSet resources = resourcePool.getAll();
-      for (int i = 0; i < resources.size(); i++) {
-        String name = resources.get(i).getResourceId().getName();
-        Object value = resources.get(i).get();
-        replacementMap.put(name,value);
+      for (Resource resource : resources) {
+        replacementMap.put(resource.getResourceId().getName(), resource.get());
       }
     }
 
