@@ -52,7 +52,7 @@ public abstract class AbstractInterpreter extends Interpreter {
     return internalInterpret(st, context);
   }
 
-  static String interpolate(String cmd, InterpreterContext context){
+  static String interpolate(final String cmd, final InterpreterContext context){
 
     // Interpolation takes values either from ResourcePool or AngularObjectRegistry, prioritizing ResourcePool if duplicate keys are found.
     final String noteId = context.getNoteId();
@@ -70,7 +70,7 @@ public abstract class AbstractInterpreter extends Interpreter {
       allObjects.addAll(registry.getAll(noteId,paragraphId));
 
       // Add each object to a Map from the List. Order of the List matters, value of a duplicated key in the Map will be the last occurrence of that key in the List.
-      for (AngularObject angularObject : allObjects) {
+      for (final AngularObject angularObject : allObjects) {
         replacementMap.put(angularObject.getName(),angularObject.get());
       }
     }
@@ -78,7 +78,7 @@ public abstract class AbstractInterpreter extends Interpreter {
     // StringSubstitutor wants Map so convert ResourcePool if exists
     if(resourcePool != null){
       final ResourceSet resources = resourcePool.getAll();
-      for (Resource resource : resources) {
+      for (final Resource resource : resources) {
         replacementMap.put(resource.getResourceId().getName(), resource.get());
       }
     }
@@ -92,7 +92,7 @@ public abstract class AbstractInterpreter extends Interpreter {
     try {
       return substitutor.replace(cmd);
     }
-    catch (IllegalArgumentException e){
+    catch (final IllegalArgumentException e){
       throw new IllegalArgumentException(
               "Failure in interpolating variables. Ensure that all variables are resolvable or escape them as $${literal}.\n" +
                       "Original error message: " + e.getMessage()
