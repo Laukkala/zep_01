@@ -27,17 +27,17 @@ public final class FakeFailingRemoteInterpreterEventClient implements Interprete
 
     @Override
     public <R> R callRemoteFunction(final PooledRemoteClient.RemoteFunction<R, RemoteInterpreterEventService.Client> func) {
-        return null; 
+        throw new RuntimeException("Not implemented by fake");
     }
 
     @Override
     public void setIntpGroupId(final String intpGroupId) {
-        
+        throw new RuntimeException("Not implemented by fake");
     }
 
     @Override
     public void registerInterpreterProcess(final RegisterInfo registerInfo) {
-        
+        throw new RuntimeException("Not implemented by fake");
     }
 
     @Override
@@ -45,103 +45,103 @@ public final class FakeFailingRemoteInterpreterEventClient implements Interprete
         throw exception;
     }
 
+    public RuntimeException exception(){
+        return exception;
+    }
+
     @Override
     public void sendWebUrlInfo(final String webUrl) {
-        
+        throw new RuntimeException("Not implemented by fake");
     }
 
     @Override
     public ResourceSet getAllResources() {
-        return new ResourceSet();
+        throw new RuntimeException("Not implemented by fake");
     }
 
     @Override
     public List<ParagraphInfo> getParagraphList(final String user, final String noteId) {
-        return new ArrayList<>();
+        throw new RuntimeException("Not implemented by fake");
     }
 
     @Override
     public List<LibraryMetadata> getAllLibraryMetadatas(final String interpreter) {
-        return new ArrayList<>();
+        throw new RuntimeException("Not implemented by fake");
     }
 
     @Override
     public ByteBuffer getLibrary(final String interpreter, final String libraryName) {
-        return ByteBuffer.allocate(0);
+        throw new RuntimeException("Not implemented by fake");
     }
 
     @Override
     public Object readResource(final ResourceId resourceId) {
-        return new Object();
+        throw new RuntimeException("Not implemented by fake");
     }
 
     @Override
     public Object invokeMethod(final ResourceId resourceId, final String methodName, final Class[] paramTypes, final Object[] params) {
-        return new Object();
+        throw new RuntimeException("Not implemented by fake");
     }
 
     @Override
     public Resource invokeMethod(final ResourceId resourceId, final String methodName, final Class[] paramTypes, final Object[] params, final String returnResourceName) {
-        return null; 
+        throw new RuntimeException("Not implemented by fake");
     }
 
     @Override
     public void onInterpreterOutputAppend(final String noteId, final String paragraphId, final int outputIndex, final String output) {
-        
+        throw new RuntimeException("Not implemented by fake");
     }
 
     @Override
     public void onInterpreterOutputUpdate(final String noteId, final String paragraphId, final int outputIndex, final InterpreterResult.Type type, final String output) {
-        
+        throw new RuntimeException("Not implemented by fake");
     }
 
     @Override
     public void onInterpreterOutputUpdateAll(final String noteId, final String paragraphId, final List<InterpreterResultMessage> messages) {
-        
+        throw new RuntimeException("Not implemented by fake");
     }
 
     @Override
     public void runParagraphs(final String noteId, final List<String> paragraphIds, final List<Integer> paragraphIndices, final String curParagraphId) {
-        
+        throw new RuntimeException("Not implemented by fake");
     }
 
     @Override
     public void checkpointOutput(final String noteId, final String paragraphId) {
-        
+        throw new RuntimeException("Not implemented by fake");
     }
 
     @Override
     public void onParaInfosReceived(final Map<String, String> infos) {
-        
+        throw new RuntimeException("Not implemented by fake");
     }
 
     @Override
     public void onAddAngularObject(final String interpreterGroupId, final AngularObject angularObject) {
-        
+        throw new RuntimeException("Not implemented by fake");
     }
 
     @Override
     public void onUpdateAngularObject(final String interpreterGroupId, final AngularObject angularObject) {
-        
+        throw new RuntimeException("Not implemented by fake");
     }
 
     @Override
     public void onRemoveAngularObject(final String interpreterGroupId, final AngularObject angularObject) {
-        
+        throw new RuntimeException("Not implemented by fake");
     }
 
     @Override
     public void updateParagraphConfig(final String noteId, final String paragraphId, final Map<String, String> config) {
-        
+        throw new RuntimeException("Not implemented by fake");
     }
 
     @Override
     public void close() {
-        
-    }
-
-    public RuntimeException exception(){
-        return exception;
+        throw new RuntimeException("Not implemented by fake");
     }
 
     @Override

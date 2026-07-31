@@ -16,6 +16,13 @@ public final class FakeRemoteInterpreterEventClientTest {
         Assertions.assertTrue(client.unregistered());
     }
 
+
+    @Test
+    public void testUnregistered(){
+        final FakeRemoteInterpreterEventClient client = new FakeRemoteInterpreterEventClient();
+        Assertions.assertFalse(client.unregistered());
+    }
+
     @Test
     public void testContract() {
         EqualsVerifier.forClass(FakeRemoteInterpreterEventClient.class).verify();
