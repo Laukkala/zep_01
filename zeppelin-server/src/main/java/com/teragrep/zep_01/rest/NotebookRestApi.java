@@ -38,6 +38,8 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
+
+import com.teragrep.zep_01.common.MessageIdStub;
 import org.apache.commons.lang3.StringUtils;
 import com.teragrep.zep_01.annotation.ZeppelinApi;
 import com.teragrep.zep_01.conf.ZeppelinConfiguration;
@@ -70,8 +72,6 @@ import com.teragrep.zep_01.user.AuthenticationInfo;
 import org.quartz.CronExpression;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import static com.teragrep.zep_01.common.Message.MSG_ID_NOT_DEFINED;
 
 /**
  * Rest api endpoint for the notebook.
@@ -574,7 +574,7 @@ public class NotebookRestApi extends AbstractRestApi {
 
     AuthenticationInfo subject = new AuthenticationInfo(user);
     notebook.saveNote(note, subject);
-    notebookServer.broadcastParagraph(note, p, MSG_ID_NOT_DEFINED);
+    notebookServer.broadcastParagraph(note, p, new MessageIdStub());
     return new JsonResponse<>(Status.OK, "").build();
   }
 

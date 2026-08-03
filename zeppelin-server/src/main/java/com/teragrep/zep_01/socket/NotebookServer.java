@@ -31,13 +31,11 @@ import javax.inject.Inject;
 import javax.inject.Provider;
 import javax.servlet.http.HttpServletRequest;
 
-import com.teragrep.zep_01.common.ValidatedMessage;
+import com.teragrep.zep_01.common.*;
 import com.teragrep.zep_01.display.*;
 import com.teragrep.zep_01.interpreter.*;
 import com.teragrep.zep_01.interpreter.remote.RemoteInterpreter;
 import com.teragrep.zep_01.rest.exception.BadRequestException;
-import jakarta.json.Json;
-import jakarta.json.JsonObject;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.thrift.TException;
@@ -56,7 +54,6 @@ import com.teragrep.zep_01.notebook.Paragraph;
 import com.teragrep.zep_01.notebook.ParagraphJobListener;
 import com.teragrep.zep_01.notebook.AuthorizationService;
 import com.teragrep.zep_01.notebook.repo.NotebookRepoWithVersionControl.Revision;
-import com.teragrep.zep_01.common.Message;
 import com.teragrep.zep_01.common.Message.OP;
 import com.teragrep.zep_01.rest.exception.ForbiddenException;
 import com.teragrep.zep_01.scheduler.Job.Status;
@@ -78,8 +75,6 @@ import org.eclipse.jetty.websocket.servlet.WebSocketServletFactory;
 import org.glassfish.hk2.api.ServiceLocator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import static com.teragrep.zep_01.common.Message.MSG_ID_NOT_DEFINED;
 
 /**
  * Zeppelin websocket service. This class used setter injection because all servlet should have
@@ -580,26 +575,26 @@ public class NotebookServer extends WebSocketServlet
     getConnectionManager().broadcast(note.getId(), message);
   }
 
-  private void inlineBroadcastParagraph(Note note, Paragraph p, String msgId) {
+  private void inlineBroadcastParagraph(Note note, Paragraph p, MessageId msgId) {
     broadcastNoteForms(note);
 
     if (note.isPersonalizedMode()) {
       broadcastParagraphs(p.getUserParagraphMap(), p, msgId);
     } else {
-      Message message = new Message(OP.PARAGRAPH).withMsgId(msgId).put("paragraph", p);
+      Message message = new Message(OP.PARAGRAPH, msgId).put("paragraph", p);
       getConnectionManager().broadcast(note.getId(), message);
     }
   }
 
-  public void broadcastParagraph(Note note, Paragraph p, String msgId) {
+  public void broadcastParagraph(Note note, Paragraph p, MessageId msgId) {
     inlineBroadcastParagraph(note, p, msgId);
   }
 
   private void inlineBroadcastParagraphs(Map<String, Paragraph> userParagraphMap,
-                                         String msgId) {
+                                         MessageId msgId) {
     if (null != userParagraphMap) {
       for (String user : userParagraphMap.keySet()) {
-        Message message = new Message(OP.PARAGRAPH).withMsgId(msgId).put("paragraph", userParagraphMap.get(user));
+        Message message = new Message(OP.PARAGRAPH, msgId).put("paragraph", userParagraphMap.get(user));
         getConnectionManager().multicastToUser(user, message);
       }
     }
@@ -607,7 +602,7 @@ public class NotebookServer extends WebSocketServlet
 
   private void broadcastParagraphs(Map<String, Paragraph> userParagraphMap,
                                    Paragraph defaultParagraph,
-                                   String msgId) {
+                                   MessageId msgId) {
     inlineBroadcastParagraphs(userParagraphMap, msgId);
   }
 
@@ -1030,9 +1025,9 @@ public class NotebookServer extends WebSocketServlet
             if (p.getNote().isPersonalizedMode()) {
               Map<String, Paragraph> userParagraphMap =
                   p.getNote().getParagraph(paragraphId).getUserParagraphMap();
-              broadcastParagraphs(userParagraphMap, p, fromMessage.msgId);
+              broadcastParagraphs(userParagraphMap, p, fromMessage.msgId());
             } else {
-              broadcastParagraph(p.getNote(), p, fromMessage.msgId);
+              broadcastParagraph(p.getNote(), p, fromMessage.msgId());
             }
           }
         });
@@ -1101,7 +1096,7 @@ public class NotebookServer extends WebSocketServlet
       throw new BadRequestException("Request must contain \"noteId\", \"paragraphId\", \"start\", \"length\", \"draw\" and \"search.value\" parameters!");
     }
     // Casting is required to get Message parameters in correct format, as GSON parses all numbers as Doubles, and Message.get() returns a generic Object.
-    final String msgId = fromMessage.msgId;
+    final MessageId msgId = fromMessage.msgId();
     final String noteId = (String) fromMessage.get("noteId");
     final String paragraphId = (String) fromMessage.get("paragraphId");
     final int start = (int) Double.parseDouble(fromMessage.get("start").toString());
@@ -1135,8 +1130,7 @@ public class NotebookServer extends WebSocketServlet
     // If any other type of Exception is thrown (indicating some other problem), it will be caught by NotebookServer.onMessage() and result in an ERROR_INFO message.
     try{
       String dataset = ((ManagedInterpreterGroup)interpreterGroup).getDataset(sessionId,interpreter.getClassName(),noteId,paragraphId,start,length,search,draw);
-      Message msg = new Message(Message.OP.PARAGRAPH_UPDATE_OUTPUT)
-              .withMsgId(msgId)
+      Message msg = new Message(Message.OP.PARAGRAPH_UPDATE_OUTPUT, msgId)
               .put("data",dataset)
               .put("index",0)
               .put("noteid",noteId)
@@ -1153,8 +1147,7 @@ public class NotebookServer extends WebSocketServlet
       data.put("draw",draw);
       data.put("recordsTotal",0);
       data.put("recordsFiltered",0);
-      Message msg = new Message(Message.OP.PARAGRAPH_UPDATE_OUTPUT)
-              .withMsgId(msgId)
+      Message msg = new Message(Message.OP.PARAGRAPH_UPDATE_OUTPUT, msgId)
               .put("data",data)
               .put("draw",0)
               .put("type",InterpreterResult.Type.JSONTABLE.toString())
@@ -1235,9 +1228,9 @@ public class NotebookServer extends WebSocketServlet
           public void onSuccess(Paragraph p, ServiceContext context) throws IOException {
             super.onSuccess(p, context);
             if (p.getNote().isPersonalizedMode()) {
-              getConnectionManager().unicastParagraph(p.getNote(), p, context.getAutheInfo().getUser(), fromMessage.msgId);
+              getConnectionManager().unicastParagraph(p.getNote(), p, context.getAutheInfo().getUser(), fromMessage.msgId());
             } else {
-              broadcastParagraph(p.getNote(), p, fromMessage.msgId);
+              broadcastParagraph(p.getNote(), p, fromMessage.msgId());
             }
           }
         });
@@ -1272,7 +1265,7 @@ public class NotebookServer extends WebSocketServlet
   }
 
   private void sendPong(NotebookSocket conn, Message fromMessage) throws IOException {
-    conn.send(serializeMessage(new Message(OP.PONG).put("msgId", fromMessage.msgId)));
+    conn.send(serializeMessage(new Message(OP.PONG).put("msgId", fromMessage.msgId())));
   }
 
   /**
@@ -1526,7 +1519,7 @@ public class NotebookServer extends WebSocketServlet
             if (p.getNote().isPersonalizedMode()) {
               Paragraph p2 = p.getNote().clearPersonalizedParagraphOutput(paragraphId,
                   context.getAutheInfo().getUser());
-              getConnectionManager().unicastParagraph(p.getNote(), p2, context.getAutheInfo().getUser(), fromMessage.msgId);
+              getConnectionManager().unicastParagraph(p.getNote(), p2, context.getAutheInfo().getUser(), fromMessage.msgId());
             }
 
             // if it's the last paragraph and not empty, let's add a new one
@@ -1722,7 +1715,7 @@ public class NotebookServer extends WebSocketServlet
       } else {
         note.clearParagraphOutput(paragraphId);
         Paragraph paragraph = note.getParagraph(paragraphId);
-        broadcastParagraph(note, paragraph, MSG_ID_NOT_DEFINED);
+        broadcastParagraph(note, paragraph, new MessageIdStub());
       }
     } catch (IOException e) {
       LOG.warn("Fail to call onOutputClear", e);
@@ -1907,7 +1900,7 @@ public class NotebookServer extends WebSocketServlet
     }
 
     p.setStatusToUserParagraph(p.getStatus());
-    broadcastParagraph(p.getNote(), p, MSG_ID_NOT_DEFINED);
+    broadcastParagraph(p.getNote(), p, new MessageIdStub());
     try {
       broadcastUpdateNoteJobInfo(p.getNote(), System.currentTimeMillis() - 5000);
     } catch (IOException e) {

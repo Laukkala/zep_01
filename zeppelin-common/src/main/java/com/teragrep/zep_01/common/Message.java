@@ -17,9 +17,10 @@
 
 package com.teragrep.zep_01.common;
 
-import com.google.gson.Gson;
+import com.google.gson.*;
 import org.slf4j.Logger;
 
+import java.lang.reflect.Type;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
@@ -224,7 +225,10 @@ public class Message implements JsonSerializable {
           OP.DEL_NOTE,
           OP.PATCH_PARAGRAPH)));
 
-  private static final Gson GSON = new Gson();
+  private static final Gson GSON = new GsonBuilder()
+          .registerTypeAdapter(MessageId.class,new MessageIdDeserializer())
+          .registerTypeAdapter(MessageId.class,new MessageIdSerializer())
+          .create();
   public static final Message EMPTY = new Message(null);
 
   public OP op;
@@ -237,16 +241,15 @@ public class Message implements JsonSerializable {
   // When message from server is response to the client request
   // includes the msgId in response message, client can pair request and response message.
   // When server send message that is not response to the client request, set null;
-  public String msgId = MSG_ID_NOT_DEFINED;
-  public static String MSG_ID_NOT_DEFINED = null;
+  private final MessageId msgId;
 
-  public Message(OP op) {
-    this.op = op;
+  public Message(OP op){
+    this(op, new MessageIdStub());
   }
 
-  public Message withMsgId(String msgId) {
+  public Message(OP op, MessageId msgId) {
+    this.op = op;
     this.msgId = msgId;
-    return this;
   }
 
   public Message put(String k, Object v) {
@@ -256,6 +259,10 @@ public class Message implements JsonSerializable {
 
   public Object get(String k) {
     return data.get(k);
+  }
+
+  public MessageId msgId(){
+    return msgId;
   }
 
   public static boolean isDisabledForRunningNotes(OP eventType) {

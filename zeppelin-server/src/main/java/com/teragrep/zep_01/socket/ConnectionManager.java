@@ -20,6 +20,7 @@ package com.teragrep.zep_01.socket;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.teragrep.zep_01.common.*;
 import org.apache.commons.lang3.StringUtils;
 import com.teragrep.zep_01.conf.ZeppelinConfiguration;
 import com.teragrep.zep_01.display.GUI;
@@ -29,7 +30,6 @@ import com.teragrep.zep_01.notebook.NoteInfo;
 import com.teragrep.zep_01.notebook.NotebookImportDeserializer;
 import com.teragrep.zep_01.notebook.Paragraph;
 import com.teragrep.zep_01.notebook.AuthorizationService;
-import com.teragrep.zep_01.common.Message;
 import com.teragrep.zep_01.notebook.socket.WatcherMessage;
 import com.teragrep.zep_01.user.AuthenticationInfo;
 import com.teragrep.zep_01.util.WatcherSecurityKey;
@@ -61,7 +61,10 @@ public class ConnectionManager {
       .setDateFormat("yyyy-MM-dd'T'HH:mm:ssZ")
       .registerTypeAdapter(Date.class, new NotebookImportDeserializer())
       .setPrettyPrinting()
-      .registerTypeAdapterFactory(Input.TypeAdapterFactory).create();
+      .registerTypeAdapterFactory(Input.TypeAdapterFactory)
+      .registerTypeAdapter(MessageId.class, new MessageIdSerializer())
+      .registerTypeAdapter(MessageId.class, new MessageIdDeserializer())
+      .create();
 
   final Queue<NotebookSocket> connectedSockets = new ConcurrentLinkedQueue<>();
   // noteId -> connection
@@ -321,7 +324,7 @@ public class ConnectionManager {
     broadcastToWatchers(StringUtils.EMPTY, StringUtils.EMPTY, m);
   }
 
-  public void unicastParagraph(Note note, Paragraph p, String user, String msgId) {
+  public void unicastParagraph(Note note, Paragraph p, String user, MessageId msgId) {
     if (!note.isPersonalizedMode() || p == null || user == null) {
       return;
     }
@@ -332,7 +335,7 @@ public class ConnectionManager {
     }
 
     for (NotebookSocket conn : userSocketMap.get(user)) {
-      Message m = new Message(Message.OP.PARAGRAPH).withMsgId(msgId).put("paragraph", p);
+      Message m = new Message(Message.OP.PARAGRAPH, msgId).put("paragraph", p);
       unicast(m, conn);
     }
   }
