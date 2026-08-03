@@ -20,7 +20,6 @@ package com.teragrep.zep_01.common;
 import com.google.gson.*;
 import org.slf4j.Logger;
 
-import java.lang.reflect.Type;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
@@ -226,8 +225,7 @@ public class Message implements JsonSerializable {
           OP.PATCH_PARAGRAPH)));
 
   private static final Gson GSON = new GsonBuilder()
-          .registerTypeAdapter(MessageId.class,new MessageIdDeserializer())
-          .registerTypeAdapter(MessageId.class,new MessageIdSerializer())
+          .registerTypeAdapter(MessageId.class,new MessageIdSerialization())
           .create();
   public static final Message EMPTY = new Message(null);
 
