@@ -229,7 +229,7 @@ public final class Message implements JsonSerializable {
   private final Map<String, Object> data;
   private final String ticket;
   private final String principal;
-  public String roles = "";
+  private final String roles;
 
   // Unique id generated from client side. to identify message.
   // When message from server is response to the client request
@@ -238,23 +238,24 @@ public final class Message implements JsonSerializable {
   private final MessageId msgId;
 
   public Message(OP op){
-    this(op, new MessageIdStub(), new HashMap<>(), "anonymous", "anonymous");
+    this(op, new MessageIdStub(), new HashMap<>(), "anonymous", "anonymous","");
   }
 
   public Message(OP op, MessageId msgId){
-    this(op, msgId, new HashMap<>(), "anonymous", "anonymous");
+    this(op, msgId, new HashMap<>(), "anonymous", "anonymous","");
   }
 
   public Message(OP op, Map<String, Object> data){
-    this(op, new MessageIdStub(), data, "anonymous","anonymous");
+    this(op, new MessageIdStub(), data, "anonymous","anonymous","");
   }
 
-  public Message(OP op, MessageId msgId, Map<String, Object> data, String principal, String ticket) {
+  public Message(OP op, MessageId msgId, Map<String, Object> data, String principal, String ticket, String roles) {
     this.op = op;
     this.msgId = msgId;
     this.data = data;
     this.principal = principal;
     this.ticket = ticket;
+    this.roles = roles;
   }
 
   public Message put(String k, Object v) {
@@ -275,6 +276,10 @@ public final class Message implements JsonSerializable {
 
   public String principal(){
     return principal;
+  }
+
+  public String roles(){
+    return roles;
   }
 
   public Object get(String k) {

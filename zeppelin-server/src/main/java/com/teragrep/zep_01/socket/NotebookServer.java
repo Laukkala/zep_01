@@ -237,7 +237,7 @@ public class NotebookServer extends WebSocketServlet
       LOG.debug("RECEIVE: " + receivedMessage.op +
           ", RECEIVE PRINCIPAL: " + receivedMessage.principal() +
           ", RECEIVE TICKET: " + receivedMessage.ticket() +
-          ", RECEIVE ROLES: " + receivedMessage.roles +
+          ", RECEIVE ROLES: " + receivedMessage.roles() +
           ", RECEIVE DATA: " + receivedMessage.data());
 
       if (LOG.isTraceEnabled()) {

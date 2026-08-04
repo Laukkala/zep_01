@@ -39,7 +39,7 @@ public abstract class AbstractMessageHandler implements MessageHandler {
         LOGGER.debug("RECEIVE: " + messageReceived.op +
                 ", RECEIVE PRINCIPAL: " + messageReceived.principal() +
                 ", RECEIVE TICKET: " + messageReceived.ticket() +
-                ", RECEIVE ROLES: " + messageReceived.roles +
+                ", RECEIVE ROLES: " + messageReceived.roles() +
                 ", RECEIVE DATA: " + messageReceived.data());
       }
 

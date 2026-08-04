@@ -172,8 +172,8 @@ public class ZeppelinClient {
     final String msg;
     if (credentialsAvailable()) {
       String principal = authModule.getPrincipal();
-      Message msgWithCredentials = new Message(zeppelinMsg.op, zeppelinMsg.msgId(), zeppelinMsg.data(), principal, zeppelinMsg.ticket());
-      msgWithCredentials.roles = authModule.getRoles();
+      String roles = authModule.getRoles();
+      Message msgWithCredentials = new Message(zeppelinMsg.op, zeppelinMsg.msgId(), zeppelinMsg.data(), principal, zeppelinMsg.ticket(), roles);
       msg = msgWithCredentials.toJson();
     }
     else {
@@ -285,7 +285,7 @@ public class ZeppelinClient {
   private Message zeppelinGetNoteMsg(String noteId, String principal, String ticket) {
     HashMap<String, Object> data = new HashMap<String, Object>();
     data.put("id", noteId);
-    Message getNoteMsg = new Message(Message.OP.GET_NOTE, new MessageIdStub(), data, principal, ticket);
+    Message getNoteMsg = new Message(Message.OP.GET_NOTE, new MessageIdStub(), data, principal, ticket,"");
     return getNoteMsg;
   }
 

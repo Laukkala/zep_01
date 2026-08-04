@@ -57,7 +57,7 @@ public class WatcherWebsocket implements WebSocketListener {
     LOG.info("WatcherWebsocket connection opened");
     this.connection = session;
     String ticket = TicketContainer.instance.getTicketEntry(watcherPrincipal, null).getTicket();
-    Message watcherMsg = new Message(OP.WATCHER, new MessageIdStub(), new HashMap<>(), watcherPrincipal, ticket);
+    Message watcherMsg = new Message(OP.WATCHER, new MessageIdStub(), new HashMap<>(), watcherPrincipal, ticket,"");
     session.getRemote().sendStringByFuture(watcherMsg.toJson());
   }
 
