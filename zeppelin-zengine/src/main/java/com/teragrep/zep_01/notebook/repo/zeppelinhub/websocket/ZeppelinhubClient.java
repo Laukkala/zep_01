@@ -230,12 +230,12 @@ public class ZeppelinhubClient {
 
   @SuppressWarnings("unchecked")
   private void forwardToZeppelin(Message.OP op, ZeppelinhubMessage hubMsg) {
-    Message zeppelinMsg = new Message(op);
     if (!(hubMsg.data instanceof Map)) {
       LOGGER.error("Data field of message from ZeppelinHub isn't in correct Map format");
       return;
     }
-    zeppelinMsg.data = (Map<String, Object>) hubMsg.data;
+    Map<String, Object> data = (Map<String, Object>) hubMsg.data;
+    Message zeppelinMsg = new Message(op, data);
     zeppelinMsg.principal = hubMsg.meta.get("owner");
     zeppelinMsg.ticket = TicketContainer.instance.getTicketEntry(zeppelinMsg.principal, null).getTicket();
     Client client = Client.getInstance();
@@ -259,7 +259,6 @@ public class ZeppelinhubClient {
         LOGGER.warn("Base client isn't initialized, returning");
         return false;
       }
-      Message zeppelinMsg = new Message(OP.RUN_PARAGRAPH);
 
       JSONArray paragraphs = data.getJSONArray("data");
       String principal = data.getJSONObject("meta").getString("owner");
@@ -268,8 +267,8 @@ public class ZeppelinhubClient {
           LOGGER.warn("Wrong \"paragraph\" format for RUN_NOTEBOOK");
           continue;
         }
-        zeppelinMsg.data = gson.fromJson(paragraphs.getString(i),
-            new TypeToken<Map<String, Object>>(){}.getType());
+        final Map<String, Object> paragraphData = gson.fromJson(paragraphs.getString(i), new TypeToken<Map<String, Object>>(){}.getType());
+        final Message zeppelinMsg = new Message(OP.RUN_PARAGRAPH, paragraphData);
         zeppelinMsg.principal = principal;
         zeppelinMsg.ticket = TicketContainer.instance.getTicketEntry(principal, null).getTicket();
         client.relayToZeppelin(zeppelinMsg, noteId);

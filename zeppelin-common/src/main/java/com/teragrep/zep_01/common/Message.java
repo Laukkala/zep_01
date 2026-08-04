@@ -20,18 +20,14 @@ package com.teragrep.zep_01.common;
 import com.google.gson.*;
 import org.slf4j.Logger;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Copied from zeppelin-zengine (TODO, zjffdu). Should resume the same piece of code instead of copying.
  * Zeppelin websocket message template class.
  */
-public class Message implements JsonSerializable {
+public final class Message implements JsonSerializable {
+
   /**
    * Representation of event type.
    */
@@ -229,8 +225,8 @@ public class Message implements JsonSerializable {
           .create();
   public static final Message EMPTY = new Message(null);
 
-  public OP op;
-  public Map<String, Object> data = new HashMap<>();
+  public final OP op;
+  private final Map<String, Object> data;
   public String ticket = "anonymous";
   public String principal = "anonymous";
   public String roles = "";
@@ -242,17 +238,33 @@ public class Message implements JsonSerializable {
   private final MessageId msgId;
 
   public Message(OP op){
-    this(op, new MessageIdStub());
+    this(op, new MessageIdStub(), new HashMap<>());
   }
 
-  public Message(OP op, MessageId msgId) {
+  public Message(OP op, MessageId msgId){
+    this(op, msgId, new HashMap<>());
+  }
+
+  public Message(OP op, Map<String, Object> data){
+    this(op, new MessageIdStub(), data);
+  }
+
+  public Message(OP op, MessageId msgId, Map<String, Object> data) {
     this.op = op;
     this.msgId = msgId;
+    this.data = data;
   }
 
   public Message put(String k, Object v) {
     data.put(k, v);
     return this;
+  }
+
+  /**
+   *Returns a copy of the data Map in this Message so that it can't get modified externally
+    */
+  public Map<String, Object> data(){
+    return new HashMap<>(data);
   }
 
   public Object get(String k) {
@@ -296,5 +308,18 @@ public class Message implements JsonSerializable {
 
   public static Message fromJson(String json) {
     return GSON.fromJson(json, Message.class);
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) return true;
+    if (o == null || getClass() != o.getClass()) return false;
+    Message message = (Message) o;
+    return op == message.op && Objects.equals(data, message.data) && Objects.equals(ticket, message.ticket) && Objects.equals(principal, message.principal) && Objects.equals(roles, message.roles) && Objects.equals(msgId, message.msgId);
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(op, data, ticket, principal, roles, msgId);
   }
 }

@@ -36,30 +36,30 @@ public final class ValidatedMessage {
     if(! messageToValidate.op.equals(Message.OP.PARAGRAPH_UPDATE_RESULT)){
       valid = false;
     }
-    if(valid && (! messageToValidate.data.containsKey("noteId") || ! messageToValidate.data.get("noteId").getClass().equals(String.class))){
+    if(valid && (messageToValidate.get("noteId") == null || ! messageToValidate.get("noteId").getClass().equals(String.class))){
       valid = false;
     }
-    if(valid && (! messageToValidate.data.containsKey("paragraphId") || ! messageToValidate.data.get("paragraphId").getClass().equals(String.class))){
-      valid = false;
-    }
-    // GSON parses all numbers as Double, regardless of if they are integers or floats in the source JSON.
-    if(valid && (! messageToValidate.data.containsKey("start") || ! messageToValidate.data.get("start").getClass().equals(Double.class))){
+    if(valid && (messageToValidate.get("paragraphId") == null || ! messageToValidate.get("paragraphId").getClass().equals(String.class))){
       valid = false;
     }
     // GSON parses all numbers as Double, regardless of if they are integers or floats in the source JSON.
-    if(valid && (! messageToValidate.data.containsKey("length") || ! messageToValidate.data.get("length").getClass().equals(Double.class))){
+    if(valid && (messageToValidate.get("start") == null || ! messageToValidate.get("start").getClass().equals(Double.class))){
       valid = false;
     }
     // GSON parses all numbers as Double, regardless of if they are integers or floats in the source JSON.
-    if(valid && (! messageToValidate.data.containsKey("draw") || ! messageToValidate.data.get("draw").getClass().equals(Double.class))){
+    if(valid && (messageToValidate.get("length") == null || ! messageToValidate.get("length").getClass().equals(Double.class))){
+      valid = false;
+    }
+    // GSON parses all numbers as Double, regardless of if they are integers or floats in the source JSON.
+    if(valid && (messageToValidate.get("draw") == null || ! messageToValidate.get("draw").getClass().equals(Double.class))){
       valid = false;
     }
     // GSON parses all JSON objects as LinkedTreeMaps
-    if(valid && (! messageToValidate.data.containsKey("search") || ! messageToValidate.data.get("search").getClass().equals(LinkedTreeMap.class))) {
+    if(valid && (messageToValidate.get("search") == null || ! messageToValidate.get("search").getClass().equals(LinkedTreeMap.class))) {
       valid = false;
     }
     // GSON parses all JSON objects as LinkedTreeMaps
-    LinkedTreeMap<String,Object> searchMap = (LinkedTreeMap<String, java.lang.Object>) messageToValidate.data.get("search");
+    LinkedTreeMap<String,Object> searchMap = (LinkedTreeMap<String, java.lang.Object>) messageToValidate.get("search");
       if(valid && (! searchMap.containsKey("value") || ! searchMap.get("value").getClass().equals(String.class))){
         valid = false;
       }

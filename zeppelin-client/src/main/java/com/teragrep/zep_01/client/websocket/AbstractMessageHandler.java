@@ -40,23 +40,23 @@ public abstract class AbstractMessageHandler implements MessageHandler {
                 ", RECEIVE PRINCIPAL: " + messageReceived.principal +
                 ", RECEIVE TICKET: " + messageReceived.ticket +
                 ", RECEIVE ROLES: " + messageReceived.roles +
-                ", RECEIVE DATA: " + messageReceived.data);
+                ", RECEIVE DATA: " + messageReceived.data());
       }
 
       switch (messageReceived.op) {
         case PARAGRAPH_UPDATE_OUTPUT:
-          String noteId = (String) messageReceived.data.get("noteId");
-          String paragraphId = (String) messageReceived.data.get("paragraphId");
-          int index = (int) Double.parseDouble(messageReceived.data.get("index").toString());
-          String type = (String) messageReceived.data.get("type");
-          String output = (String) messageReceived.data.get("data");
+          String noteId = (String) messageReceived.get("noteId");
+          String paragraphId = (String) messageReceived.get("paragraphId");
+          int index = (int) Double.parseDouble(messageReceived.get("index").toString());
+          String type = (String) messageReceived.get("type");
+          String output = (String) messageReceived.get("data");
           onStatementUpdateOutput(paragraphId, index, type, output);
           break;
         case PARAGRAPH_APPEND_OUTPUT:
-          noteId = (String) messageReceived.data.get("noteId");
-          paragraphId = (String) messageReceived.data.get("paragraphId");
-          index = (int) Double.parseDouble(messageReceived.data.get("index").toString());
-          output = (String) messageReceived.data.get("data");
+          noteId = (String) messageReceived.get("noteId");
+          paragraphId = (String) messageReceived.get("paragraphId");
+          index = (int) Double.parseDouble(messageReceived.get("index").toString());
+          output = (String) messageReceived.get("data");
           onStatementAppendOutput(paragraphId, index, output);
           break;
         default:

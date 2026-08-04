@@ -261,31 +261,28 @@ public class InterpreterRestApi {
           new SimpleServiceCallback<String>() {
             @Override
             public void onStart(String message, ServiceContext context) {
-              Message m = new Message(OP.INTERPRETER_INSTALL_STARTED);
               Map<String, Object> data = new HashMap<>();
               data.put("result", "Starting");
               data.put("message", message);
-              m.data = data;
+              Message m = new Message(OP.INTERPRETER_INSTALL_STARTED, data);
               notebookServer.broadcast(m);
             }
 
             @Override
             public void onSuccess(String message, ServiceContext context) {
-              Message m = new Message(OP.INTERPRETER_INSTALL_RESULT);
               Map<String, Object> data = new HashMap<>();
               data.put("result", "Succeed");
               data.put("message", message);
-              m.data = data;
+              Message m = new Message(OP.INTERPRETER_INSTALL_RESULT, data);
               notebookServer.broadcast(m);
             }
 
             @Override
             public void onFailure(Exception ex, ServiceContext context) {
-              Message m = new Message(OP.INTERPRETER_INSTALL_RESULT);
               Map<String, Object> data = new HashMap<>();
               data.put("result", "Failed");
               data.put("message", ex.getMessage());
-              m.data = data;
+              Message m = new Message(OP.INTERPRETER_INSTALL_RESULT, data);
               notebookServer.broadcast(m);
             }
           });

@@ -238,7 +238,7 @@ public class NotebookServer extends WebSocketServlet
           ", RECEIVE PRINCIPAL: " + receivedMessage.principal +
           ", RECEIVE TICKET: " + receivedMessage.ticket +
           ", RECEIVE ROLES: " + receivedMessage.roles +
-          ", RECEIVE DATA: " + receivedMessage.data);
+          ", RECEIVE DATA: " + receivedMessage.data());
 
       if (LOG.isTraceEnabled()) {
         LOG.trace("RECEIVE MSG = " + receivedMessage);
@@ -528,7 +528,7 @@ public class NotebookServer extends WebSocketServlet
                                      ServiceContext context,
                                      Message fromMessage) throws IOException {
     List<InterpreterSettingsList> settingList = new ArrayList<>();
-    String noteId = (String) fromMessage.data.get("noteId");
+    String noteId = (String) fromMessage.get("noteId");
     Note note = getNotebook().getNote(noteId);
     if (note != null) {
       List<InterpreterSetting> bindedSettings =
@@ -544,11 +544,11 @@ public class NotebookServer extends WebSocketServlet
 
   public void saveInterpreterBindings(NotebookSocket conn, ServiceContext context, Message fromMessage) throws IOException {
     List<InterpreterSettingsList> settingList = new ArrayList<>();
-    String noteId = (String) fromMessage.data.get("noteId");
+    String noteId = (String) fromMessage.get("noteId");
     Note note = getNotebook().getNote(noteId);
     if (note != null) {
       List<String> settingIdList =
-              gson.fromJson(String.valueOf(fromMessage.data.get("selectedSettingIds")),
+              gson.fromJson(String.valueOf(fromMessage.get("selectedSettingIds")),
                       new TypeToken<ArrayList<String>>() {}.getType());
       if (!settingIdList.isEmpty()) {
         note.setDefaultInterpreterGroup(settingIdList.get(0));
@@ -1461,7 +1461,7 @@ public class NotebookServer extends WebSocketServlet
                                 Message fromMessage) throws IOException {
     final String noteId = (String) fromMessage.get("noteId");
     List<Map<String, Object>> paragraphs =
-        gson.fromJson(String.valueOf(fromMessage.data.get("paragraphs")),
+        gson.fromJson(String.valueOf(fromMessage.get("paragraphs")),
             new TypeToken<List<Map<String, Object>>>() {
             }.getType());
 
@@ -2183,8 +2183,9 @@ public class NotebookServer extends WebSocketServlet
 
   @ManagedOperation
   public void sendMessage(String message) {
-    Message m = new Message(OP.NOTICE);
-    m.data.put("notice", message);
+    Map<String, Object> data = new HashMap<>();
+    data.put("notice", message);
+    Message m = new Message(OP.NOTICE, data);
     getConnectionManager().broadcast(m);
   }
 
