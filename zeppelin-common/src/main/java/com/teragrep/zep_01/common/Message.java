@@ -228,7 +228,7 @@ public final class Message implements JsonSerializable {
   public final OP op;
   private final Map<String, Object> data;
   private final String ticket;
-  public String principal = "anonymous";
+  private final String principal;
   public String roles = "";
 
   // Unique id generated from client side. to identify message.
@@ -238,21 +238,22 @@ public final class Message implements JsonSerializable {
   private final MessageId msgId;
 
   public Message(OP op){
-    this(op, new MessageIdStub(), new HashMap<>(), "anonymous");
+    this(op, new MessageIdStub(), new HashMap<>(), "anonymous", "anonymous");
   }
 
   public Message(OP op, MessageId msgId){
-    this(op, msgId, new HashMap<>(), "anonymous");
+    this(op, msgId, new HashMap<>(), "anonymous", "anonymous");
   }
 
   public Message(OP op, Map<String, Object> data){
-    this(op, new MessageIdStub(), data, "anonymous");
+    this(op, new MessageIdStub(), data, "anonymous","anonymous");
   }
 
-  public Message(OP op, MessageId msgId, Map<String, Object> data, String ticket) {
+  public Message(OP op, MessageId msgId, Map<String, Object> data, String principal, String ticket) {
     this.op = op;
     this.msgId = msgId;
     this.data = data;
+    this.principal = principal;
     this.ticket = ticket;
   }
 
@@ -270,6 +271,10 @@ public final class Message implements JsonSerializable {
 
   public String ticket(){
     return ticket;
+  }
+
+  public String principal(){
+    return principal;
   }
 
   public Object get(String k) {

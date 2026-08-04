@@ -37,7 +37,7 @@ public abstract class AbstractMessageHandler implements MessageHandler {
       Message messageReceived = GSON.fromJson(msg, Message.class);
       if (messageReceived.op != Message.OP.PING) {
         LOGGER.debug("RECEIVE: " + messageReceived.op +
-                ", RECEIVE PRINCIPAL: " + messageReceived.principal +
+                ", RECEIVE PRINCIPAL: " + messageReceived.principal() +
                 ", RECEIVE TICKET: " + messageReceived.ticket() +
                 ", RECEIVE ROLES: " + messageReceived.roles +
                 ", RECEIVE DATA: " + messageReceived.data());

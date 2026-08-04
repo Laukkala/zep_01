@@ -238,8 +238,7 @@ public class ZeppelinhubClient {
     Map<String, Object> data = (Map<String, Object>) hubMsg.data;
     String principal = hubMsg.meta.get("owner");
     String ticket = TicketContainer.instance.getTicketEntry(principal, null).getTicket();
-    Message zeppelinMsg = new Message(op, new MessageIdStub(), data, ticket);
-    zeppelinMsg.principal = principal;
+    Message zeppelinMsg = new Message(op, new MessageIdStub(), data, principal, ticket);
     Client client = Client.getInstance();
     if (client == null) {
       LOGGER.warn("Base client isn't initialized, returning");
@@ -271,8 +270,7 @@ public class ZeppelinhubClient {
         }
         final Map<String, Object> paragraphData = gson.fromJson(paragraphs.getString(i), new TypeToken<Map<String, Object>>(){}.getType());
         final String ticket = TicketContainer.instance.getTicketEntry(principal, null).getTicket();
-        final Message zeppelinMsg = new Message(OP.RUN_PARAGRAPH, new MessageIdStub(), paragraphData, ticket);
-        zeppelinMsg.principal = principal;
+        final Message zeppelinMsg = new Message(OP.RUN_PARAGRAPH, new MessageIdStub(), paragraphData, principal, ticket);
         client.relayToZeppelin(zeppelinMsg, noteId);
         LOGGER.info("\nSending RUN_PARAGRAPH message to Zeppelin ");
       }

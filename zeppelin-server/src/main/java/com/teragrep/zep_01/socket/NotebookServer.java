@@ -235,7 +235,7 @@ public class NotebookServer extends WebSocketServlet
       }
 
       LOG.debug("RECEIVE: " + receivedMessage.op +
-          ", RECEIVE PRINCIPAL: " + receivedMessage.principal +
+          ", RECEIVE PRINCIPAL: " + receivedMessage.principal() +
           ", RECEIVE TICKET: " + receivedMessage.ticket() +
           ", RECEIVE ROLES: " + receivedMessage.roles +
           ", RECEIVE DATA: " + receivedMessage.data());
@@ -244,7 +244,7 @@ public class NotebookServer extends WebSocketServlet
         LOG.trace("RECEIVE MSG = " + receivedMessage);
       }
 
-      TicketContainer.Entry ticketEntry = TicketContainer.instance.getTicketEntry(receivedMessage.principal);
+      TicketContainer.Entry ticketEntry = TicketContainer.instance.getTicketEntry(receivedMessage.principal());
       if (ticketEntry == null || StringUtils.isEmpty(ticketEntry.getTicket())) {
         LOG.debug("{} message: invalid ticket {}", receivedMessage.op, receivedMessage.ticket());
         return;
@@ -260,7 +260,7 @@ public class NotebookServer extends WebSocketServlet
 
       ZeppelinConfiguration conf = ZeppelinConfiguration.create();
       boolean allowAnonymous = conf.isAnonymousAllowed();
-      if (!allowAnonymous && receivedMessage.principal.equals("anonymous")) {
+      if (!allowAnonymous && receivedMessage.principal().equals("anonymous")) {
         LOG.warn("Anonymous access not allowed.");
         return;
       }
@@ -274,7 +274,7 @@ public class NotebookServer extends WebSocketServlet
       }
 
       if (StringUtils.isEmpty(conn.getUser())) {
-        getConnectionManager().addUserConnection(receivedMessage.principal, conn);
+        getConnectionManager().addUserConnection(receivedMessage.principal(), conn);
       }
 
       ServiceContext context = getServiceContext(ticketEntry);
@@ -1283,7 +1283,7 @@ public class NotebookServer extends WebSocketServlet
     String interpreterGroupId = (String) fromMessage.get("interpreterGroupId");
     String varName = (String) fromMessage.get("name");
     Object varValue = fromMessage.get("value");
-    String user = fromMessage.principal;
+    String user = fromMessage.principal();
 
     getNotebookService().updateAngularObject(noteId, paragraphId, interpreterGroupId,
         varName, varValue, context,

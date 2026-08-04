@@ -171,8 +171,8 @@ public class ZeppelinClient {
   public String serialize(Message zeppelinMsg) {
     final String msg;
     if (credentialsAvailable()) {
-      Message msgWithCredentials = new Message(zeppelinMsg.op, zeppelinMsg.msgId(), zeppelinMsg.data(),zeppelinMsg.ticket());
-      msgWithCredentials.principal = authModule.getPrincipal();
+      String principal = authModule.getPrincipal();
+      Message msgWithCredentials = new Message(zeppelinMsg.op, zeppelinMsg.msgId(), zeppelinMsg.data(), principal, zeppelinMsg.ticket());
       msgWithCredentials.roles = authModule.getRoles();
       msg = msgWithCredentials.toJson();
     }
@@ -216,7 +216,7 @@ public class ZeppelinClient {
   }
 
   public void send(Message msg, String noteId) {
-    Session noteSession = getZeppelinConnection(noteId, msg.principal, msg.ticket());
+    Session noteSession = getZeppelinConnection(noteId, msg.principal(), msg.ticket());
     if (!isSessionOpen(noteSession)) {
       LOG.error("Cannot open websocket connection to Zeppelin note {}", noteId);
       return;
@@ -285,8 +285,7 @@ public class ZeppelinClient {
   private Message zeppelinGetNoteMsg(String noteId, String principal, String ticket) {
     HashMap<String, Object> data = new HashMap<String, Object>();
     data.put("id", noteId);
-    Message getNoteMsg = new Message(Message.OP.GET_NOTE, new MessageIdStub(), data, ticket);
-    getNoteMsg.principal = principal;
+    Message getNoteMsg = new Message(Message.OP.GET_NOTE, new MessageIdStub(), data, principal, ticket);
     return getNoteMsg;
   }
 
@@ -303,7 +302,7 @@ public class ZeppelinClient {
       return;
     }
 
-    token = UserTokenContainer.getInstance().getUserToken(zeppelinMsg.principal);
+    token = UserTokenContainer.getInstance().getUserToken(zeppelinMsg.principal());
     Client client = Client.getInstance();
     if (client == null) {
       LOG.warn("Client isn't initialized yet");
