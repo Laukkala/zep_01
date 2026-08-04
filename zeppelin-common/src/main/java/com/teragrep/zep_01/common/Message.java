@@ -227,7 +227,7 @@ public final class Message implements JsonSerializable {
 
   public final OP op;
   private final Map<String, Object> data;
-  public String ticket = "anonymous";
+  private final String ticket;
   public String principal = "anonymous";
   public String roles = "";
 
@@ -238,21 +238,22 @@ public final class Message implements JsonSerializable {
   private final MessageId msgId;
 
   public Message(OP op){
-    this(op, new MessageIdStub(), new HashMap<>());
+    this(op, new MessageIdStub(), new HashMap<>(), "anonymous");
   }
 
   public Message(OP op, MessageId msgId){
-    this(op, msgId, new HashMap<>());
+    this(op, msgId, new HashMap<>(), "anonymous");
   }
 
   public Message(OP op, Map<String, Object> data){
-    this(op, new MessageIdStub(), data);
+    this(op, new MessageIdStub(), data, "anonymous");
   }
 
-  public Message(OP op, MessageId msgId, Map<String, Object> data) {
+  public Message(OP op, MessageId msgId, Map<String, Object> data, String ticket) {
     this.op = op;
     this.msgId = msgId;
     this.data = data;
+    this.ticket = ticket;
   }
 
   public Message put(String k, Object v) {
@@ -265,6 +266,10 @@ public final class Message implements JsonSerializable {
     */
   public Map<String, Object> data(){
     return new HashMap<>(data);
+  }
+
+  public String ticket(){
+    return ticket;
   }
 
   public Object get(String k) {

@@ -1183,7 +1183,7 @@ public class NotebookService {
     p.setText(text);
     p.setTitle(title);
     AuthenticationInfo subject =
-        new AuthenticationInfo(fromMessage.principal, fromMessage.roles, fromMessage.ticket);
+        new AuthenticationInfo(fromMessage.principal, fromMessage.roles, fromMessage.ticket());
     p.setAuthenticationInfo(subject);
     p.settings.setParams(params);
     p.setConfig(config);

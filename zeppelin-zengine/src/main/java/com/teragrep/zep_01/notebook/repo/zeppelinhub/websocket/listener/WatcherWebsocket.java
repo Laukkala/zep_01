@@ -16,6 +16,7 @@
  */
 package com.teragrep.zep_01.notebook.repo.zeppelinhub.websocket.listener;
 
+import com.teragrep.zep_01.common.MessageIdStub;
 import org.apache.commons.lang3.StringUtils;
 import com.teragrep.zep_01.notebook.repo.zeppelinhub.websocket.ZeppelinClient;
 import com.teragrep.zep_01.common.Message;
@@ -26,6 +27,8 @@ import org.eclipse.jetty.websocket.api.Session;
 import org.eclipse.jetty.websocket.api.WebSocketListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.HashMap;
 
 /**
  * Zeppelin Watcher that will forward user note to ZeppelinHub.
@@ -53,9 +56,9 @@ public class WatcherWebsocket implements WebSocketListener {
   public void onWebSocketConnect(Session session) {
     LOG.info("WatcherWebsocket connection opened");
     this.connection = session;
-    Message watcherMsg = new Message(OP.WATCHER);
+    String ticket = TicketContainer.instance.getTicketEntry(watcherPrincipal, null).getTicket();
+    Message watcherMsg = new Message(OP.WATCHER, new MessageIdStub(), new HashMap<>(), ticket);
     watcherMsg.principal = watcherPrincipal;
-    watcherMsg.ticket = TicketContainer.instance.getTicketEntry(watcherPrincipal, null).getTicket();
     session.getRemote().sendStringByFuture(watcherMsg.toJson());
   }
 

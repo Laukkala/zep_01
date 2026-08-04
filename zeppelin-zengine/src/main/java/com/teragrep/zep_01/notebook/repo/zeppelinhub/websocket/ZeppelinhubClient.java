@@ -27,6 +27,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
+import com.teragrep.zep_01.common.MessageIdStub;
 import org.apache.commons.lang3.StringUtils;
 import com.teragrep.zep_01.notebook.repo.zeppelinhub.websocket.listener.ZeppelinhubWebsocket;
 import com.teragrep.zep_01.notebook.repo.zeppelinhub.websocket.protocol.ZeppelinHubOp;
@@ -235,9 +236,10 @@ public class ZeppelinhubClient {
       return;
     }
     Map<String, Object> data = (Map<String, Object>) hubMsg.data;
-    Message zeppelinMsg = new Message(op, data);
-    zeppelinMsg.principal = hubMsg.meta.get("owner");
-    zeppelinMsg.ticket = TicketContainer.instance.getTicketEntry(zeppelinMsg.principal, null).getTicket();
+    String principal = hubMsg.meta.get("owner");
+    String ticket = TicketContainer.instance.getTicketEntry(principal, null).getTicket();
+    Message zeppelinMsg = new Message(op, new MessageIdStub(), data, ticket);
+    zeppelinMsg.principal = principal;
     Client client = Client.getInstance();
     if (client == null) {
       LOGGER.warn("Base client isn't initialized, returning");
@@ -268,9 +270,9 @@ public class ZeppelinhubClient {
           continue;
         }
         final Map<String, Object> paragraphData = gson.fromJson(paragraphs.getString(i), new TypeToken<Map<String, Object>>(){}.getType());
-        final Message zeppelinMsg = new Message(OP.RUN_PARAGRAPH, paragraphData);
+        final String ticket = TicketContainer.instance.getTicketEntry(principal, null).getTicket();
+        final Message zeppelinMsg = new Message(OP.RUN_PARAGRAPH, new MessageIdStub(), paragraphData, ticket);
         zeppelinMsg.principal = principal;
-        zeppelinMsg.ticket = TicketContainer.instance.getTicketEntry(principal, null).getTicket();
         client.relayToZeppelin(zeppelinMsg, noteId);
         LOGGER.info("\nSending RUN_PARAGRAPH message to Zeppelin ");
       }

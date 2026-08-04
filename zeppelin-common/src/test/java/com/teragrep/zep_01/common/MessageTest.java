@@ -12,7 +12,7 @@ public final class MessageTest {
     public void msgIdtest(){
         final String testId = "testId";
         final MessageIdImpl id = new MessageIdImpl(testId);
-        final Message message = new Message(Message.OP.PING, id, new HashMap<>());
+        final Message message = new Message(Message.OP.PING, id, new HashMap<>(),"anonmous");
         Assertions.assertEquals(testId,message.msgId().asString());
     }
 
@@ -20,7 +20,7 @@ public final class MessageTest {
     public void gsonSerializationTest(){
         final String testId = "testId";
         final MessageIdImpl id = new MessageIdImpl(testId);
-        final Message message = new Message(Message.OP.PING, id, new HashMap<>());
+        final Message message = new Message(Message.OP.PING, id, new HashMap<>(),"anonmous");
         final String message1Serialized = message.toJson();
 
         final Message message2 = new Message(Message.OP.PING);

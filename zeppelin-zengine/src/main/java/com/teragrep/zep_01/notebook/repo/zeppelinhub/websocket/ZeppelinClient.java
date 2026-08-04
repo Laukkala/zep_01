@@ -28,6 +28,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
+import com.teragrep.zep_01.common.MessageIdStub;
 import org.apache.commons.lang3.StringUtils;
 import com.teragrep.zep_01.common.Message;
 import com.teragrep.zep_01.conf.ZeppelinConfiguration;
@@ -168,12 +169,16 @@ public class ZeppelinClient {
   }
 
   public String serialize(Message zeppelinMsg) {
+    final String msg;
     if (credentialsAvailable()) {
-      zeppelinMsg.principal = authModule.getPrincipal();
-      zeppelinMsg.ticket = authModule.getTicket();
-      zeppelinMsg.roles = authModule.getRoles();
+      Message msgWithCredentials = new Message(zeppelinMsg.op, zeppelinMsg.msgId(), zeppelinMsg.data(),zeppelinMsg.ticket());
+      msgWithCredentials.principal = authModule.getPrincipal();
+      msgWithCredentials.roles = authModule.getRoles();
+      msg = msgWithCredentials.toJson();
     }
-    String msg = zeppelinMsg.toJson();
+    else {
+      msg = zeppelinMsg.toJson();
+    }
     return msg;
   }
 
@@ -211,7 +216,7 @@ public class ZeppelinClient {
   }
 
   public void send(Message msg, String noteId) {
-    Session noteSession = getZeppelinConnection(noteId, msg.principal, msg.ticket);
+    Session noteSession = getZeppelinConnection(noteId, msg.principal, msg.ticket());
     if (!isSessionOpen(noteSession)) {
       LOG.error("Cannot open websocket connection to Zeppelin note {}", noteId);
       return;
@@ -280,9 +285,8 @@ public class ZeppelinClient {
   private Message zeppelinGetNoteMsg(String noteId, String principal, String ticket) {
     HashMap<String, Object> data = new HashMap<String, Object>();
     data.put("id", noteId);
-    Message getNoteMsg = new Message(Message.OP.GET_NOTE, data);
+    Message getNoteMsg = new Message(Message.OP.GET_NOTE, new MessageIdStub(), data, ticket);
     getNoteMsg.principal = principal;
-    getNoteMsg.ticket = ticket;
     return getNoteMsg;
   }
 
