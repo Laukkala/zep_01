@@ -62,7 +62,7 @@ public class ConnectionManager {
       .registerTypeAdapter(Date.class, new NotebookImportDeserializer())
       .setPrettyPrinting()
       .registerTypeAdapterFactory(Input.TypeAdapterFactory)
-      .registerTypeAdapter(MessageId.class, new MessageIdSerialization())
+      .registerTypeAdapter(MessageId.class, new MessageSerialization())
       .create();
 
   final Queue<NotebookSocket> connectedSockets = new ConcurrentLinkedQueue<>();

@@ -221,7 +221,7 @@ public final class Message implements JsonSerializable {
           OP.PATCH_PARAGRAPH)));
 
   private static final Gson GSON = new GsonBuilder()
-          .registerTypeAdapter(MessageId.class,new MessageIdSerialization())
+          .registerTypeAdapter(Message.class, new MessageSerialization())
           .create();
   public static final Message EMPTY = new Message(null);
 

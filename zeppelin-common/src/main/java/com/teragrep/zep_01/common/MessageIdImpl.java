@@ -4,6 +4,7 @@ import com.google.gson.*;
 
 import javax.xml.crypto.Data;
 import java.lang.reflect.Type;
+import java.util.Objects;
 
 public class MessageIdImpl implements MessageId {
 
@@ -24,5 +25,18 @@ public class MessageIdImpl implements MessageId {
     @Override
     public boolean isStub() {
         return false;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        MessageIdImpl messageId = (MessageIdImpl) o;
+        return Objects.equals(id, messageId.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
     }
 }
