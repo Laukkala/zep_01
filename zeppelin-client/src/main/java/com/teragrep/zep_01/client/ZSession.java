@@ -125,8 +125,9 @@ public class ZSession {
               .replace("https", "ws").replace("http", "ws") + "/ws");
 
       // call GET_NOTE to establish websocket connection between this session and zeppelin-server
-      Message msg = new Message(Message.OP.GET_NOTE);
-      msg.put("id", getNoteId());
+      HashMap<String, Object> msgData = new HashMap<>();
+      msgData.put("id", getNoteId());
+      Message msg = new Message(Message.OP.GET_NOTE,msgData);
       this.webSocketClient.send(msg);
     }
   }
@@ -184,8 +185,9 @@ public class ZSession {
               .replace("https", "ws").replace("http", "ws") + "/ws");
 
       // call GET_NOTE to establish websocket connection between this session and zeppelin-server
-      Message msg = new Message(Message.OP.GET_NOTE);
-      msg.put("id", getNoteId());
+      HashMap<String, Object> msgData = new HashMap<>();
+      msgData.put("id", getNoteId());
+      Message msg = new Message(Message.OP.GET_NOTE, msgData);
       this.webSocketClient.send(msg);
     }
   }

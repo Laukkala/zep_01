@@ -33,6 +33,7 @@ import com.teragrep.zep_01.notebook.AuthorizationService;
 import com.teragrep.zep_01.notebook.socket.WatcherMessage;
 import com.teragrep.zep_01.user.AuthenticationInfo;
 import com.teragrep.zep_01.util.WatcherSecurityKey;
+import org.apache.shiro.crypto.hash.Hash;
 import org.eclipse.jetty.websocket.api.WebSocketException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -181,14 +182,15 @@ public class ConnectionManager {
     }
     boolean collaborativeStatus = socketList.size() > 1;
     if (collaborativeStatus) {
-      Message message = new Message(Message.OP.COLLABORATIVE_MODE_STATUS);
-      message.put("status", collaborativeStatus);
+      HashMap<String, Object> msgData = new HashMap<>();
+      msgData.put("status", collaborativeStatus);
       // Create a list of users for the response
       HashSet<String> userList = new HashSet<>();
       for (NotebookSocket noteSocket : socketList) {
         userList.add(noteSocket.getUser());
       }
-      message.put("users", userList);
+      msgData.put("users", userList);
+      Message message = new Message(Message.OP.COLLABORATIVE_MODE_STATUS, msgData);
       broadcast(noteId, message);
     }
   }
@@ -334,7 +336,9 @@ public class ConnectionManager {
     }
 
     for (NotebookSocket conn : userSocketMap.get(user)) {
-      Message m = new Message(Message.OP.PARAGRAPH, msgId).put("paragraph", p);
+      HashMap<String, Object> msgData = new HashMap<>();
+      msgData.put("paragraph", p);
+      Message m = new Message(Message.OP.PARAGRAPH, msgId, msgData);
       unicast(m, conn);
     }
   }
@@ -363,12 +367,16 @@ public class ConnectionManager {
       userAndRoles.add(user);
       // TODO(zjffdu) is it ok for comment the following line ?
       // notesInfo = generateNotesInfo(false, new AuthenticationInfo(user), userAndRoles);
-      multicastToUser(user, new Message(Message.OP.NOTES_INFO).put("notes", notesInfo));
+      HashMap<String, Object> msgData = new HashMap<>();
+      msgData.put("notes", notesInfo);
+      multicastToUser(user, new Message(Message.OP.NOTES_INFO, msgData));
     }
   }
 
   public void broadcastNote(Note note) {
-    broadcast(note.getId(), new Message(Message.OP.NOTE).put("note", note));
+    HashMap<String, Object> msgData = new HashMap<>();
+    msgData.put("note",note);
+    broadcast(note.getId(), new Message(Message.OP.NOTE, msgData));
   }
 
   public void broadcastParagraph(Note note, Paragraph p) {
@@ -377,15 +385,19 @@ public class ConnectionManager {
     if (note.isPersonalizedMode()) {
       broadcastParagraphs(p.getUserParagraphMap());
     } else {
-      broadcast(note.getId(), new Message(Message.OP.PARAGRAPH).put("paragraph", p));
+      HashMap<String, Object> msgData = new HashMap<>();
+      msgData.put("paragraph", p);
+      broadcast(note.getId(), new Message(Message.OP.PARAGRAPH, msgData));
     }
   }
 
   public void broadcastParagraphs(Map<String, Paragraph> userParagraphMap) {
     if (null != userParagraphMap) {
       for (String user : userParagraphMap.keySet()) {
+        HashMap<String, Object> msgData = new HashMap<>();
+        msgData.put("paragraph", userParagraphMap.get(user));
         multicastToUser(user,
-            new Message(Message.OP.PARAGRAPH).put("paragraph", userParagraphMap.get(user)));
+            new Message(Message.OP.PARAGRAPH, msgData));
       }
     }
   }
@@ -393,8 +405,11 @@ public class ConnectionManager {
   private void broadcastNewParagraph(Note note, Paragraph para) {
     LOGGER.info("Broadcasting paragraph on run call instead of note.");
     int paraIndex = note.getParagraphs().indexOf(para);
+    HashMap<String, Object> msgData = new HashMap<>();
+    msgData.put("paragraph", para);
+    msgData.put("index", paraIndex);
     broadcast(note.getId(),
-        new Message(Message.OP.PARAGRAPH_ADDED).put("paragraph", para).put("index", paraIndex));
+        new Message(Message.OP.PARAGRAPH_ADDED, msgData));
   }
 
   //  public void broadcastNoteList(AuthenticationInfo subject, Set<String> userAndRoles) {
@@ -414,8 +429,9 @@ public class ConnectionManager {
     GUI formsSettings = new GUI();
     formsSettings.setForms(note.getNoteForms());
     formsSettings.setParams(note.getNoteParams());
-    broadcast(note.getId(), new Message(Message.OP.SAVE_NOTE_FORMS)
-        .put("formsData", formsSettings));
+    HashMap<String, Object> msgData = new HashMap<>();
+    msgData.put("formsData", formsSettings);
+    broadcast(note.getId(), new Message(Message.OP.SAVE_NOTE_FORMS, msgData));
   }
 
   public void switchConnectionToWatcher(NotebookSocket conn) {

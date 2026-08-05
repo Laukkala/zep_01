@@ -38,6 +38,7 @@ import com.teragrep.zep_01.interpreter.remote.RemoteInterpreter;
 import com.teragrep.zep_01.rest.exception.BadRequestException;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
+import org.apache.shiro.crypto.hash.Hash;
 import org.apache.thrift.TException;
 import com.teragrep.zep_01.conf.ZeppelinConfiguration;
 import com.teragrep.zep_01.interpreter.remote.RemoteAngularObjectRegistry;
@@ -252,7 +253,9 @@ public class NotebookServer extends WebSocketServlet
         /* not to pollute logs, log instead of exception */
         LOG.debug("{} message: invalid ticket {} != {}", receivedMessage.op, receivedMessage.ticket(), ticketEntry.getTicket());
         if (!receivedMessage.op.equals(OP.PING)) {
-          conn.send(serializeMessage(new Message(OP.SESSION_LOGOUT).put("info", "Your ticket is invalid possibly due to server restart. Please login again.")));
+          HashMap<String, Object> msgData = new HashMap<>();
+          msgData.put("info", "Your ticket is invalid possibly due to server restart. Please login again.");
+          conn.send(serializeMessage(new Message(OP.SESSION_LOGOUT, msgData)));
         }
 
         return;
@@ -446,7 +449,9 @@ public class NotebookServer extends WebSocketServlet
     } catch (Exception e) {
       LOG.error("Can't handle message: " + msg, e);
       try {
-        conn.send(serializeMessage(new Message(OP.ERROR_INFO).put("info", e.getMessage())));
+        HashMap<String, Object> msgData = new HashMap<>();
+        msgData.put("info", e.getMessage());
+        conn.send(serializeMessage(new Message(OP.ERROR_INFO,msgData)));
       } catch (IOException iox) {
         LOG.error("Fail to send error info", iox);
       }
@@ -487,7 +492,9 @@ public class NotebookServer extends WebSocketServlet
             Map<String, Object> response = new HashMap<>();
             response.put("lastResponseUnixTime", System.currentTimeMillis());
             response.put("jobs", notesJobInfo);
-            conn.send(serializeMessage(new Message(OP.LIST_NOTE_JOBS).put("noteJobs", response)));
+            HashMap<String, Object> msgData = new HashMap<>();
+            msgData.put("noteJobs", response);
+            conn.send(serializeMessage(new Message(OP.LIST_NOTE_JOBS, msgData)));
           }
 
           @Override
@@ -509,8 +516,10 @@ public class NotebookServer extends WebSocketServlet
             Map<String, Object> response = new HashMap<>();
             response.put("lastResponseUnixTime", System.currentTimeMillis());
             response.put("jobs", notesJobInfo);
+            HashMap<String, Object> msgData = new HashMap<>();
+            msgData.put("noteRunningJobs", response);
             getConnectionManager().broadcast(JobManagerServiceType.JOB_MANAGER_PAGE.getKey(),
-                new Message(OP.LIST_UPDATE_NOTE_JOBS).put("noteRunningJobs", response));
+                new Message(OP.LIST_UPDATE_NOTE_JOBS, msgData));
           }
 
           @Override
@@ -538,8 +547,10 @@ public class NotebookServer extends WebSocketServlet
                 setting.getInterpreterInfos(), true));
       }
     }
+    HashMap<String, Object> msgData = new HashMap<>();
+    msgData.put("interpreterBindings", settingList);
     conn.send(serializeMessage(
-        new Message(OP.INTERPRETER_BINDINGS).put("interpreterBindings", settingList)));
+        new Message(OP.INTERPRETER_BINDINGS,msgData)));
   }
 
   public void saveInterpreterBindings(NotebookSocket conn, ServiceContext context, Message fromMessage) throws IOException {
@@ -562,8 +573,10 @@ public class NotebookServer extends WebSocketServlet
       }
     }
 
+    HashMap<String, Object> msgData = new HashMap<>();
+    msgData.put("interpreterBindings", settingList);
     conn.send(serializeMessage(
-            new Message(OP.INTERPRETER_BINDINGS).put("interpreterBindings", settingList)));
+            new Message(OP.INTERPRETER_BINDINGS, msgData)));
   }
 
   public void broadcastNote(Note note) {
@@ -571,7 +584,9 @@ public class NotebookServer extends WebSocketServlet
   }
 
   private void inlineBroadcastNote(Note note) {
-    Message message = new Message(OP.NOTE).put("note", note);
+    HashMap<String, Object> msgData = new HashMap<>();
+    msgData.put("note", note);
+    Message message = new Message(OP.NOTE, msgData);
     getConnectionManager().broadcast(note.getId(), message);
   }
 
@@ -581,7 +596,9 @@ public class NotebookServer extends WebSocketServlet
     if (note.isPersonalizedMode()) {
       broadcastParagraphs(p.getUserParagraphMap(), p, msgId);
     } else {
-      Message message = new Message(OP.PARAGRAPH, msgId).put("paragraph", p);
+      HashMap<String, Object> msgData = new HashMap<>();
+      msgData.put("paragraph", p);
+      Message message = new Message(OP.PARAGRAPH, msgId, msgData);
       getConnectionManager().broadcast(note.getId(), message);
     }
   }
@@ -594,7 +611,9 @@ public class NotebookServer extends WebSocketServlet
                                          MessageId msgId) {
     if (null != userParagraphMap) {
       for (String user : userParagraphMap.keySet()) {
-        Message message = new Message(OP.PARAGRAPH, msgId).put("paragraph", userParagraphMap.get(user));
+        HashMap<String, Object> msgData = new HashMap<>();
+        msgData.put("paragraph", userParagraphMap.get(user));
+        Message message = new Message(OP.PARAGRAPH, msgId, msgData);
         getConnectionManager().multicastToUser(user, message);
       }
     }
@@ -610,7 +629,10 @@ public class NotebookServer extends WebSocketServlet
     LOG.info("Broadcasting paragraph on run call instead of note.");
     int paraIndex = note.getParagraphs().indexOf(para);
 
-    Message message = new Message(OP.PARAGRAPH_ADDED).put("paragraph", para).put("index", paraIndex);
+    HashMap<String, Object> msgData = new HashMap<>();
+    msgData.put("paragraph", para);
+    msgData.put("index", paraIndex);
+    Message message = new Message(OP.PARAGRAPH_ADDED, msgData);
     getConnectionManager().broadcast(note.getId(), message);
   }
 
@@ -629,8 +651,10 @@ public class NotebookServer extends WebSocketServlet
       List<NoteInfo> notesInfo = getNotebook().getNotesInfo(
           noteId -> authorizationService.isReader(noteId, userAndRoles));
 
+      HashMap<String, Object> msgData = new HashMap<>();
+      msgData.put("notes", notesInfo);
       getConnectionManager().multicastToUser(user,
-        new Message(OP.NOTES_INFO).put("notes", notesInfo));
+        new Message(OP.NOTES_INFO, msgData));
     });
   }
 
@@ -645,7 +669,9 @@ public class NotebookServer extends WebSocketServlet
           public void onSuccess(List<NoteInfo> notesInfo,
                                 ServiceContext context) throws IOException {
             super.onSuccess(notesInfo, context);
-            getConnectionManager().unicast(new Message(OP.NOTES_INFO).put("notes", notesInfo), conn);
+            HashMap<String, Object> msgData = new HashMap<>();
+            msgData.put("notes", notesInfo);
+            getConnectionManager().unicast(new Message(OP.NOTES_INFO,msgData), conn);
           }
         });
   }
@@ -660,10 +686,12 @@ public class NotebookServer extends WebSocketServlet
                        Set<String> allowed) throws IOException {
     LOG.info("Cannot {}. Connection readers {}. Allowed readers {}", op, userAndRoles, allowed);
 
-    conn.send(serializeMessage(new Message(OP.AUTH_INFO).put("info",
-        "Insufficient privileges to " + op + " note.\n\n" + "Allowed users or roles: " + allowed
-            .toString() + "\n\n" + "But the user " + userName + " belongs to: " + userAndRoles
-            .toString())));
+    HashMap<String, Object> msgData = new HashMap<>();
+    msgData.put("info",
+            "Insufficient privileges to " + op + " note.\n\n" + "Allowed users or roles: " + allowed
+                    .toString() + "\n\n" + "But the user " + userName + " belongs to: " + userAndRoles
+                    .toString());
+    conn.send(serializeMessage(new Message(OP.AUTH_INFO, msgData)));
   }
 
 
@@ -695,7 +723,9 @@ public class NotebookServer extends WebSocketServlet
           @Override
           public void onSuccess(Note note, ServiceContext context) throws IOException {
             getConnectionManager().addNoteConnection(note.getId(), conn);
-            conn.send(serializeMessage(new Message(OP.NOTE).put("note", note)));
+            HashMap<String, Object> msgData = new HashMap<>();
+            msgData.put("note", note);
+            conn.send(serializeMessage(new Message(OP.NOTE,msgData)));
             updateAngularObjectRegistry(conn, note);
             sendAllAngularObjects(note, context.getAutheInfo().getUser(), conn);
           }
@@ -712,7 +742,9 @@ public class NotebookServer extends WebSocketServlet
               @Override
               public void onSuccess(Note note, ServiceContext context) throws IOException {
                 getConnectionManager().addNoteConnection(note.getId(), conn);
-                conn.send(serializeMessage(new Message(OP.NOTE).put("note", note)));
+                HashMap<String, Object> msgData = new HashMap<>();
+                msgData.put("note", note);
+                conn.send(serializeMessage(new Message(OP.NOTE, msgData)));
                 updateAngularObjectRegistry(conn, note);
                 sendAllAngularObjects(note, context.getAutheInfo().getUser(), conn);
               }
@@ -757,11 +789,15 @@ public class NotebookServer extends WebSocketServlet
             super.onSuccess(note, context);
             if (note != null) {
               getConnectionManager().addNoteConnection(note.getId(), conn);
-              conn.send(serializeMessage(new Message(OP.NOTE).put("note", note)));
+              HashMap<String, Object> msgData = new HashMap<>();
+              msgData.put("note", note);
+              conn.send(serializeMessage(new Message(OP.NOTE, msgData)));
               sendAllAngularObjects(note, context.getAutheInfo().getUser(), conn);
             } else {
+              HashMap<String, Object> msgData = new HashMap<>();
+              msgData.put("note", null);
               getConnectionManager().removeConnectionFromAllNote(conn);
-              conn.send(serializeMessage(new Message(OP.NOTE).put("note", null)));
+              conn.send(serializeMessage(new Message(OP.NOTE, msgData)));
             }
           }
         });
@@ -784,9 +820,11 @@ public class NotebookServer extends WebSocketServlet
         new WebSocketServiceCallback<Note>(conn) {
           @Override
           public void onSuccess(Note note, ServiceContext context) throws IOException {
-            getConnectionManager().broadcast(note.getId(), new Message(OP.NOTE_UPDATED).put("name", name)
-                .put("config", config)
-                .put("info", note.getInfo()));
+            HashMap<String, Object> msgData = new HashMap<>();
+            msgData.put("name", name);
+            msgData.put("config", config);
+            msgData.put("info", note.getInfo());
+            getConnectionManager().broadcast(note.getId(), new Message(OP.NOTE_UPDATED, msgData));
             broadcastNoteList(context.getAutheInfo(), context.getUserAndRoles());
           }
         });
@@ -868,15 +906,19 @@ public class NotebookServer extends WebSocketServlet
           public void onSuccess(Note note, ServiceContext context) throws IOException {
             super.onSuccess(note, context);
             getConnectionManager().addNoteConnection(note.getId(), conn);
-            conn.send(serializeMessage(new Message(OP.NEW_NOTE).put("note", note)));
+            HashMap<String, Object> msgData = new HashMap<>();
+            msgData.put("note", note);
+            conn.send(serializeMessage(new Message(OP.NEW_NOTE, msgData)));
             broadcastNoteList(context.getAutheInfo(), context.getUserAndRoles());
           }
 
           @Override
           public void onFailure(Exception ex, ServiceContext context) throws IOException {
             super.onFailure(ex, context);
-            conn.send(serializeMessage(new Message(OP.ERROR_INFO).put("info",
-                "Failed to create note.\n" + ExceptionUtils.getMessage(ex))));
+            HashMap<String, Object> msgData = new HashMap<>();
+            msgData.put("info",
+                    "Failed to create note.\n" + ExceptionUtils.getMessage(ex));
+            conn.send(serializeMessage(new Message(OP.ERROR_INFO, msgData)));
           }
         });
   }
@@ -1062,8 +1104,10 @@ public class NotebookServer extends WebSocketServlet
           @Override
           public void onSuccess(String result, ServiceContext context) throws IOException {
             super.onSuccess(result, context);
-            Message message = new Message(OP.PATCH_PARAGRAPH).put("patch", result)
-                .put("paragraphId", paragraphId);
+            HashMap<String, Object> msgData = new HashMap<>();
+            msgData.put("patch", result);
+            msgData.put("paragraphId", paragraphId);
+            Message message = new Message(OP.PATCH_PARAGRAPH, msgData);
             getConnectionManager().broadcastExcept(noteId2, message, conn);
           }
         });
@@ -1080,7 +1124,9 @@ public class NotebookServer extends WebSocketServlet
           public void onSuccess(Note newNote, ServiceContext context) throws IOException {
             super.onSuccess(newNote, context);
             getConnectionManager().addNoteConnection(newNote.getId(), conn);
-            conn.send(serializeMessage(new Message(OP.NEW_NOTE).put("note", newNote)));
+            HashMap<String, Object> msgData = new HashMap<>();
+            msgData.put("note", newNote);
+            conn.send(serializeMessage(new Message(OP.NEW_NOTE, msgData)));
             broadcastNoteList(context.getAutheInfo(), context.getUserAndRoles());
           }
         });
@@ -1130,30 +1176,34 @@ public class NotebookServer extends WebSocketServlet
     // If any other type of Exception is thrown (indicating some other problem), it will be caught by NotebookServer.onMessage() and result in an ERROR_INFO message.
     try{
       String dataset = ((ManagedInterpreterGroup)interpreterGroup).getDataset(sessionId,interpreter.getClassName(),noteId,paragraphId,start,length,search,draw);
-      Message msg = new Message(Message.OP.PARAGRAPH_UPDATE_OUTPUT, msgId)
-              .put("data",dataset)
-              .put("index",0)
-              .put("noteid",noteId)
-              .put("paragraphId",paragraphId)
-              .put("type",InterpreterResult.Type.JSONTABLE);
+      HashMap<String, Object> msgData = new HashMap<>();
+      msgData.put("data",dataset);
+      msgData.put("index",0);
+      msgData.put("noteid",noteId);
+      msgData.put("paragraphId",paragraphId);
+      msgData.put("type",InterpreterResult.Type.JSONTABLE);
+      Message msg = new Message(Message.OP.PARAGRAPH_UPDATE_OUTPUT, msgId, msgData);
       conn.send(serializeMessage(msg));
     }
     catch (InterpreterException exception){
       // Log the Exception to technical logs, only send a generic error message to UI.
-      LOG.error("Failed to access data from Interpreter process for note: {} paragraph: {} cause: {}",noteId,paragraphId,exception);
+      LOG.error("Failed to access data from Interpreter process for note: {} paragraph: {} cause: ",noteId,paragraphId,exception);
       LinkedHashMap data = new LinkedHashMap();
       data.put("error",true);
       data.put("message","Failed to access data from Interpreter process. Please rerun the paragraph or see technical log for details!");
       data.put("draw",draw);
       data.put("recordsTotal",0);
       data.put("recordsFiltered",0);
-      Message msg = new Message(Message.OP.PARAGRAPH_UPDATE_OUTPUT, msgId)
-              .put("data",data)
-              .put("draw",0)
-              .put("type",InterpreterResult.Type.JSONTABLE.toString())
-              .put("index",0)
-              .put("noteId", noteId)
-              .put("paragraphId", paragraphId);
+
+      HashMap<String,Object> msgData = new HashMap<>();
+      msgData.put("data",data);
+      msgData.put("draw",0);
+      msgData.put("type",InterpreterResult.Type.JSONTABLE.toString());
+      msgData.put("index",0);
+      msgData.put("noteId", noteId);
+      msgData.put("paragraphId", paragraphId);
+      Message msg = new Message(Message.OP.PARAGRAPH_UPDATE_OUTPUT, msgId, msgData);
+
       conn.send(serializeMessage(msg));
     }
   }
@@ -1211,8 +1261,9 @@ public class NotebookServer extends WebSocketServlet
           @Override
           public void onSuccess(Paragraph p, ServiceContext context) throws IOException {
             super.onSuccess(p, context);
-            getConnectionManager().broadcast(p.getNote().getId(), new Message(OP.PARAGRAPH_REMOVED).
-                put("id", p.getId()));
+            HashMap<String, Object> msgData = new HashMap<>();
+            msgData.put("id", p.getId());
+            getConnectionManager().broadcast(p.getNote().getId(), new Message(OP.PARAGRAPH_REMOVED, msgData));
           }
         });
   }
@@ -1249,23 +1300,28 @@ public class NotebookServer extends WebSocketServlet
           public void onSuccess(List<InterpreterCompletion> completions, ServiceContext context)
               throws IOException {
             super.onSuccess(completions, context);
-            Message resp = new Message(OP.COMPLETION_LIST).put("id", paragraphId);
-            resp.put("completions", completions);
+            HashMap<String, Object> msgData = new HashMap<>();
+            msgData.put("id", paragraphId);
+            msgData.put("completions", completions);
+            Message resp = new Message(OP.COMPLETION_LIST, msgData);
             conn.send(serializeMessage(resp));
           }
 
           @Override
           public void onFailure(Exception ex, ServiceContext context) throws IOException {
             super.onFailure(ex, context);
-            Message resp = new Message(OP.COMPLETION_LIST).put("id", paragraphId);
-            resp.put("completions", new ArrayList<>());
+            HashMap<String, Object> msgData = new HashMap<>();
+            msgData.put("id", paragraphId);
+            msgData.put("completions", new ArrayList<>());
+            Message resp = new Message(OP.COMPLETION_LIST, msgData);
             conn.send(serializeMessage(resp));
           }
         });
   }
 
   private void sendPong(NotebookSocket conn, Message fromMessage) throws IOException {
-    conn.send(serializeMessage(new Message(OP.PONG).put("msgId", fromMessage.msgId())));
+    MessageId msgId = fromMessage.msgId();
+    conn.send(serializeMessage(new Message(OP.PONG, msgId)));
   }
 
   /**
@@ -1291,10 +1347,14 @@ public class NotebookServer extends WebSocketServlet
           @Override
           public void onSuccess(AngularObject ao, ServiceContext context) throws IOException {
             super.onSuccess(ao, context);
+            HashMap<String, Object> msgData = new HashMap<>();
+            msgData.put("angularObject", ao);
+            msgData.put("interpreterGroupId", interpreterGroupId);
+            msgData.put("noteId", noteId);
+            msgData.put("paragraphId", ao.getParagraphId());
+
             getConnectionManager().broadcastExcept(noteId,
-                new Message(OP.ANGULAR_OBJECT_UPDATE).put("angularObject", ao)
-                    .put("interpreterGroupId", interpreterGroupId).put("noteId", noteId)
-                    .put("paragraphId", ao.getParagraphId()), conn);
+                new Message(OP.ANGULAR_OBJECT_UPDATE, msgData), conn);
             Note note = getNotebook().getNote(noteId);
             note.addOrUpdateAngularObject(interpreterGroupId, ao);
           }
@@ -1373,11 +1433,12 @@ public class NotebookServer extends WebSocketServlet
     final AngularObject ao =
         remoteRegistry.addAndNotifyRemoteProcess(varName, varValue, noteId, paragraphId);
 
-    getConnectionManager().broadcastExcept(noteId, new Message(OP.ANGULAR_OBJECT_UPDATE)
-        .put("angularObject", ao)
-        .put("interpreterGroupId", interpreterGroupId).put("noteId", noteId)
-        .put("paragraphId", paragraphId), conn);
-
+    HashMap<String, Object> msgData = new HashMap<>();
+    msgData.put("angularObject", ao);
+    msgData.put("interpreterGroupId", interpreterGroupId);
+    msgData.put("noteId", noteId);
+    msgData.put("paragraphId", paragraphId);
+    getConnectionManager().broadcastExcept(noteId, new Message(OP.ANGULAR_OBJECT_UPDATE, msgData), conn);
     return ao;
   }
 
@@ -1387,10 +1448,12 @@ public class NotebookServer extends WebSocketServlet
                                                NotebookSocket conn) {
     final AngularObject ao =
         remoteRegistry.removeAndNotifyRemoteProcess(varName, noteId, paragraphId);
-    getConnectionManager().broadcastExcept(noteId, new Message(OP.ANGULAR_OBJECT_REMOVE)
-        .put("angularObject", ao)
-        .put("interpreterGroupId", interpreterGroupId).put("noteId", noteId)
-        .put("paragraphId", paragraphId), conn);
+    HashMap<String, Object> msgData = new HashMap<>();
+    msgData.put("angularObject", ao);
+    msgData.put("interpreterGroupId", interpreterGroupId);
+    msgData.put("noteId", noteId);
+    msgData.put("paragraphId", paragraphId);
+    getConnectionManager().broadcastExcept(noteId, new Message(OP.ANGULAR_OBJECT_REMOVE, msgData), conn);
 
     return ao;
   }
@@ -1406,8 +1469,11 @@ public class NotebookServer extends WebSocketServlet
           @Override
           public void onSuccess(Paragraph result, ServiceContext context) throws IOException {
             super.onSuccess(result, context);
+            HashMap<String, Object> msgData = new HashMap<>();
+            msgData.put("id", paragraphId);
+            msgData.put("index", newIndex);
             getConnectionManager().broadcast(result.getNote().getId(),
-                new Message(OP.PARAGRAPH_MOVED).put("id", paragraphId).put("index", newIndex));
+                new Message(OP.PARAGRAPH_MOVED, msgData));
           }
         });
   }
@@ -1444,9 +1510,11 @@ public class NotebookServer extends WebSocketServlet
     if (newParaId == null) {
       return;
     }
-    fromMessage.put("id", newParaId);
+    Map<String, Object> msgData = fromMessage.data();
+    msgData.put("id", newParaId);
 
-    updateParagraph(conn, context, fromMessage);
+    Message modifiedMessage = new Message(fromMessage.op,fromMessage.msgId(),msgData,fromMessage.principal(),fromMessage.ticket(),fromMessage.roles());
+    updateParagraph(conn, context, modifiedMessage);
   }
 
   private void cancelParagraph(NotebookSocket conn, ServiceContext context, Message fromMessage) throws IOException {
@@ -1495,8 +1563,10 @@ public class NotebookServer extends WebSocketServlet
           public void onSuccess(Paragraph p, ServiceContext context) throws IOException {
             super.onSuccess(p, context);
             // broadcast to other clients only
+            HashMap<String, Object> msgData = new HashMap<>();
+            msgData.put("paragraph", p);
             getConnectionManager().broadcastExcept(p.getNote().getId(),
-                new Message(OP.RUN_PARAGRAPH_USING_SPELL).put("paragraph", p), conn);
+                new Message(OP.RUN_PARAGRAPH_USING_SPELL, msgData), conn);
           }
         });
   }
@@ -1545,8 +1615,10 @@ public class NotebookServer extends WebSocketServlet
                                 ServiceContext context) throws IOException {
             super.onSuccess(properties, context);
             properties.put("isRevisionSupported", String.valueOf(getNotebook().isRevisionSupported()));
+            HashMap<String, Object> msgData = new HashMap<>();
+            msgData.put("configurations", properties);
             conn.send(serializeMessage(
-                new Message(OP.CONFIGURATIONS_INFO).put("configurations", properties)));
+                new Message(OP.CONFIGURATIONS_INFO, msgData)));
           }
         });
   }
@@ -1567,13 +1639,16 @@ public class NotebookServer extends WebSocketServlet
               List<Revision> revisions =
                   getNotebook().listRevisionHistory(noteId, getNotebook().getNote(noteId).getPath(),
                       context.getAutheInfo());
+              HashMap<String, Object> msgData = new HashMap<>();
+              msgData.put("revisionList", revisions);
               conn.send(
-                  serializeMessage(new Message(OP.LIST_REVISION_HISTORY).put("revisionList",
-                      revisions)));
+                  serializeMessage(new Message(OP.LIST_REVISION_HISTORY, msgData)));
             } else {
-              conn.send(serializeMessage(new Message(OP.ERROR_INFO).put("info",
-                  "Couldn't checkpoint note revision: possibly no changes found or storage doesn't support versioning. "
-                      + "Please check the logs for more details.")));
+              HashMap<String, Object> msgData = new HashMap<>();
+              msgData.put("info",
+                      "Couldn't checkpoint note revision: possibly no changes found or storage doesn't support versioning. "
+                              + "Please check the logs for more details.");
+              conn.send(serializeMessage(new Message(OP.ERROR_INFO, msgData)));
             }
           }
         });
@@ -1590,8 +1665,10 @@ public class NotebookServer extends WebSocketServlet
           public void onSuccess(List<Revision> revisions, ServiceContext context)
               throws IOException {
             super.onSuccess(revisions, context);
+            HashMap<String, Object> msgData = new HashMap<>();
+            msgData.put("revisionList", revisions);
             conn.send(serializeMessage(
-                new Message(OP.LIST_REVISION_HISTORY).put("revisionList", revisions)));
+                new Message(OP.LIST_REVISION_HISTORY, msgData)));
           }
         });
   }
@@ -1607,7 +1684,9 @@ public class NotebookServer extends WebSocketServlet
           public void onSuccess(Note note, ServiceContext context) throws IOException {
             super.onSuccess(note, context);
             Note reloadedNote = getNotebook().loadNoteFromRepo(noteId, context.getAutheInfo());
-            conn.send(serializeMessage(new Message(OP.SET_NOTE_REVISION).put("status", true)));
+            HashMap<String, Object> msgData = new HashMap<>();
+            msgData.put("status", true);
+            conn.send(serializeMessage(new Message(OP.SET_NOTE_REVISION, msgData)));
             broadcastNote(reloadedNote);
           }
         });
@@ -1624,9 +1703,12 @@ public class NotebookServer extends WebSocketServlet
           @Override
           public void onSuccess(Note note, ServiceContext context) throws IOException {
             super.onSuccess(note, context);
+            HashMap<String, Object> msgData = new HashMap<>();
+            msgData.put("noteId", noteId);
+            msgData.put("revisionId", revisionId);
+            msgData.put("note", note);
             conn.send(serializeMessage(
-                new Message(OP.NOTE_REVISION).put("noteId", noteId).put("revisionId", revisionId)
-                    .put("note", note)));
+                new Message(OP.NOTE_REVISION, msgData)));
           }
         });
   }
@@ -1642,9 +1724,13 @@ public class NotebookServer extends WebSocketServlet
           @Override
           public void onSuccess(Note note, ServiceContext context) throws IOException {
             super.onSuccess(note, context);
+            HashMap<String, Object> msgData = new HashMap<>();
+            msgData.put("noteId", noteId);
+            msgData.put("revisionId", revisionId);
+            msgData.put("position", position);
+            msgData.put("note", note);
             conn.send(serializeMessage(
-                new Message(OP.NOTE_REVISION_FOR_COMPARE).put("noteId", noteId)
-                    .put("revisionId", revisionId).put("position", position).put("note", note)));
+                new Message(OP.NOTE_REVISION_FOR_COMPARE, msgData)));
           }
         });
   }
@@ -1659,8 +1745,12 @@ public class NotebookServer extends WebSocketServlet
     if (!sendParagraphStatusToFrontend) {
       return;
     }
-    Message msg = new Message(OP.PARAGRAPH_APPEND_OUTPUT).put("noteId", noteId)
-        .put("paragraphId", paragraphId).put("index", index).put("data", output);
+    HashMap<String, Object> msgData = new HashMap<>();
+    msgData.put("noteId", noteId);
+    msgData.put("paragraphId", paragraphId);
+    msgData.put("index", index);
+    msgData.put("data", output);
+    Message msg = new Message(OP.PARAGRAPH_APPEND_OUTPUT, msgData);
     getConnectionManager().broadcast(noteId, msg);
   }
 
@@ -1675,8 +1765,13 @@ public class NotebookServer extends WebSocketServlet
     if (!sendParagraphStatusToFrontend) {
       return;
     }
-    Message msg = new Message(OP.PARAGRAPH_UPDATE_OUTPUT).put("noteId", noteId)
-        .put("paragraphId", paragraphId).put("index", index).put("type", type).put("data", output);
+    HashMap<String, Object> msgData = new HashMap<>();
+    msgData.put("noteId", noteId);
+    msgData.put("paragraphId", paragraphId);
+    msgData.put("index", index);
+    msgData.put("type", type);
+    msgData.put("data", output);
+    Message msg = new Message(OP.PARAGRAPH_UPDATE_OUTPUT, msgData);
     try {
       Note note = getNotebook().getNote(noteId);
       if (note == null) {
@@ -1854,8 +1949,10 @@ public class NotebookServer extends WebSocketServlet
       Map<String, Object> response = new HashMap<>();
       response.put("lastResponseUnixTime", System.currentTimeMillis());
       response.put("jobs", notesJobInfo);
+      HashMap<String, Object> msgData = new HashMap<>();
+      msgData.put("noteRunningJobs", response);
       getConnectionManager().broadcast(JobManagerServiceType.JOB_MANAGER_PAGE.getKey(),
-          new Message(OP.LIST_UPDATE_NOTE_JOBS).put("noteRunningJobs", response));
+          new Message(OP.LIST_UPDATE_NOTE_JOBS, msgData));
     }
   }
 
@@ -1865,8 +1962,11 @@ public class NotebookServer extends WebSocketServlet
     if (!sendParagraphStatusToFrontend) {
       return;
     }
+    HashMap<String, Object> msgData = new HashMap<>();
+    msgData.put("id", p.getId());
+    msgData.put("progress", progress);
     getConnectionManager().broadcast(p.getNote().getId(),
-        new Message(OP.PROGRESS).put("id", p.getId()).put("progress", progress));
+        new Message(OP.PROGRESS, msgData));
   }
 
   @Override
@@ -1921,10 +2021,11 @@ public class NotebookServer extends WebSocketServlet
 
   @Override
   public void noteRunningStatusChange(String noteId, boolean newStatus) {
+    HashMap<String, Object> msgData = new HashMap<>();
+    msgData.put("status", newStatus);
     getConnectionManager().broadcast(
         noteId,
-        new Message(OP.NOTE_RUNNING_STATUS
-        ).put("status", newStatus));
+        new Message(OP.NOTE_RUNNING_STATUS, msgData));
   }
 
   private void sendAllAngularObjects(Note note, String user, NotebookSocket conn)
@@ -1943,11 +2044,13 @@ public class NotebookServer extends WebSocketServlet
           intpSetting.getInterpreterGroup(user, note.getId()).getAngularObjectRegistry();
       List<AngularObject> objects = registry.getAllWithGlobal(note.getId());
       for (AngularObject object : objects) {
+        HashMap<String, Object> msgData = new HashMap<>();
+        msgData.put("angularObject", object);
+        msgData.put("interpreterGroupId", intpSetting.getInterpreterGroup(user, note.getId()).getId());
+        msgData.put("noteId", note.getId());
+        msgData.put("paragraphId", object.getParagraphId());
         conn.send(serializeMessage(
-            new Message(OP.ANGULAR_OBJECT_UPDATE).put("angularObject", object)
-                .put("interpreterGroupId",
-                    intpSetting.getInterpreterGroup(user, note.getId()).getId())
-                .put("noteId", note.getId()).put("paragraphId", object.getParagraphId())));
+            new Message(OP.ANGULAR_OBJECT_UPDATE, msgData)));
       }
     }
   }
@@ -1989,10 +2092,12 @@ public class NotebookServer extends WebSocketServlet
     if (intpSettings.isEmpty()) {
       return;
     }
-    getConnectionManager().broadcast(note.getId(), new Message(OP.ANGULAR_OBJECT_UPDATE)
-            .put("angularObject", angularObject)
-            .put("interpreterGroupId", interpreterGroupId).put("noteId", note.getId())
-            .put("paragraphId", angularObject.getParagraphId()));
+    HashMap<String, Object> msgData = new HashMap<>();
+    msgData.put("angularObject", angularObject);
+    msgData.put("interpreterGroupId", interpreterGroupId);
+    msgData.put("noteId", note.getId());
+    msgData.put("paragraphId", angularObject.getParagraphId());
+    getConnectionManager().broadcast(note.getId(), new Message(OP.ANGULAR_OBJECT_UPDATE, msgData));
   }
 
   @Override
@@ -2021,11 +2126,12 @@ public class NotebookServer extends WebSocketServlet
             getNotebook().getInterpreterSettingManager().getSettingIds();
     for (String id : settingIds) {
       if (interpreterGroupId.contains(id)) {
+        HashMap<String, Object> msgData = new HashMap<>();
+        msgData.put("name", angularObject.getName());
+        msgData.put("noteId", angularObject.getNoteId());
+        msgData.put("paragraphId", angularObject.getParagraphId());
         getConnectionManager().broadcast(noteId,
-                new Message(OP.ANGULAR_OBJECT_REMOVE)
-                        .put("name", angularObject.getName())
-                        .put("noteId", angularObject.getNoteId())
-                        .put("paragraphId", angularObject.getParagraphId()));
+                new Message(OP.ANGULAR_OBJECT_REMOVE, msgData));
         break;
       }
     }
@@ -2044,9 +2150,10 @@ public class NotebookServer extends WebSocketServlet
           public void onSuccess(Map<String, Object> settings,
                                 ServiceContext context) throws IOException {
             super.onSuccess(settings, context);
-            Message resp = new Message(OP.EDITOR_SETTING);
-            resp.put("paragraphId", paragraphId);
-            resp.put("editor", settings);
+            HashMap<String, Object> msgData = new HashMap<>();
+            msgData.put("paragraphId", paragraphId);
+            msgData.put("editor", settings);
+            Message resp = new Message(OP.EDITOR_SETTING, msgData);
             conn.send(serializeMessage(resp));
           }
 
@@ -2068,8 +2175,10 @@ public class NotebookServer extends WebSocketServlet
         result.add(setting);
       }
     }
+    HashMap<String, Object> msgData = new HashMap();
+    msgData.put("interpreterSettings", result);
     conn.send(serializeMessage(
-        new Message(OP.INTERPRETER_SETTINGS).put("interpreterSettings", result)));
+        new Message(OP.INTERPRETER_SETTINGS, msgData)));
   }
 
   @Override
@@ -2092,10 +2201,12 @@ public class NotebookServer extends WebSocketServlet
           paragraph
                   .updateRuntimeInfos(label, tooltip, metaInfos, setting.getGroup(), setting.getId());
           getNotebook().saveNote(note, AuthenticationInfo.ANONYMOUS);
+          HashMap<String, Object> msgData = new HashMap<>();
+          msgData.put("id", paragraphId);
+          msgData.put("infos", paragraph.getRuntimeInfos());
           getConnectionManager().broadcast(
                   note.getId(),
-                  new Message(OP.PARAS_INFO).put("id", paragraphId).put("infos",
-                          paragraph.getRuntimeInfos()));
+                  new Message(OP.PARAS_INFO, msgData));
         }
       }
     } catch (IOException e) {
@@ -2142,8 +2253,10 @@ public class NotebookServer extends WebSocketServlet
     GUI formsSettings = new GUI();
     formsSettings.setForms(note.getNoteForms());
     formsSettings.setParams(note.getNoteParams());
+    Map<String, Object> msgData = new HashMap<>();
+    msgData.put("formsData", formsSettings);
     getConnectionManager().broadcast(note.getId(),
-        new Message(OP.SAVE_NOTE_FORMS).put("formsData", formsSettings));
+        new Message(OP.SAVE_NOTE_FORMS, msgData));
   }
 
   private void saveNoteForms(NotebookSocket conn,
@@ -2213,14 +2326,17 @@ public class NotebookServer extends WebSocketServlet
         Type type = new TypeToken<Map<String, String>>() {}.getType();
         Map<String, String> jsonObject =
             gson.fromJson(((ForbiddenException) ex).getResponse().getEntity().toString(), type);
-        conn.send(serializeMessage(new Message(OP.AUTH_INFO)
-            .put("info", jsonObject.get("message"))));
+        HashMap<String, Object> msgData = new HashMap<>();
+        msgData.put("info", jsonObject.get("message"));
+        conn.send(serializeMessage(new Message(OP.AUTH_INFO, msgData)));
       } else {
         String message = ex.getMessage();
         if (ex.getCause() != null) {
           message += ", cause: " + ex.getCause().getMessage();
         }
-        conn.send(serializeMessage(new Message(OP.ERROR_INFO).put("info", message)));
+        HashMap<String, Object> msgData = new HashMap<>();
+        msgData.put("info", message);
+        conn.send(serializeMessage(new Message(OP.ERROR_INFO, msgData)));
       }
     }
   }

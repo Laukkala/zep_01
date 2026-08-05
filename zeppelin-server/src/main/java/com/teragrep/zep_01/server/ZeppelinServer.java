@@ -45,10 +45,7 @@ import java.io.IOException;
 import java.lang.management.ManagementFactory;
 import java.nio.file.Files;
 import java.security.GeneralSecurityException;
-import java.util.Base64;
-import java.util.HashSet;
-import java.util.List;
-import java.util.EnumSet;
+import java.util.*;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import javax.management.remote.JMXServiceURL;
@@ -295,8 +292,11 @@ public class ZeppelinServer extends ResourceConfig {
             () -> {
               NotebookServer notebookServer = sharedServiceLocator.getService(NotebookServer.class);
               notebookServer.getConnectionManager().forAllUsers((user, userAndRoles) -> {
+                HashMap<String, Object> msgData = new HashMap<>();
+                msgData.put("goodbye",true);
+                Message shutdownMessage = new Message(Message.OP.SERVER_SHUTDOWN, msgData);
                 notebookServer.getConnectionManager().multicastToUser(user,
-                  new Message(Message.OP.SERVER_SHUTDOWN).put("goodbye", true));
+                  shutdownMessage);
               });
               LOG.info("Shutting down Zeppelin Server ... ");
               try {

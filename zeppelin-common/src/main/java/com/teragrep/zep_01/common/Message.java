@@ -245,6 +245,10 @@ public final class Message implements JsonSerializable {
     this(op, msgId, new HashMap<>(), "anonymous", "anonymous","");
   }
 
+  public Message(OP op, MessageId msgId, Map<String, Object> data){
+    this(op, msgId, data, "anonymous","anonymous","");
+  }
+
   public Message(OP op, Map<String, Object> data){
     this(op, new MessageIdStub(), data, "anonymous","anonymous","");
   }
