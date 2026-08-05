@@ -35,15 +35,15 @@ public abstract class AbstractMessageHandler implements MessageHandler {
   public void onMessage(String msg) {
     try {
       Message messageReceived = GSON.fromJson(msg, Message.class);
-      if (messageReceived.op != Message.OP.PING) {
-        LOGGER.debug("RECEIVE: " + messageReceived.op +
+      if (messageReceived.op() != Message.OP.PING) {
+        LOGGER.debug("RECEIVE: " + messageReceived.op() +
                 ", RECEIVE PRINCIPAL: " + messageReceived.principal() +
                 ", RECEIVE TICKET: " + messageReceived.ticket() +
                 ", RECEIVE ROLES: " + messageReceived.roles() +
                 ", RECEIVE DATA: " + messageReceived.data());
       }
 
-      switch (messageReceived.op) {
+      switch (messageReceived.op()) {
         case PARAGRAPH_UPDATE_OUTPUT:
           String noteId = (String) messageReceived.get("noteId");
           String paragraphId = (String) messageReceived.get("paragraphId");

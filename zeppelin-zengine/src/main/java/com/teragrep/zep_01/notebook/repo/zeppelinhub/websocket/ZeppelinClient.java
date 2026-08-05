@@ -173,7 +173,7 @@ public class ZeppelinClient {
     if (credentialsAvailable()) {
       String principal = authModule.getPrincipal();
       String roles = authModule.getRoles();
-      Message msgWithCredentials = new Message(zeppelinMsg.op, zeppelinMsg.msgId(), zeppelinMsg.data(), principal, zeppelinMsg.ticket(), roles);
+      Message msgWithCredentials = new Message(zeppelinMsg.op(), zeppelinMsg.msgId(), zeppelinMsg.data(), principal, zeppelinMsg.ticket(), roles);
       msg = msgWithCredentials.toJson();
     }
     else {
@@ -298,7 +298,7 @@ public class ZeppelinClient {
       return;
     }
     String token;
-    if (!isActionable(zeppelinMsg.op)) {
+    if (!isActionable(zeppelinMsg.op())) {
       return;
     }
 

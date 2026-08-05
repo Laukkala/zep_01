@@ -230,12 +230,12 @@ public class NotebookServer extends WebSocketServlet
       Message receivedMessage = deserializeMessage(msg);
 
       // Send pong back regardless of logged in status and stop processing
-      if (receivedMessage.op == OP.PING) {
+      if (receivedMessage.op() == OP.PING) {
         sendPong(conn, receivedMessage);
         return;
       }
 
-      LOG.debug("RECEIVE: " + receivedMessage.op +
+      LOG.debug("RECEIVE: " + receivedMessage.op() +
           ", RECEIVE PRINCIPAL: " + receivedMessage.principal() +
           ", RECEIVE TICKET: " + receivedMessage.ticket() +
           ", RECEIVE ROLES: " + receivedMessage.roles() +
@@ -247,12 +247,12 @@ public class NotebookServer extends WebSocketServlet
 
       TicketContainer.Entry ticketEntry = TicketContainer.instance.getTicketEntry(receivedMessage.principal());
       if (ticketEntry == null || StringUtils.isEmpty(ticketEntry.getTicket())) {
-        LOG.debug("{} message: invalid ticket {}", receivedMessage.op, receivedMessage.ticket());
+        LOG.debug("{} message: invalid ticket {}", receivedMessage.op(), receivedMessage.ticket());
         return;
       } else if (!ticketEntry.getTicket().equals(receivedMessage.ticket())) {
         /* not to pollute logs, log instead of exception */
-        LOG.debug("{} message: invalid ticket {} != {}", receivedMessage.op, receivedMessage.ticket(), ticketEntry.getTicket());
-        if (!receivedMessage.op.equals(OP.PING)) {
+        LOG.debug("{} message: invalid ticket {} != {}", receivedMessage.op(), receivedMessage.ticket(), ticketEntry.getTicket());
+        if (!receivedMessage.op().equals(OP.PING)) {
           HashMap<String, Object> msgData = new HashMap<>();
           msgData.put("info", "Your ticket is invalid possibly due to server restart. Please login again.");
           conn.send(serializeMessage(new Message(OP.SESSION_LOGOUT, msgData)));
@@ -268,11 +268,11 @@ public class NotebookServer extends WebSocketServlet
         return;
       }
 
-      if (Message.isDisabledForRunningNotes(receivedMessage.op)) {
+      if (Message.isDisabledForRunningNotes(receivedMessage.op())) {
         Note note = getNotebook().getNote((String) receivedMessage.get("noteId"));
         if (note != null && note.isRunning()) {
           throw new Exception("Note is now running sequentially. Can not be performed: " +
-                  receivedMessage.op);
+                  receivedMessage.op());
         }
       }
 
@@ -282,7 +282,7 @@ public class NotebookServer extends WebSocketServlet
 
       ServiceContext context = getServiceContext(ticketEntry);
       // Lets be elegant here
-      switch (receivedMessage.op) {
+      switch (receivedMessage.op()) {
         case LIST_NOTES:
           listNotesInfo(conn, context);
           break;
@@ -1513,7 +1513,7 @@ public class NotebookServer extends WebSocketServlet
     Map<String, Object> msgData = fromMessage.data();
     msgData.put("id", newParaId);
 
-    Message modifiedMessage = new Message(fromMessage.op,fromMessage.msgId(),msgData,fromMessage.principal(),fromMessage.ticket(),fromMessage.roles());
+    Message modifiedMessage = new Message(fromMessage.op(),fromMessage.msgId(),msgData,fromMessage.principal(),fromMessage.ticket(),fromMessage.roles());
     updateParagraph(conn, context, modifiedMessage);
   }
 

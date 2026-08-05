@@ -33,7 +33,7 @@ public final class ValidatedMessage {
   }
   public boolean isValid() {
     boolean valid = true;
-    if(! messageToValidate.op.equals(Message.OP.PARAGRAPH_UPDATE_RESULT)){
+    if(! messageToValidate.op().equals(Message.OP.PARAGRAPH_UPDATE_RESULT)){
       valid = false;
     }
     if(valid && (messageToValidate.get("noteId") == null || ! messageToValidate.get("noteId").getClass().equals(String.class))){

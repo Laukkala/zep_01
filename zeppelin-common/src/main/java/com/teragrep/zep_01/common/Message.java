@@ -225,7 +225,7 @@ public final class Message implements JsonSerializable {
           .create();
   public static final Message EMPTY = new Message(null);
 
-  public final OP op;
+  private final OP op;
   private final Map<String, Object> data;
   private final String ticket;
   private final String principal;
@@ -269,6 +269,9 @@ public final class Message implements JsonSerializable {
     return new HashMap<>(data);
   }
 
+  public OP op(){
+    return op;
+  }
   public String ticket(){
     return ticket;
   }

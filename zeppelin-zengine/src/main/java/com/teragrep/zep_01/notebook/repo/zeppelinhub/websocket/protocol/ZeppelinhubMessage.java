@@ -61,7 +61,7 @@ public class ZeppelinhubMessage implements JsonSerializable {
     if (zeppelinMsg == null) {
       return EMPTY;
     }
-    return new ZeppelinhubMessage(zeppelinMsg.op, zeppelinMsg.data(), meta);
+    return new ZeppelinhubMessage(zeppelinMsg.op(), zeppelinMsg.data(), meta);
   }
 
   @Override
