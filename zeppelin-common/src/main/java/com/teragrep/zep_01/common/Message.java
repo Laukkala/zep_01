@@ -237,23 +237,23 @@ public final class Message implements JsonSerializable {
   // When server send message that is not response to the client request, set null;
   private final MessageId msgId;
 
-  public Message(OP op){
+  public Message(final OP op){
     this(op, new MessageIdStub(), new HashMap<>(), "anonymous", "anonymous","");
   }
 
-  public Message(OP op, MessageId msgId){
+  public Message(final OP op, final MessageId msgId){
     this(op, msgId, new HashMap<>(), "anonymous", "anonymous","");
   }
 
-  public Message(OP op, MessageId msgId, Map<String, Object> data){
+  public Message(final OP op, final MessageId msgId, final Map<String, Object> data){
     this(op, msgId, data, "anonymous","anonymous","");
   }
 
-  public Message(OP op, Map<String, Object> data){
+  public Message(final OP op, final Map<String, Object> data){
     this(op, new MessageIdStub(), data, "anonymous","anonymous","");
   }
 
-  public Message(OP op, MessageId msgId, Map<String, Object> data, String principal, String ticket, String roles) {
+  public Message(final OP op, final MessageId msgId, final Map<String, Object> data, final String principal, final String ticket, final String roles) {
     this.op = op;
     this.msgId = msgId;
     this.data = data;
@@ -281,7 +281,7 @@ public final class Message implements JsonSerializable {
     return roles;
   }
 
-  public Object get(String k) {
+  public Object get(final String k) {
     return data.get(k);
   }
 
@@ -289,18 +289,18 @@ public final class Message implements JsonSerializable {
     return msgId;
   }
 
-  public static boolean isDisabledForRunningNotes(OP eventType) {
+  public static boolean isDisabledForRunningNotes(final OP eventType) {
     return disabledForRunningNoteMessages.contains(eventType);
   }
 
-  public <T> T getType(String key) {
+  public <T> T getType(final String key) {
     return (T) data.get(key);
   }
 
-  public <T> T getType(String key, Logger log) {
+  public <T> T getType(final String key, final Logger log) {
     try {
       return getType(key);
-    } catch (ClassCastException e) {
+    } catch (final ClassCastException e) {
       log.error("Failed to get {} from message (Invalid type). ", key , e);
       return null;
     }
@@ -320,15 +320,15 @@ public final class Message implements JsonSerializable {
     return GSON.toJson(this);
   }
 
-  public static Message fromJson(String json) {
+  public static Message fromJson(final String json) {
     return GSON.fromJson(json, Message.class);
   }
 
   @Override
-  public boolean equals(Object o) {
+  public boolean equals(final Object o) {
     if (this == o) return true;
     if (o == null || getClass() != o.getClass()) return false;
-    Message message = (Message) o;
+    final Message message = (Message) o;
     return op == message.op && Objects.equals(data, message.data) && Objects.equals(ticket, message.ticket) && Objects.equals(principal, message.principal) && Objects.equals(roles, message.roles) && Objects.equals(msgId, message.msgId);
   }
 
