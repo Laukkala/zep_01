@@ -262,11 +262,6 @@ public final class Message implements JsonSerializable {
     this.roles = roles;
   }
 
-  public Message put(String k, Object v) {
-    data.put(k, v);
-    return this;
-  }
-
   /**
    *Returns a copy of the data Map in this Message so that it can't get modified externally
     */

@@ -38,11 +38,7 @@ import static org.mockito.Mockito.when;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -129,7 +125,9 @@ public class NotebookServerTest extends AbstractTestRestApi {
     NotebookSocket sock2 = createWebSocket();
 
     String noteName = "Note with millis " + System.currentTimeMillis();
-    notebookServer.onMessage(sock1, new Message(OP.NEW_NOTE).put("name", noteName).toJson());
+    HashMap<String, Object> msgData = new HashMap<>();
+    msgData.put("name", noteName);
+    notebookServer.onMessage(sock1, new Message(OP.NEW_NOTE, msgData).toJson());
     Note createdNote = null;
     for (Note note : notebook.getAllNotes()) {
       if (note.getName().equals(noteName)) {
@@ -138,7 +136,9 @@ public class NotebookServerTest extends AbstractTestRestApi {
       }
     }
 
-    Message message = new Message(OP.GET_NOTE).put("id", createdNote.getId());
+    HashMap<String, Object> msg2Data = new HashMap<>();
+    msg2Data.put("id", createdNote.getId());
+    Message message = new Message(OP.GET_NOTE, msg2Data);
     notebookServer.onMessage(sock1, message.toJson());
     notebookServer.onMessage(sock2, message.toJson());
 
@@ -178,9 +178,10 @@ public class NotebookServerTest extends AbstractTestRestApi {
   }
 
   private void patchParagraph(NotebookSocket noteSocket, String paragraphId, String patch) {
-    Message message = new Message(OP.PATCH_PARAGRAPH);
-    message.put("patch", patch);
-    message.put("id", paragraphId);
+    HashMap<String, Object> msgData = new HashMap<>();
+    msgData.put("patch", patch);
+    msgData.put("id", paragraphId);
+    Message message = new Message(OP.PATCH_PARAGRAPH, msgData);
     notebookServer.onMessage(noteSocket, message.toJson());
   }
 
@@ -229,19 +230,23 @@ public class NotebookServerTest extends AbstractTestRestApi {
     notebookServer.onOpen(sock2);
     verify(sock1, times(0)).send(anyString()); // getNote, getAngularObject
     // open the same notebook from sockets
-    notebookServer.onMessage(sock1, new Message(OP.GET_NOTE).put("id", note1.getId()).toJson());
-    notebookServer.onMessage(sock2, new Message(OP.GET_NOTE).put("id", note1.getId()).toJson());
+    HashMap<String, Object> msgData = new HashMap<>();
+    msgData.put("id", note1.getId());
+    notebookServer.onMessage(sock1, new Message(OP.GET_NOTE, msgData).toJson());
+    notebookServer.onMessage(sock2, new Message(OP.GET_NOTE, msgData).toJson());
 
     reset(sock1);
     reset(sock2);
 
     // update object from sock1
+    HashMap<String, Object> updateMsgData = new HashMap<>();
+    updateMsgData.put("noteId", note1.getId());
+    updateMsgData.put("name", "object1");
+    updateMsgData.put("value", "value1");
+    updateMsgData.put("interpreterGroupId", interpreterGroup.getId());
+
     notebookServer.onMessage(sock1,
-            new Message(OP.ANGULAR_OBJECT_UPDATED)
-                    .put("noteId", note1.getId())
-                    .put("name", "object1")
-                    .put("value", "value1")
-                    .put("interpreterGroupId", interpreterGroup.getId()).toJson());
+            new Message(OP.ANGULAR_OBJECT_UPDATED, updateMsgData).toJson());
 
 
     // expect object is broadcasted except for where the update is created
@@ -287,18 +292,22 @@ public class NotebookServerTest extends AbstractTestRestApi {
     notebookServer.onOpen(sock1);
     verify(sock1, times(0)).send(anyString()); // getNote, getAngularObject
     // open the same notebook from sockets
-    notebookServer.onMessage(sock1, new Message(OP.GET_NOTE).put("id", note1.getId()).toJson());
+    HashMap<String, Object> msgData = new HashMap<>();
+    msgData.put("id", note1.getId());
+    notebookServer.onMessage(sock1, new Message(OP.GET_NOTE, msgData).toJson());
 
     reset(sock1);
 
     // bind object from sock1
+    HashMap<String, Object> clientBindMsgData = new HashMap<>();
+    clientBindMsgData.put("noteId", note1.getId());
+    clientBindMsgData.put("paragraphId", p1.getId());
+    clientBindMsgData.put("name", "COMMAND_TYPE");
+    clientBindMsgData.put("value", "COMMAND_TYPE_VALUE");
+    clientBindMsgData.put("interpreterGroupId", interpreterGroup.getId());
+
     notebookServer.onMessage(sock1,
-            new Message(OP.ANGULAR_OBJECT_CLIENT_BIND)
-                    .put("noteId", note1.getId())
-                    .put("paragraphId", p1.getId())
-                    .put("name", "COMMAND_TYPE")
-                    .put("value", "COMMAND_TYPE_VALUE")
-                    .put("interpreterGroupId", interpreterGroup.getId()).toJson());
+            new Message(OP.ANGULAR_OBJECT_CLIENT_BIND, clientBindMsgData).toJson());
     List<AngularObject> list = note1.getAngularObjects("angular-shared_process");
     assertEquals(1, list.size());
     assertEquals(list.get(0).getNoteId(), note1.getId());
@@ -312,13 +321,15 @@ public class NotebookServerTest extends AbstractTestRestApi {
     assertEquals("COMMAND_TYPE_VALUE", ao.get());
 
     // update bind object from sock1
+    HashMap<String, Object> clientBindUpdateMsgData = new HashMap<>();
+    clientBindUpdateMsgData.put("noteId", note1.getId());
+    clientBindUpdateMsgData.put("paragraphId", p1.getId());
+    clientBindUpdateMsgData.put("name", "COMMAND_TYPE");
+    clientBindUpdateMsgData.put("value", "COMMAND_TYPE_VALUE_UPDATE");
+    clientBindUpdateMsgData.put("interpreterGroupId", interpreterGroup.getId());
+
     notebookServer.onMessage(sock1,
-            new Message(OP.ANGULAR_OBJECT_UPDATED)
-                    .put("noteId", note1.getId())
-                    .put("paragraphId", p1.getId())
-                    .put("name", "COMMAND_TYPE")
-                    .put("value", "COMMAND_TYPE_VALUE_UPDATE")
-                    .put("interpreterGroupId", interpreterGroup.getId()).toJson());
+            new Message(OP.ANGULAR_OBJECT_UPDATED, clientBindUpdateMsgData).toJson());
     list = note1.getAngularObjects("angular-shared_process");
     assertEquals(1, list.size());
     assertEquals(list.get(0).getNoteId(), note1.getId());
@@ -332,13 +343,15 @@ public class NotebookServerTest extends AbstractTestRestApi {
     assertEquals("COMMAND_TYPE_VALUE_UPDATE", ao1.get());
 
     // unbind object from sock1
+    HashMap<String, Object> clientUnbindMsgData = new HashMap<>();
+    clientUnbindMsgData.put("noteId", note1.getId());
+    clientUnbindMsgData.put("paragraphId", p1.getId());
+    clientUnbindMsgData.put("name", "COMMAND_TYPE");
+    clientUnbindMsgData.put("value", "COMMAND_TYPE_VALUE");
+    clientUnbindMsgData.put("interpreterGroupId", interpreterGroup.getId());
+
     notebookServer.onMessage(sock1,
-            new Message(OP.ANGULAR_OBJECT_CLIENT_UNBIND)
-                    .put("noteId", note1.getId())
-                    .put("paragraphId", p1.getId())
-                    .put("name", "COMMAND_TYPE")
-                    .put("value", "COMMAND_TYPE_VALUE")
-                    .put("interpreterGroupId", interpreterGroup.getId()).toJson());
+            new Message(OP.ANGULAR_OBJECT_CLIENT_UNBIND, clientUnbindMsgData).toJson());
     list = note1.getAngularObjects("angular-shared_process");
     assertEquals(0, list.size());
     // Check if the interpreterGroup AngularObjectRegistry is delete
@@ -391,7 +404,9 @@ public class NotebookServerTest extends AbstractTestRestApi {
     assertEquals(0, mapRegistry1.size());
 
     // open the notebook from sockets, AngularObjectRegistry that triggers the update of the interpreterGroup
-    notebookServer.onMessage(sock1, new Message(OP.GET_NOTE).put("id", note1.getId()).toJson());
+    HashMap<String, Object> msgData = new HashMap<>();
+    msgData.put("id", note1.getId());
+    notebookServer.onMessage(sock1, new Message(OP.GET_NOTE,msgData).toJson());
     Thread.sleep(1000);
 
     // After executing GET_NOTE, check the AngularObjectRegistry of the interpreterGroup
@@ -425,11 +440,12 @@ public class NotebookServerTest extends AbstractTestRestApi {
     //Given
     final String varName = "name";
     final String value = "DuyHai DOAN";
-    final Message messageReceived = new Message(OP.ANGULAR_OBJECT_CLIENT_BIND)
-            .put("noteId", "noteId")
-            .put("name", varName)
-            .put("value", value)
-            .put("paragraphId", "paragraphId");
+    Map<String, Object> msgData = new HashMap<>();
+    msgData.put("noteId", "noteId");
+    msgData.put("name", varName);
+    msgData.put("value", value);
+    msgData.put("paragraphId", "paragraphId");
+    final Message messageReceived = new Message(OP.ANGULAR_OBJECT_CLIENT_BIND, msgData);
 
     final Notebook notebook = mock(Notebook.class);
     notebookServer.setNotebook(() -> notebook);
@@ -455,11 +471,12 @@ public class NotebookServerTest extends AbstractTestRestApi {
     NotebookSocket conn = mock(NotebookSocket.class);
     NotebookSocket otherConn = mock(NotebookSocket.class);
 
-    final String mdMsg1 = notebookServer.serializeMessage(new Message(OP.ANGULAR_OBJECT_UPDATE)
-            .put("angularObject", ao1)
-            .put("interpreterGroupId", "mdGroup")
-            .put("noteId", "noteId")
-            .put("paragraphId", "paragraphId"));
+    Map<String, Object> updateMsgData = new HashMap<>();
+    updateMsgData.put("angularObject", ao1);
+    updateMsgData.put("interpreterGroupId", "mdGroup");
+    updateMsgData.put("noteId", "noteId");
+    updateMsgData.put("paragraphId", "paragraphId");
+    final String mdMsg1 = notebookServer.serializeMessage(new Message(OP.ANGULAR_OBJECT_UPDATE, updateMsgData));
 
     notebookServer.getConnectionManager().noteSocketMap.put("noteId", asList(conn, otherConn));
 
@@ -477,10 +494,11 @@ public class NotebookServerTest extends AbstractTestRestApi {
     //Given
     final String varName = "name";
     final String value = "val";
-    final Message messageReceived = new Message(OP.ANGULAR_OBJECT_CLIENT_UNBIND)
-            .put("noteId", "noteId")
-            .put("name", varName)
-            .put("paragraphId", "paragraphId");
+    final HashMap<String, Object> msgData = new HashMap<>();
+    msgData.put("noteId", "noteId");
+    msgData.put("name", varName);
+    msgData.put("paragraphId", "paragraphId");
+    final Message messageReceived = new Message(OP.ANGULAR_OBJECT_CLIENT_UNBIND, msgData);
 
     final Notebook notebook = mock(Notebook.class);
     notebookServer.setNotebook(() -> notebook);
@@ -502,11 +520,12 @@ public class NotebookServerTest extends AbstractTestRestApi {
     NotebookSocket conn = mock(NotebookSocket.class);
     NotebookSocket otherConn = mock(NotebookSocket.class);
 
-    final String mdMsg1 = notebookServer.serializeMessage(new Message(OP.ANGULAR_OBJECT_REMOVE)
-            .put("angularObject", ao1)
-            .put("interpreterGroupId", "mdGroup")
-            .put("noteId", "noteId")
-            .put("paragraphId", "paragraphId"));
+    Map<String, Object> updateMsgData = new HashMap<>();
+    updateMsgData.put("angularObject", ao1);
+    updateMsgData.put("interpreterGroupId", "mdGroup");
+    updateMsgData.put("noteId", "noteId");
+    updateMsgData.put("paragraphId", "paragraphId");
+    final String mdMsg1 = notebookServer.serializeMessage(new Message(OP.ANGULAR_OBJECT_REMOVE, updateMsgData));
 
     notebookServer.getConnectionManager().noteSocketMap.put("noteId", asList(conn, otherConn));
 
@@ -538,10 +557,11 @@ public class NotebookServerTest extends AbstractTestRestApi {
       defaultInterpreterId = settings.get(0).getId();
     }
     // create note from sock1
+    HashMap<String, Object> msgData = new HashMap<>();
+    msgData.put("name", noteName);
+    msgData.put("defaultInterpreterId", defaultInterpreterId);
     notebookServer.onMessage(sock1,
-        new Message(OP.NEW_NOTE)
-        .put("name", noteName)
-        .put("defaultInterpreterId", defaultInterpreterId).toJson());
+        new Message(OP.NEW_NOTE, msgData).toJson());
 
     int sendCount = 2;
     if (ZeppelinConfiguration.create().isZeppelinNotebookCollaborativeModeEnable()) {
@@ -701,30 +721,31 @@ public class NotebookServerTest extends AbstractTestRestApi {
         defaultInterpreterId = settings.get(0).getId();
       }
       // create note from sock1
+      HashMap<String, Object> msgData = new HashMap<>();
+      msgData.put("name", noteName);
+      msgData.put("defaultInterpreterId", defaultInterpreterId);
       notebookServer.onMessage(sock1,
-              new Message(OP.NEW_NOTE)
-                      .put("name", noteName)
-                      .put("defaultInterpreterId", defaultInterpreterId).toJson());
+              new Message(OP.NEW_NOTE).toJson());
 
       // Make sure there is only one created notebook, and get its' ID.
       Assertions.assertEquals(1,notebook.getAllNotes().size());
       String noteId = notebook.getAllNotes().get(0).getId();
 
       // Expect correct number of COLLABORATIVE_MODE_STATUS messages when a number of users join the same notebook.
-      notebookServer.onMessage(sock1,new Message(OP.GET_NOTE)
-              .put("id",noteId).toJson());
+      HashMap<String, Object> getNoteMsgData = new HashMap<>();
+      getNoteMsgData.put("id",noteId);
+      notebookServer.onMessage(sock1,new Message(OP.GET_NOTE, getNoteMsgData)
+              .toJson());
 
       // User 1 shouldn't get a COLLABORATIVE_MODE_STATUS message when they join as the first user
 
       Assertions.assertDoesNotThrow(()-> verify(sock1, times(0)).send(contains(OP.COLLABORATIVE_MODE_STATUS.toString())));
-      notebookServer.onMessage(sock2, new Message(OP.GET_NOTE)
-              .put("id", noteId).toJson());
+      notebookServer.onMessage(sock2, new Message(OP.GET_NOTE, getNoteMsgData).toJson());
         // Both users 1 and 2 should receive a COLLABORATIVE_MODE_STATUS message when user 2 joins so that they both know about each other.
       Assertions.assertDoesNotThrow(()-> verify(sock1, times(1)).send(contains(OP.COLLABORATIVE_MODE_STATUS.toString())));
       Assertions.assertDoesNotThrow(()-> verify(sock2, times(1)).send(contains(OP.COLLABORATIVE_MODE_STATUS.toString())));
 
-      notebookServer.onMessage(sock3, new Message(OP.GET_NOTE)
-              .put("id", noteId).toJson());
+      notebookServer.onMessage(sock3, new Message(OP.GET_NOTE, getNoteMsgData).toJson());
       // Both users 1 and 2 should receive a COLLABORATIVE_MODE_STATUS message when user 3 joins
       Assertions.assertDoesNotThrow(()-> verify(sock1, times(2)).send(contains(OP.COLLABORATIVE_MODE_STATUS.toString())));
       Assertions.assertDoesNotThrow(()-> verify(sock2, times(2)).send(contains(OP.COLLABORATIVE_MODE_STATUS.toString())));
@@ -748,10 +769,11 @@ public class NotebookServerTest extends AbstractTestRestApi {
         defaultInterpreterId = settings.get(0).getId();
       }
       // create note from sock1
+    HashMap<String, Object> msgData = new HashMap<>();
+      msgData.put("name", noteName);
+      msgData.put("defaultInterpreterId", defaultInterpreterId);
       notebookServer.onMessage(sock1,
-              new Message(OP.NEW_NOTE)
-                      .put("name", noteName)
-                      .put("defaultInterpreterId", defaultInterpreterId).toJson());
+              new Message(OP.NEW_NOTE, msgData).toJson());
 
       // Make sure there is only one created notebook, and get its' ID.
       Assertions.assertEquals(1,notebook.getAllNotes().size());
@@ -759,10 +781,11 @@ public class NotebookServerTest extends AbstractTestRestApi {
 
       // create another note from sock1
       String note2Name = "Note with millis " + System.currentTimeMillis();
+      HashMap<String, Object> newNoteMsgData = new HashMap<>();
+      newNoteMsgData.put("name", note2Name);
+      newNoteMsgData.put("defaultInterpreterId", defaultInterpreterId);
       notebookServer.onMessage(sock1,
-              new Message(OP.NEW_NOTE)
-                      .put("name", note2Name)
-                      .put("defaultInterpreterId", defaultInterpreterId).toJson());
+              new Message(OP.NEW_NOTE, newNoteMsgData).toJson());
 
       String note2Id = "";
       for (Note note : notebook.getAllNotes()) {
@@ -773,20 +796,21 @@ public class NotebookServerTest extends AbstractTestRestApi {
       }
 
       // Expect no COLLABORATIVE_MODE_STATUS messages when users join an unrelated notebook.
-      notebookServer.onMessage(sock1,new Message(OP.GET_NOTE)
-              .put("id",noteId).toJson());
+      HashMap<String, Object> getNoteMsgData = new HashMap<>();
+      getNoteMsgData.put("id",noteId);
+      notebookServer.onMessage(sock1,new Message(OP.GET_NOTE, getNoteMsgData).toJson());
 
       // User 1 shouldn't get a COLLABORATIVE_MODE_STATUS message when they join as the first user
       Assertions.assertDoesNotThrow(()-> verify(sock1, times(0)).send(contains(OP.COLLABORATIVE_MODE_STATUS.toString())));
-      notebookServer.onMessage(sock2,new Message(OP.GET_NOTE)
-              .put("id",noteId).toJson());
+      notebookServer.onMessage(sock2,new Message(OP.GET_NOTE, getNoteMsgData).toJson());
 
       // Both users 1 and 2 should receive a COLLABORATIVE_MODE_STATUS message when user 2 joins so that they both know about each other.
       Assertions.assertDoesNotThrow(()-> verify(sock1, times(1)).send(contains(OP.COLLABORATIVE_MODE_STATUS.toString())));
       Assertions.assertDoesNotThrow(()-> verify(sock2, times(1)).send(contains(OP.COLLABORATIVE_MODE_STATUS.toString())));
 
-      notebookServer.onMessage(sock3,new Message(OP.GET_NOTE)
-              .put("id",note2Id).toJson());
+    HashMap<String, Object> getNote2MsgData = new HashMap<>();
+    getNote2MsgData.put("id",note2Id);
+      notebookServer.onMessage(sock3,new Message(OP.GET_NOTE,getNote2MsgData).toJson());
 
       // Both users 1 and 2 shouldn't receive a COLLABORATIVE_MODE_STATUS message when user 3 joins some other notebook
       Assertions.assertDoesNotThrow(()-> verify(sock1, times(1)).send(contains(OP.COLLABORATIVE_MODE_STATUS.toString())));
