@@ -1570,7 +1570,7 @@ public class NotebookServer extends WebSocketServlet
           @Override
           public void onSuccess(Revision revision, ServiceContext context) throws IOException {
             super.onSuccess(revision, context);
-            if (!revision.isEmpty()) {
+            if (revision != null && !revision.isEmpty()) {
               List<Revision> revisions =
                   getNotebook().listRevisionHistory(noteId, getNotebook().getNote(noteId).getPath(),
                       context.getAutheInfo());
