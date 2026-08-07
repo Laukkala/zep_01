@@ -9,7 +9,6 @@ import com.teragrep.zep_01.interpreter.thrift.LibraryMetadata;
 import com.teragrep.zep_01.interpreter.thrift.ParagraphInfo;
 import com.teragrep.zep_01.interpreter.thrift.RegisterInfo;
 import com.teragrep.zep_01.interpreter.thrift.RemoteInterpreterEventService;
-import com.teragrep.zep_01.resource.LocalResourcePool;
 import com.teragrep.zep_01.resource.Resource;
 import com.teragrep.zep_01.resource.ResourceId;
 import com.teragrep.zep_01.resource.ResourceSet;
