@@ -130,7 +130,7 @@ public class GitNotebookRepo extends VFSNotebookRepo implements NotebookRepoWith
                              String commitMessage,
                              AuthenticationInfo subject) throws IOException {
     String noteFileName = buildNoteFileName(noteId, notePath);
-    Revision revision = Revision.EMPTY;
+    Revision revision = new Revision();
     try {
       List<DiffEntry> gitDiff = git.diff().call();
       boolean modified = gitDiff.parallelStream().anyMatch(diffEntry -> diffEntry.getNewPath().equals(noteFileName));

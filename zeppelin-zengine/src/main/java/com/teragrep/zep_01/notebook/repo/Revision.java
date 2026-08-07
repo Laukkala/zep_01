@@ -8,11 +8,14 @@ public final class Revision {
 /**
  * Represents the 'Revision' a point in life of the notebook
  */
-    public static final Revision EMPTY = new Revision(StringUtils.EMPTY, StringUtils.EMPTY, 0);
 
     public final String id;
     public final String message;
     public final int time;
+
+    public Revision() {
+        this(StringUtils.EMPTY, StringUtils.EMPTY, 0);
+    }
 
     public Revision(final String revId, final String message, final int time) {
         this.id = revId;
@@ -21,7 +24,7 @@ public final class Revision {
     }
 
     public boolean isEmpty() {
-        return this.equals(EMPTY);
+        return (id.equals(StringUtils.EMPTY) && message.equals(StringUtils.EMPTY) && time == 0);
     }
 
     @Override

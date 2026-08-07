@@ -146,7 +146,7 @@ public class GitNotebookRepoTest {
     assertThat(notebookRepo.revisionHistory(TEST_NOTE_ID, TEST_NOTE_PATH, null).size()).isEqualTo(2);
     assertThat(notebookRepo.revisionHistory(TEST_NOTE_ID2, TEST_NOTE_PATH2, null).size()).isEqualTo(1);
     assertThat(notebookRepo.checkpoint(TEST_NOTE_ID2, TEST_NOTE_PATH2, "first commit, note2", null))
-      .isEqualTo(Revision.EMPTY);
+      .isEqualTo(new Revision());
     assertThat(notebookRepo.revisionHistory(TEST_NOTE_ID2, TEST_NOTE_PATH2, null).size()).isEqualTo(1);
 
     //modify, save and checkpoint second note
