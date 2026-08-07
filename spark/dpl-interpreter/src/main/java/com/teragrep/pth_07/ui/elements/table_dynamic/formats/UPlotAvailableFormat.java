@@ -43,41 +43,30 @@
  * Teragrep, the applicable Commercial License may apply to this file if you as
  * a licensee so wish it.
  */
-package com.teragrep.pth_07.ui.elements;
+package com.teragrep.pth_07.ui.elements.table_dynamic.formats;
 
-import com.teragrep.zep_01.interpreter.InterpreterContext;
+import jakarta.json.JsonObject;
+import jakarta.json.JsonValue;
+import org.apache.spark.sql.Dataset;
+import org.apache.spark.sql.Row;
 
-import java.io.IOException;
+public final class UPlotAvailableFormat implements AvailableFormat {
 
-public class OutputContent extends AbstractUserInterfaceElement {
+    private static final RenderFormat renderFormatStub = new RenderFormatStub();
 
-    private String outputContent = "";
-
-    public OutputContent(InterpreterContext interpreterContext) {
-        super(interpreterContext);
+    @Override
+    public boolean isStub() {
+        return false;
     }
 
     @Override
-    protected void draw() {
-        getInterpreterContext().out().clear(false);
-        try {
-            getInterpreterContext().out().write(outputContent);
-        } catch (IOException e) {
-            e.printStackTrace();
+    public RenderFormat asRenderFormat(final UIOption uiOption, final Dataset<Row> rowDataset) {
+        RenderFormat rv = renderFormatStub;
+        JsonObject json = uiOption.asJson();
+        if(json.containsKey("type") && json.get("type").getValueType().equals(JsonValue.ValueType.STRING) && json.getString("type").equals("uPlot")){
+            rv = new UPlotFormat(uiOption, rowDataset);
         }
+        return rv;
     }
 
-    @Override
-    public void emit() {
-        // no angular in this one
-    }
-
-    public void setOutputContent(String outputContent) {
-        this.outputContent = outputContent;
-        draw();
-    }
-
-    public void clear() {
-        getInterpreterContext().out().clear(true);
-    }
 }

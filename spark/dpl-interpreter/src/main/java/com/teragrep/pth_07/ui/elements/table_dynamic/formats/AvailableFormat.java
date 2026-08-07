@@ -43,42 +43,19 @@
  * Teragrep, the applicable Commercial License may apply to this file if you as
  * a licensee so wish it.
  */
+package com.teragrep.pth_07.ui.elements.table_dynamic.formats;
 
-package com.teragrep.pth_07.ui.elements.table_dynamic.pojo;
 
-import com.google.gson.annotations.Expose;
-import com.google.gson.annotations.SerializedName;
+import com.teragrep.stb_01.Stubable;
+import org.apache.spark.sql.Dataset;
+import org.apache.spark.sql.Row;
 
-public class Order {
+/**
+ * Implement this interface to declare a new RenderFormat to which a Spark Dataset may be formatted to.
+ * RenderFormats require a Spark Dataset to instantiate, but an AvailableFormat can be instantiated without one.
+ */
+public interface AvailableFormat extends Stubable {
 
-    @SerializedName("column")
-    @Expose
-    private Integer column;
-    @SerializedName("dir")
-    @Expose
-    private String dir;
+    RenderFormat asRenderFormat(UIOption uiOption, Dataset<Row> rowDataset);
 
-    public Integer getColumn() {
-        return column;
-    }
-
-    public void setColumn(Integer column) {
-        this.column = column;
-    }
-
-    public String getDir() {
-        return dir;
-    }
-
-    public void setDir(String dir) {
-        this.dir = dir;
-    }
-
-    @Override
-    public String toString() {
-        return "Order{" +
-                "column=" + column +
-                ", dir='" + dir + '\'' +
-                '}';
-    }
 }
