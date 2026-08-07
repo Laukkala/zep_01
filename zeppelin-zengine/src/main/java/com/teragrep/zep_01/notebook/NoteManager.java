@@ -18,9 +18,9 @@
 
 package com.teragrep.zep_01.notebook;
 
+import com.teragrep.zep_01.notebook.exception.NoteNotFoundException;
 import org.apache.commons.lang3.StringUtils;
 import com.teragrep.zep_01.conf.ZeppelinConfiguration;
-import com.teragrep.zep_01.notebook.exception.NotePathAlreadyExistsException;
 import com.teragrep.zep_01.notebook.repo.NotebookRepo;
 import com.teragrep.zep_01.user.AuthenticationInfo;
 import org.slf4j.Logger;
@@ -29,8 +29,6 @@ import org.slf4j.LoggerFactory;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -95,12 +93,12 @@ public class NoteManager {
    * @return
    */
   public Stream<Note> getNotesStream() {
-    return notesInfo.values().stream()
-            .map(notePath -> {
+    return notesInfo.keySet().stream()
+            .map(noteId -> {
               try {
-                return getNoteNode(notePath).getNote();
+                return getNoteNode(noteId).getNote();
               } catch (Exception e) {
-                LOGGER.warn("Fail to load note: {}", notePath, e);
+                LOGGER.warn("Fail to load note: {}", noteId, e);
                 return null;
               }
             })
@@ -117,12 +115,8 @@ public class NoteManager {
     init();
   }
 
-  private void addOrUpdateNoteNode(Note note, boolean checkDuplicates) throws IOException {
+  private void addOrUpdateNoteNode(Note note) throws IOException {
     String notePath = note.getPath();
-
-    if (checkDuplicates && !isNotePathAvailable(notePath)) {
-      throw new NotePathAlreadyExistsException("Note '" + notePath + "' existed");
-    }
 
     String[] tokens = notePath.split("/");
     Folder curFolder = root;
@@ -132,27 +126,28 @@ public class NoteManager {
       }
     }
 
-    curFolder.addNote(tokens[tokens.length -1], note);
+    curFolder.addNote(note.getId(), note);
     this.notesInfo.put(note.getId(), note.getPath());
   }
 
-  private void addOrUpdateNoteNode(Note note) throws IOException {
-    addOrUpdateNoteNode(note, false);
-  }
-
   /**
-   * Check whether there exist note under this notePath.
+   * Check whether there exist note under this noteId.
    *
-   * @param notePath
+   * @param noteId
    * @return
    */
-  public boolean containsNote(String notePath) {
+  public boolean containsNote(String noteId) {
     try {
-      getNoteNode(notePath);
+      getNoteNode(noteId);
       return true;
-    } catch (IOException e) {
+    } catch (NoteNotFoundException e) {
       return false;
     }
+  }
+
+  public boolean trashContainsNote(String noteId) {
+    final NoteNode noteNode = getTrashFolder().getNote(noteId);
+    return !noteNode.isStub();
   }
 
   /**
@@ -193,7 +188,7 @@ public class NoteManager {
   }
 
   public void addNote(Note note, AuthenticationInfo subject) throws IOException {
-    addOrUpdateNoteNode(note, true);
+    addOrUpdateNoteNode(note);
     note.setLoaded(true);
   }
 
@@ -217,7 +212,7 @@ public class NoteManager {
   public void removeNote(String noteId, AuthenticationInfo subject) throws IOException {
     String notePath = this.notesInfo.remove(noteId);
     Folder folder = getOrCreateFolder(getFolderName(notePath));
-    folder.removeNote(getNoteName(notePath));
+    folder.removeNote(noteId);
     this.notebookRepo.remove(noteId, notePath, subject);
   }
 
@@ -229,13 +224,12 @@ public class NoteManager {
       throw new IOException("No metadata found for this note: " + noteId);
     }
 
-    if (!isNotePathAvailable(newNotePath)) {
-      throw new NotePathAlreadyExistsException("Note '" + newNotePath + "' existed");
-    }
-
     // move the old NoteNode from notePath to newNotePath
-    NoteNode noteNode = getNoteNode(notePath);
-    noteNode.getParent().removeNote(getNoteName(notePath));
+    NoteNode noteNode = getNoteNode(noteId);
+    if(noteNode.isStub()){
+      throw new NoteNotFoundException("Note with ID "+noteId+ " not found!");
+    }
+    noteNode.getParent().removeNote(noteId);
     noteNode.setNotePath(newNotePath);
     String newParent = getFolderName(newNotePath);
     Folder newFolder = getOrCreateFolder(newParent);
@@ -251,7 +245,7 @@ public class NoteManager {
     String oldNoteName = getNoteName(notePath);
     String newNoteName = getNoteName(newNotePath);
     if (!StringUtils.equalsIgnoreCase(oldNoteName, newNoteName)) {
-      this.notebookRepo.save(noteNode.note, subject);
+      this.notebookRepo.save(noteNode.getRawNote(), subject);
     }
   }
 
@@ -311,7 +305,10 @@ public class NoteManager {
     if (notePath == null) {
       return null;
     }
-    NoteNode noteNode = getNoteNode(notePath);
+    NoteNode noteNode = getNoteNode(noteId);
+    if(noteNode.isStub()){
+      throw new NoteNotFoundException("No such note "+noteId+" !");
+    }
     return noteNode.getNote(reload);
   }
 
@@ -319,7 +316,7 @@ public class NoteManager {
    * Get note from NotebookRepo.
    *
    * @param noteId
-   * @return return null if not found on NotebookRepo.
+   * @return returns the searched for Note.
    * @throws IOException
    */
   public Note getNote(String noteId) throws IOException {
@@ -327,7 +324,10 @@ public class NoteManager {
     if (notePath == null) {
       return null;
     }
-    NoteNode noteNode = getNoteNode(notePath);
+    NoteNode noteNode = getNoteNode(noteId);
+    if(noteNode.isStub()){
+      throw new NoteNotFoundException("No such note "+noteId+" !");
+    }
     return noteNode.getNote();
   }
 
@@ -347,20 +347,11 @@ public class NoteManager {
     return curFolder;
   }
 
-  private NoteNode getNoteNode(String notePath) throws IOException {
-    String[] tokens = notePath.split("/");
+  private NoteNode getNoteNode(String noteId) throws NoteNotFoundException {
     Folder curFolder = root;
-    for (int i = 0; i < tokens.length - 1; ++i) {
-      if (!StringUtils.isBlank(tokens[i])) {
-        curFolder = curFolder.getFolder(tokens[i]);
-        if (curFolder == null) {
-          throw new IOException("Can not find note: " + notePath);
-        }
-      }
-    }
-    NoteNode noteNode = curFolder.getNote(tokens[tokens.length - 1]);
-    if (noteNode == null) {
-      throw new IOException("Can not find note: " + notePath);
+    NoteNode noteNode = curFolder.getNote(noteId);
+    if(noteNode.isStub()){
+      throw new NoteNotFoundException("Note with id "+noteId+" not found!");
     }
     return noteNode;
   }
@@ -391,264 +382,6 @@ public class NoteManager {
   private String getNoteName(String notePath) {
     int pos = notePath.lastIndexOf('/');
     return notePath.substring(pos + 1);
-  }
-
-  private boolean isNotePathAvailable(String notePath) {
-    String[] tokens = notePath.split("/");
-    Folder curFolder = root;
-    for (int i = 0; i < tokens.length - 1; ++i) {
-      if (!StringUtils.isBlank(tokens[i])) {
-        curFolder = curFolder.getFolder(tokens[i]);
-        if (curFolder == null) {
-          return true;
-        }
-      }
-    }
-    if (curFolder.containsNote(tokens[tokens.length - 1])) {
-      return false;
-    }
-
-    return true;
-  }
-
-  /**
-   * Represent one folder that could contains sub folders and note files.
-   */
-  public static class Folder {
-
-    private String name;
-    private Folder parent;
-    private NotebookRepo notebookRepo;
-
-    // noteName -> NoteNode
-    private Map<String, NoteNode> notes = new HashMap<>();
-    // folderName -> Folder
-    private Map<String, Folder> subFolders = new HashMap<>();
-
-    public Folder(String name, NotebookRepo notebookRepo) {
-      this.name = name;
-      this.notebookRepo = notebookRepo;
-    }
-
-    public Folder(String name, Folder parent, NotebookRepo notebookRepo) {
-      this(name, notebookRepo);
-      this.parent = parent;
-    }
-
-    public synchronized Folder getOrCreateFolder(String folderName) {
-      if (StringUtils.isBlank(folderName)) {
-        return this;
-      }
-      if (!subFolders.containsKey(folderName)) {
-        subFolders.put(folderName, new Folder(folderName, this, notebookRepo));
-      }
-      return subFolders.get(folderName);
-    }
-
-    public Folder getParent() {
-      return parent;
-    }
-
-    public void setParent(Folder parent) {
-      this.parent = parent;
-    }
-
-    public String getName() {
-      return name;
-    }
-
-    public void setName(String name) {
-      this.name = name;
-    }
-
-    public Folder getFolder(String folderName) {
-      return subFolders.get(folderName);
-    }
-
-    public Map<String, Folder> getFolders() {
-      return subFolders;
-    }
-
-    public NoteNode getNote(String noteName) {
-      return this.notes.get(noteName);
-    }
-
-    public void addNote(String noteName, Note note) {
-      notes.put(noteName, new NoteNode(note, this, notebookRepo));
-    }
-
-    /**
-     * Attach another folder under this folder, this is used when moving folder.
-     * The path of notes under this folder also need to be updated.
-     */
-    public void addFolder(String folderName, Folder folder) throws IOException {
-      subFolders.put(folderName, folder);
-      folder.setParent(this);
-      folder.setName(folderName);
-      for (NoteNode noteNode : folder.getNoteNodeRecursively()) {
-        noteNode.updateNotePath();
-      }
-    }
-
-    public boolean containsNote(String noteName) {
-      return notes.containsKey(noteName);
-    }
-
-    /**
-     * Attach note under this folder, this is used when moving note
-     * @param noteNode
-     */
-    public void addNoteNode(NoteNode noteNode) {
-      this.notes.put(noteNode.getNoteName(), noteNode);
-      noteNode.setParent(this);
-    }
-
-    public void removeNote(String noteName) {
-      this.notes.remove(noteName);
-    }
-
-    public List<Note> removeFolder(String folderName,
-                                   AuthenticationInfo subject) throws IOException {
-      Folder folder = this.subFolders.remove(folderName);
-      return folder.getRawNotesRecursively();
-    }
-
-    public List<Note> getRawNotesRecursively() {
-      List<Note> notesInfo = new ArrayList<>();
-      for (NoteNode noteNode : this.notes.values()) {
-        notesInfo.add(noteNode.getRawNote());
-      }
-      for (Folder folder : subFolders.values()) {
-        notesInfo.addAll(folder.getRawNotesRecursively());
-      }
-      return notesInfo;
-    }
-
-    public List<NoteNode> getNoteNodeRecursively() {
-      List<NoteNode> noteNodeRecursively = new ArrayList<>();
-      noteNodeRecursively.addAll(this.notes.values());
-      for (Folder folder : subFolders.values()) {
-        noteNodeRecursively.addAll(folder.getNoteNodeRecursively());
-      }
-      return noteNodeRecursively;
-    }
-
-    public Map<String, NoteNode> getNotes() {
-      return notes;
-    }
-
-    public String getPath() {
-      // root
-      if (name.equals("/")) {
-        return name;
-      }
-      // folder under root
-      if (parent.name.equals("/")) {
-        return "/" + name;
-      }
-      // other cases
-      return parent.toString() + "/" + name;
-    }
-
-    @Override
-    public String toString() {
-      return getPath();
-    }
-  }
-
-  /**
-   * One node in the file system tree structure which represent the note.
-   * This class has 2 usage scenarios:
-   * 1. metadata of note (only noteId and note name is loaded via reading the file name)
-   * 2. the note object (note content is loaded from NotebookRepo)
-   *
-   * It will load note from NotebookRepo lazily until method getNote is called.
-   */
-  public static class NoteNode {
-
-    private Folder parent;
-    private Note note;
-    private NotebookRepo notebookRepo;
-
-    public NoteNode(Note note, Folder parent, NotebookRepo notebookRepo) {
-      this.note = note;
-      this.parent = parent;
-      this.notebookRepo = notebookRepo;
-    }
-
-    public synchronized Note getNote() throws IOException {
-        return getNote(false);
-    }
-
-    /**
-     * This method will load note from NotebookRepo. If you just want to get noteId, noteName or
-     * notePath, you can call method getNoteId, getNoteName & getNotePath
-     * @return
-     * @throws IOException
-     */
-    public synchronized Note getNote(boolean reload) throws IOException {
-      if (!note.isLoaded() || reload) {
-        note = notebookRepo.get(note.getId(), note.getPath(), AuthenticationInfo.ANONYMOUS);
-        if (parent.toString().equals("/")) {
-          note.setPath("/" + note.getName());
-        } else {
-          note.setPath(parent.toString() + "/" + note.getName());
-        }
-        note.setCronSupported(ZeppelinConfiguration.create());
-        note.setLoaded(true);
-      }
-      return note;
-    }
-
-    public String getNoteId() {
-      return this.note.getId();
-    }
-
-    public String getNoteName() {
-      return this.note.getName();
-    }
-
-    public String getNotePath() {
-      if (parent.getPath().equals("/")) {
-        return parent.getPath() + note.getName();
-      } else {
-        return parent.getPath() + "/" + note.getName();
-      }
-    }
-
-    /**
-     * This method will just return the note object without checking whether it is loaded
-     * from NotebookRepo.
-     *
-     * @return
-     */
-    public Note getRawNote() {
-      return this.note;
-    }
-
-    public Folder getParent() {
-      return parent;
-    }
-
-    @Override
-    public String toString() {
-      return getNotePath();
-    }
-
-    public void setParent(Folder parent) {
-      this.parent = parent;
-    }
-
-    public void setNotePath(String notePath) {
-      this.note.setPath(notePath);
-    }
-
-    /**
-     * This is called when the ancestor folder is moved.
-     */
-    public void updateNotePath() {
-      this.note.setPath(getNotePath());
-    }
   }
 
 
