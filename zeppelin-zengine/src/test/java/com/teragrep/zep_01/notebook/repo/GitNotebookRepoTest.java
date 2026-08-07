@@ -35,7 +35,6 @@ import com.teragrep.zep_01.interpreter.InterpreterFactory;
 import com.teragrep.zep_01.notebook.Note;
 import com.teragrep.zep_01.notebook.NoteInfo;
 import com.teragrep.zep_01.notebook.Paragraph;
-import com.teragrep.zep_01.notebook.repo.NotebookRepoWithVersionControl.Revision;
 import com.teragrep.zep_01.user.AuthenticationInfo;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.errors.GitAPIException;
@@ -439,10 +438,5 @@ public class GitNotebookRepoTest {
     // try failure case - set to invalid revision
     returnedNote = notebookRepo.setNoteRevision(note.getId(), note.getPath(), "nonexistent_id", null);
     assertThat(returnedNote).isNull();
-  }
-
-  @Test
-  public void testContract() {
-    EqualsVerifier.forClass(NotebookRepoWithVersionControl.Revision.class).verify();
   }
 }

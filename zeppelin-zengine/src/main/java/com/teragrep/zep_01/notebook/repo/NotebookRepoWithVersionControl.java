@@ -80,38 +80,4 @@ public interface NotebookRepoWithVersionControl extends NotebookRepo {
   @ZeppelinApi Note setNoteRevision(String noteId, String notePath, String revId,
                                     AuthenticationInfo subject) throws IOException;
 
-  /**
-   * Represents the 'Revision' a point in life of the notebook
-   */
-  final class Revision {
-    public static final Revision EMPTY = new Revision(StringUtils.EMPTY, StringUtils.EMPTY, 0);
-
-    public final String id;
-    public final String message;
-    public final int time;
-
-    public Revision(String revId, String message, int time) {
-      this.id = revId;
-      this.message = message;
-      this.time = time;
-    }
-
-    public static boolean isEmpty(Revision revision) {
-      return revision == null || EMPTY.equals(revision);
-    }
-
-    @Override
-    public boolean equals(Object o) {
-      if (this == o) return true;
-      if (o == null || getClass() != o.getClass()) return false;
-      Revision revision = (Revision) o;
-      return time == revision.time && Objects.equals(id, revision.id) && Objects.equals(message, revision.message);
-    }
-
-    @Override
-    public int hashCode() {
-      return Objects.hash(id, message, time);
-    }
-  }
-
 }
