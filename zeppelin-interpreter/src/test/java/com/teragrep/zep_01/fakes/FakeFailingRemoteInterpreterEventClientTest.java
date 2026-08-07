@@ -4,13 +4,13 @@ import nl.jqno.equalsverifier.EqualsVerifier;
 import org.junit.Test;
 import org.junit.jupiter.api.Assertions;
 
-public class FakeFailingRemoteInterpreterEventClientTest {
+public final class FakeFailingRemoteInterpreterEventClientTest {
 
     @Test
     public void testUnregisterInterpreter(){
         final RuntimeException exception = new RuntimeException();
         final FakeFailingRemoteInterpreterEventClient client = new FakeFailingRemoteInterpreterEventClient(exception);
-        Assertions.assertThrows(RuntimeException.class,()->{client.unRegisterInterpreterProcess();});
+        Assertions.assertThrows(RuntimeException.class, client::unRegisterInterpreterProcess);
     }
 
     @Test
