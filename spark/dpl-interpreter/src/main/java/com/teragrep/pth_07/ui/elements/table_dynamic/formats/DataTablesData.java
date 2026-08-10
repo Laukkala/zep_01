@@ -102,7 +102,9 @@ public final class DataTablesData implements Jsonable {
         List<String> paginatedRows = paginate(pageStart, pageLength);
         final JsonArrayBuilder dataBuilder = Json.createArrayBuilder();
         for (final String jsonRow:paginatedRows) {
-            dataBuilder.add(Json.createReader(new StringReader(jsonRow)).readObject());
+            try(JsonReader jsonReader = Json.createReader(new StringReader(jsonRow))){
+                dataBuilder.add(jsonReader.readObject());
+            }
         }
         return dataBuilder.build();
     }
