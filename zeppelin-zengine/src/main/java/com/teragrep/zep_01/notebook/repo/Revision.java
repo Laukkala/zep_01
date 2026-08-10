@@ -24,7 +24,7 @@ public final class Revision {
     }
 
     public boolean isEmpty() {
-        return (id.equals(StringUtils.EMPTY) && message.equals(StringUtils.EMPTY) && time == 0);
+        return (id.isEmpty() && message.isEmpty() && time == 0);
     }
 
     @Override
