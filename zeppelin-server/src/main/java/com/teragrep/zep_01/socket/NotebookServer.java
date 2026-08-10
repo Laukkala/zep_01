@@ -591,7 +591,7 @@ public class NotebookServer extends WebSocketServlet
       // msgId might be null, leading to a NullPointerException, so we need to check it here. Will need to completely remove the old Message object and replace it with JsonMessages.
       final MessageId messageId;
       if(msgId == null){
-        messageId = new StubMessageId();
+        messageId = new MessageIdStub();
       }
       else {
         messageId = new MessageIdImpl(msgId);

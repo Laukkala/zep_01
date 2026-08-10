@@ -45,41 +45,13 @@
  */
 package com.teragrep.pth_07.ui.elements.table_dynamic.formats;
 
-import jakarta.json.Json;
-import jakarta.json.JsonArray;
-import jakarta.json.JsonObject;
+import nl.jqno.equalsverifier.EqualsVerifier;
+import org.junit.jupiter.api.Test;
 
-import java.io.StringReader;
-import java.util.Objects;
 
-public final class UIOptionImpl implements UIOption {
-
-    private final String string;
-
-    public UIOptionImpl(final String string) {
-        this.string = string;
-    }
-
-    @Override
-    public JsonObject asJson() {
-        return Json.createReader(new StringReader(string)).readObject();
-    }
-    @Override
-    public String toString() {
-        return string;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        UIOptionImpl uiOption = (UIOptionImpl) o;
-        return Objects.equals(string, uiOption.string);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(string);
+public final class UIOptionImplTest {
+    @Test
+    public void testContract(){
+        EqualsVerifier.forClass(UIOptionImpl.class).verify();
     }
 }
-

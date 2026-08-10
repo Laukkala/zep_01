@@ -43,16 +43,14 @@
  * Teragrep, the applicable Commercial License may apply to this file if you as
  * a licensee so wish it.
  */
-package com.teragrep.zep_01.common;
+package com.teragrep.pth_07.ui.elements.table_dynamic.formats;
 
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
+import nl.jqno.equalsverifier.EqualsVerifier;
+import org.junit.Test;
 
-class StubMessageIdTest {
-
+public final class UPlotAvailableFormatTest {
     @Test
-    void asJson() {
-        final StubMessageId stubMessageId = new StubMessageId();
-        Assertions.assertThrows(IllegalStateException.class,()->stubMessageId.asJson());
+    public void testContract(){
+        EqualsVerifier.forClass(UPlotAvailableFormat.class).verify();
     }
 }

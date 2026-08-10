@@ -51,13 +51,13 @@ public final class JsonMessage implements Jsonable {
   }
 
   public JsonMessage(final Message.OP op, final JsonValue data){
-    this(new StubMessageId(), op,data,"anonymous","anonymous","");
+    this(new MessageIdStub(), op,data,"anonymous","anonymous","");
   }
   public JsonMessage(final MessageId id, final Message.OP op, final JsonValue data){
     this(id, op,data,"anonymous","anonymous","");
   }
   public JsonMessage(final Message.OP op, final Jsonable data){
-    this(new StubMessageId(), op,data.asJson(),"anonymous","anonymous","");
+    this(new MessageIdStub(), op,data.asJson(),"anonymous","anonymous","");
   }
   public JsonMessage(final MessageId id, final Message.OP op, final Jsonable data){
     this(id, op,data.asJson(),"anonymous","anonymous","");

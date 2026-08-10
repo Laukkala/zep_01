@@ -43,43 +43,22 @@
  * Teragrep, the applicable Commercial License may apply to this file if you as
  * a licensee so wish it.
  */
-package com.teragrep.pth_07.ui.elements.table_dynamic.formats;
+package com.teragrep.zep_01.common;
 
-import jakarta.json.Json;
-import jakarta.json.JsonArray;
-import jakarta.json.JsonObject;
+import nl.jqno.equalsverifier.EqualsVerifier;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
-import java.io.StringReader;
-import java.util.Objects;
+public final class MessageIdStubTest {
 
-public final class UIOptionImpl implements UIOption {
-
-    private final String string;
-
-    public UIOptionImpl(final String string) {
-        this.string = string;
+    @Test
+    void asJson() {
+        final MessageIdStub stubMessageId = new MessageIdStub();
+        Assertions.assertThrows(IllegalStateException.class,()->stubMessageId.asJson());
     }
 
-    @Override
-    public JsonObject asJson() {
-        return Json.createReader(new StringReader(string)).readObject();
-    }
-    @Override
-    public String toString() {
-        return string;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        UIOptionImpl uiOption = (UIOptionImpl) o;
-        return Objects.equals(string, uiOption.string);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(string);
+    @Test
+    void testContract(){
+        EqualsVerifier.forClass(MessageIdStub.class).verify();
     }
 }
-

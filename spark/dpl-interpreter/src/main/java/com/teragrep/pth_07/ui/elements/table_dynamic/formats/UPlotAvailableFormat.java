@@ -50,9 +50,19 @@ import jakarta.json.JsonValue;
 import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
 
+import java.util.Objects;
+
 public final class UPlotAvailableFormat implements AvailableFormat {
 
-    private static final RenderFormat renderFormatStub = new RenderFormatStub();
+    private final RenderFormat renderFormatStub;
+
+    public UPlotAvailableFormat(){
+        this(new RenderFormatStub());
+    }
+
+    public UPlotAvailableFormat(final RenderFormat renderFormatStub){
+        this.renderFormatStub = renderFormatStub;
+    }
 
     @Override
     public boolean isStub() {
@@ -62,11 +72,23 @@ public final class UPlotAvailableFormat implements AvailableFormat {
     @Override
     public RenderFormat asRenderFormat(final UIOption uiOption, final Dataset<Row> rowDataset) {
         RenderFormat rv = renderFormatStub;
-        JsonObject json = uiOption.asJson();
+        final JsonObject json = uiOption.asJson();
         if(json.containsKey("type") && json.get("type").getValueType().equals(JsonValue.ValueType.STRING) && json.getString("type").equals("uPlot")){
             rv = new UPlotFormat(uiOption, rowDataset);
         }
         return rv;
     }
 
+    @Override
+    public boolean equals(final Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        final UPlotAvailableFormat that = (UPlotAvailableFormat) o;
+        return Objects.equals(renderFormatStub, that.renderFormatStub);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(renderFormatStub);
+    }
 }

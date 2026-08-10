@@ -73,7 +73,7 @@ class UPlotDataTest {
             .config("spark.sql.session.timeZone", "UTC")
             .getOrCreate();
 
-    StructType schema = new StructType(
+    private final StructType schema = new StructType(
             new StructField[] {
                     new StructField("_time", DataTypes.TimestampType, false, new MetadataBuilder().build()),
                     new StructField("operation", DataTypes.StringType, false, new MetadataBuilder().build()),

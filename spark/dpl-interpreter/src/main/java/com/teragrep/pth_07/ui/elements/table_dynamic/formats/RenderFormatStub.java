@@ -48,7 +48,17 @@ package com.teragrep.pth_07.ui.elements.table_dynamic.formats;
 import com.teragrep.zep_01.interpreter.InterpreterResult;
 import jakarta.json.JsonObject;
 
+import java.util.Objects;
+
 public final class RenderFormatStub implements RenderFormat {
+    private final boolean isStub;
+    public RenderFormatStub() {
+        this(true);
+    }
+
+    private RenderFormatStub(final boolean isStub) {
+        this.isStub = isStub;
+    }
 
     @Override
     public JsonObject asJson() {
@@ -62,7 +72,20 @@ public final class RenderFormatStub implements RenderFormat {
 
     @Override
     public boolean isStub() {
-        return true;
+        return isStub;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        RenderFormatStub that = (RenderFormatStub) o;
+        return isStub == that.isStub;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(isStub);
     }
 
 }
