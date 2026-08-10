@@ -52,7 +52,9 @@ public class InterpreterResultMessage implements Serializable, Jsonable {
     // If the data is in some other format, create a JSON object with the keys expected by UI, and the data as a simple String.
     final JsonObject rv;
       if(type != null && (type.equals(InterpreterResult.Type.DATATABLES) || type.equals(InterpreterResult.Type.UPLOT))){
-        rv = Json.createReader(new StringReader(data)).readObject();
+        try(JsonReader jsonReader = Json.createReader(new StringReader(data))){
+          rv = jsonReader.readObject();
+        }
       }
       else {
         JsonObjectBuilder builder = Json.createObjectBuilder();

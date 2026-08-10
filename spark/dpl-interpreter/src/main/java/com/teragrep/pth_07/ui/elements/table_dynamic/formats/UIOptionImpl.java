@@ -48,6 +48,7 @@ package com.teragrep.pth_07.ui.elements.table_dynamic.formats;
 import jakarta.json.Json;
 import jakarta.json.JsonArray;
 import jakarta.json.JsonObject;
+import jakarta.json.JsonReader;
 
 import java.io.StringReader;
 import java.util.Objects;
@@ -62,7 +63,9 @@ public final class UIOptionImpl implements UIOption {
 
     @Override
     public JsonObject asJson() {
-        return Json.createReader(new StringReader(string)).readObject();
+        try(final JsonReader jsonReader = Json.createReader(new StringReader(string))){
+            return jsonReader.readObject();
+        }
     }
     @Override
     public String toString() {

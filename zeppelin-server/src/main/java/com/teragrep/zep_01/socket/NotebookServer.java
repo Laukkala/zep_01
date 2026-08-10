@@ -369,7 +369,10 @@ public class NotebookServer extends WebSocketServlet
           break;
         case PARAGRAPH_OUTPUT_REQUEST:
           // Reading of "msg" should be done at the very top of onMessage, but refactoring every message to use their own object type is out of scope for now
-          final JsonObject json = Json.createReader(new StringReader(msg)).readObject();
+          final JsonObject json;
+          try(JsonReader jsonReader = Json.createReader(new StringReader(msg))){
+             json = jsonReader.readObject();
+          }
           final ParagraphOutputRequestMessage message = new ParagraphOutputRequestMessage(json);
           paragraphOutput(conn, message);
           break;
@@ -1141,7 +1144,10 @@ public class NotebookServer extends WebSocketServlet
     try {
       // Format the dataset within RemoteInterpreter, then return the output
       final String output = managedInterpreterGroup.formatDataset(sessionId, interpreter.getClassName(), noteId, paragraphId, options);
-      final JsonObject outputJson = Json.createReader(new StringReader(output)).readObject();
+      final JsonObject outputJson;
+      try (JsonReader jsonReader = Json.createReader(new StringReader(output))) {
+        outputJson = jsonReader.readObject();
+      }
       final ParagraphOutputResponseMessage paragraphOutputResponse = new ParagraphOutputResponseMessage(noteId, paragraphId, outputJson);
       final JsonMessage msg = new JsonMessage(new MessageIdImpl(msgId), OP.PARAGRAPH_OUTPUT, paragraphOutputResponse);
       conn.send(msg.asJson().toString());
@@ -1675,7 +1681,10 @@ public class NotebookServer extends WebSocketServlet
       return;
     }
     // As formatted data is passed as a String via Thrift, we have to parse it with JsonReader
-    JsonObject outputJson = Json.createReader(new StringReader(output)).readObject();
+    final JsonObject outputJson;
+    try(JsonReader jsonReader = Json.createReader(new StringReader(output))){
+      outputJson = jsonReader.readObject();
+    }
     final ParagraphOutputResponseMessage paragraphOutputResponse = new ParagraphOutputResponseMessage(noteId,paragraphId,outputJson);
     final JsonMessage msg = new JsonMessage(OP.PARAGRAPH_OUTPUT, paragraphOutputResponse);
     try {
