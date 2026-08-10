@@ -54,6 +54,10 @@ import com.teragrep.pth_15.DPLExecutorFactory;
 import com.teragrep.pth_15.DPLExecutorResult;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
+import jakarta.json.Json;
+import jakarta.json.JsonObject;
+import jakarta.json.JsonReader;
+import jakarta.json.stream.JsonParsingException;
 import org.apache.spark.SparkContext;
 import com.teragrep.zep_01.interpreter.*;
 import com.teragrep.zep_01.interpreter.InterpreterResult.Code;
@@ -67,6 +71,7 @@ import org.apache.spark.sql.SparkSession;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.StringReader;
 import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 import java.util.concurrent.TimeoutException;
@@ -92,7 +97,7 @@ public class DPLInterpreter extends AbstractInterpreter {
 
     private final HashMap<String, HashMap<String, UserInterfaceManager>> notebookParagraphUserInterfaceManager;
     private final List<AvailableFormat> availableFormats = Arrays.asList(new DataTablesAvailableFormat(), new UPlotAvailableFormat());
-    private final UIOption defaultUIOption = new UIOptionImpl("{\"type\":\"dataTables\",\"requestOptions\":{\"draw\":1,\"start\":0,\"length\":50,\"search\":{\"value\":\"\",\"regex\":false,\"fixed\":[]}}}");
+    private final UIOption defaultUIOption;
 
 
     public DPLInterpreter(final Properties properties) {
@@ -107,6 +112,7 @@ public class DPLInterpreter extends AbstractInterpreter {
         dplKryo = new DPLKryo();
         LOGGER.info("DPL-interpreter initialize properties: {}", properties);
         notebookParagraphUserInterfaceManager = new HashMap<>();
+        defaultUIOption = new UIOptionImpl();
     }
 
     @Override
@@ -312,8 +318,14 @@ public class DPLInterpreter extends AbstractInterpreter {
 
     @Override
     public String formatDataset(final String noteId, final String paragraphId, final String options) throws InterpreterException{
+        final JsonObject optionsJson;
+        try(JsonReader jsonReader = Json.createReader(new StringReader(options))){
+            optionsJson = jsonReader.readObject();
+        } catch (JsonParsingException exception){
+            throw new InterpreterException("Provided options are not in valid JSON format!",exception);
+        }
         final UserInterfaceManager userInterfaceManager = findUserInterfacemanger(noteId,paragraphId);
-        final UIOption option = new UIOptionImpl(options);
+        final UIOption option = new UIOptionImpl(optionsJson);
         return userInterfaceManager.formatDataset(option);
     }
 }

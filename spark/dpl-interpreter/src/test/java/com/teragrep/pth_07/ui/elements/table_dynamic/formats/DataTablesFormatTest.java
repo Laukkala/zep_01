@@ -96,7 +96,7 @@ class DataTablesFormatTest {
                         .add("length",length))
                 .build();
 
-        final UIOption formattingOptions = new UIOptionImpl(optionsJson.toString());
+        final UIOption formattingOptions = new UIOptionImpl(optionsJson);
 
         // Get rows 3-5 of the dataset, check that every value is present
         final DataTablesFormat format = new DataTablesFormat(formattingOptions,sourceData);
@@ -168,7 +168,7 @@ class DataTablesFormatTest {
                         .add("length",length))
                 .build();
 
-        final UIOption formattingOptions = new UIOptionImpl(optionsJson.toString());
+        final UIOption formattingOptions = new UIOptionImpl(optionsJson);
 
         // Get rows 3-5 of the dataset, check that every value is present
         final DataTablesFormat format = new DataTablesFormat(formattingOptions,aggDataset);
@@ -235,7 +235,7 @@ class DataTablesFormatTest {
                         .add("length",length))
                 .build();
 
-        final UIOption formattingOptions = new UIOptionImpl(optionsJson.toString());
+        final UIOption formattingOptions = new UIOptionImpl(optionsJson);
 
         // Get rows 3-5 of the dataset, check that every value is present
         final DataTablesFormat format = new DataTablesFormat(formattingOptions,aggDataset);
@@ -288,7 +288,7 @@ class DataTablesFormatTest {
                         .add("length",length1))
                 .build();
 
-        final UIOption formattingOptions1 = new UIOptionImpl(optionsJson.toString());
+        final UIOption formattingOptions1 = new UIOptionImpl(optionsJson);
 
 
         final DataTablesFormat format1 = new DataTablesFormat(formattingOptions1,sourceData);
@@ -336,7 +336,7 @@ class DataTablesFormatTest {
                         .add("length",length2))
                 .build();
 
-        final UIOption formattingOptions2 = new UIOptionImpl(optionsJson2.toString());
+        final UIOption formattingOptions2 = new UIOptionImpl(optionsJson2);
 
         // Get rows 3-5 of the dataset, check that every value is present
         final DataTablesFormat format2 = new DataTablesFormat(formattingOptions2,sourceData);

@@ -52,6 +52,8 @@ import com.teragrep.zep_01.display.AngularObject;
 import com.teragrep.zep_01.display.AngularObjectRegistry;
 import com.teragrep.zep_01.display.AngularObjectRegistryListener;
 import com.teragrep.zep_01.interpreter.*;
+import jakarta.json.Json;
+import jakarta.json.JsonObject;
 import nl.jqno.equalsverifier.EqualsVerifier;
 import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
@@ -120,7 +122,21 @@ class UserInterfaceManagerTest {
         availableFormatList.add(new DataTablesAvailableFormat());
         availableFormatList.add(new UPlotAvailableFormat());
         final Dataset<Row> emptyDataset = sparkSession.emptyDataFrame();
-        final UIOption defaultUIOption = new UIOptionImpl("{\"paragraphId\":\"paragraph_1777976743753_395717996\",\"noteId\":\"2MRV3E2UT\",\"type\":\"dataTables\",\"requestOptions\":{\"draw\":1,\"start\":0,\"length\":50,\"search\":{\"value\":\"\",\"regex\":false,\"fixed\":[]}}}");
+        final JsonObject json = Json.createObjectBuilder()
+                .add("paragraphId","paragraph_1777976743753_395717996")
+                .add("noteId","2MRV3E2UT")
+                .add("type", "dataTables")
+                .add("requestOptions",Json.createObjectBuilder()
+                        .add("draw",1)
+                        .add("start",0)
+                        .add("length",50)
+                        .add("search",Json.createObjectBuilder()
+                                .add("value","")
+                                .add("regex",false)
+                                .add("fixed",Json.createArrayBuilder().build())
+                                .build()).build())
+                .build();
+        final UIOption defaultUIOption = new UIOptionImpl(json);
         final UserInterfaceManager userInterfaceManager = new UserInterfaceManager(context,emptyDataset,defaultUIOption,availableFormatList);
 
         //TestOutput should be empty. Results of testOutput are stored to disk, so there can only be one or no results.
@@ -144,7 +160,15 @@ class UserInterfaceManagerTest {
                 "\"type\":\"dataTables\"}";
         Assertions.assertEquals(expectedDTOutput,outputList.get(0).toString());
 
-        final UIOption uPlotUIOption = new UIOptionImpl("{\"paragraphId\":\"paragraphId\",\"noteId\":\"dataTables\",\"type\":\"uPlot\",\"requestOptions\":{\"graphType\":\"line\"}}");
+        final JsonObject uPlotOptionJson = Json.createObjectBuilder()
+                .add("paragraphId","paragraphId")
+                .add("noteId","dataTables")
+                .add("type", "uPlot")
+                .add("requestOptions",Json.createObjectBuilder()
+                        .add("graphType","line")
+                        .build())
+                .build();
+        final UIOption uPlotUIOption = new UIOptionImpl(uPlotOptionJson);
         userInterfaceManager.updateUIOption(uPlotUIOption);
 
         final Dataset<Row> testDs2 = testDataset.createDataset(2,1L,1L);
@@ -174,9 +198,32 @@ class UserInterfaceManagerTest {
         availableFormatList.add(new UPlotAvailableFormat());
         final Dataset<Row> emptyDataset = sparkSession.emptyDataFrame();
 
-        final UIOption defaultUIOption = new UIOptionImpl("{\"paragraphId\":\"paragraphId\",\"noteId\":\"noteId\",\"type\":\"dataTables\",\"requestOptions\":{\"draw\":1,\"start\":0,\"length\":50,\"search\":{\"value\":\"\",\"regex\":false,\"fixed\":[]}}}");
+        final JsonObject defaultOptionJson = Json.createObjectBuilder()
+                .add("paragraphId","paragraphId")
+                .add("noteId","noteId")
+                .add("type", "dataTables")
+                .add("requestOptions",Json.createObjectBuilder()
+                        .add("draw",0)
+                        .add("start",0)
+                        .add("length",50)
+                        .add("search",Json.createObjectBuilder()
+                                .add("value","")
+                                .add("regex",false)
+                                .add("fixed",Json.createArrayBuilder().build())
+                                .build()).build())
+                .build();
+        final UIOption defaultUIOption = new UIOptionImpl(defaultOptionJson);
         final UserInterfaceManager userInterfaceManager = new UserInterfaceManager(context,emptyDataset,defaultUIOption,availableFormatList);
-        final UIOption uPlotUIOption = new UIOptionImpl("{\"paragraphId\":\"paragraphId\",\"noteId\":\"dataTables\",\"type\":\"uPlot\",\"requestOptions\":{\"graphType\":\"line\"}}");
+
+        final JsonObject uPlotOptionJson = Json.createObjectBuilder()
+                .add("paragraphId","paragraphId")
+                .add("noteId","dataTables")
+                .add("type", "uPlot")
+                .add("requestOptions",Json.createObjectBuilder()
+                        .add("graphType","line")
+                        .build())
+                .build();
+        final UIOption uPlotUIOption = new UIOptionImpl(uPlotOptionJson);
         Assertions.assertDoesNotThrow(()->userInterfaceManager.updateDataset(testDs));
 
         final String formatted = Assertions.assertDoesNotThrow(()->userInterfaceManager.formatDataset(uPlotUIOption));
@@ -213,8 +260,10 @@ class UserInterfaceManagerTest {
     void equalsVerifier() {
         InterpreterContext redInterpreterContext = InterpreterContext.builder().setNoteId("note1").build();
         InterpreterContext blueInterpreterContext = InterpreterContext.builder().setNoteId("note2").build();
-        DatasetStore redDatasetStore = new DatasetStore(testDs,new ArrayList<>(),redInterpreterContext,new UIOptionImpl("red"));
-        DatasetStore blueDatasetStore = new DatasetStore(testDs,new ArrayList<>(),blueInterpreterContext,new UIOptionImpl("red"));
+        JsonObject json = Json.createObjectBuilder()
+                .add("key","value").build();
+        DatasetStore redDatasetStore = new DatasetStore(testDs,new ArrayList<>(),redInterpreterContext,new UIOptionImpl(json));
+        DatasetStore blueDatasetStore = new DatasetStore(testDs,new ArrayList<>(),blueInterpreterContext,new UIOptionImpl(json));
         EqualsVerifier.forClass(UserInterfaceManager.class)
                 .withPrefabValues(InterpreterContext.class, redInterpreterContext, blueInterpreterContext)
                 .withPrefabValues(DatasetStore.class, redDatasetStore, blueDatasetStore)

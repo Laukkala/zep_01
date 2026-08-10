@@ -101,7 +101,7 @@ class UPlotFormatTest {
                         .add("graphType",graphType)
                         .build())
                 .build();
-        final UIOption options = new UIOptionImpl(optionsJson.toString());
+        final UIOption options = new UIOptionImpl(optionsJson);
         final UPlotFormat format = new UPlotFormat(options, resultDataset);
 
         final JsonObject formatted = Assertions.assertDoesNotThrow(()-> format.asJson());
@@ -174,7 +174,7 @@ class UPlotFormatTest {
                         .add("graphType",graphType)
                         .build())
                 .build();
-        final UIOption options = new UIOptionImpl(optionsJson.toString());
+        final UIOption options = new UIOptionImpl(optionsJson);
         final UPlotFormat format = new UPlotFormat(options, resultDataset);
 
         final JsonObject formatted = Assertions.assertDoesNotThrow(()-> format.asJson());
@@ -247,7 +247,7 @@ class UPlotFormatTest {
                         .add("graphType",graphType)
                         .build())
                 .build();
-        final UIOption options = new UIOptionImpl(optionsJson.toString());
+        final UIOption options = new UIOptionImpl(optionsJson);
         final UPlotFormat format = new UPlotFormat(options, resultDataset);
 
         final JsonObject formatted = Assertions.assertDoesNotThrow(()-> format.asJson());
@@ -322,7 +322,7 @@ class UPlotFormatTest {
                                 .add("_time"))
                         .build())
                 .build();
-        final UIOption options = new UIOptionImpl(optionsJson.toString());
+        final UIOption options = new UIOptionImpl(optionsJson);
         final UPlotFormat format = new UPlotFormat(options, resultDataset);
 
         final JsonObject formatted = Assertions.assertDoesNotThrow(()-> format.asJson());
@@ -398,7 +398,7 @@ class UPlotFormatTest {
                         .add("graphType",graphType)
                         .build())
                 .build();
-        final UIOption options = new UIOptionImpl(optionsJson.toString());
+        final UIOption options = new UIOptionImpl(optionsJson);
         final UPlotFormat format = new UPlotFormat(options, resultDataset);
 
         final JsonObject formatted = Assertions.assertDoesNotThrow(()-> format.asJson());
@@ -477,7 +477,7 @@ class UPlotFormatTest {
                                 .add("operation"))
                         .build())
                 .build();
-        final UIOption options = new UIOptionImpl(optionsJson.toString());
+        final UIOption options = new UIOptionImpl(optionsJson);
         final UPlotFormat format = new UPlotFormat(options, resultDataset);
 
         final JsonObject formatted = Assertions.assertDoesNotThrow(()-> format.asJson());
@@ -556,7 +556,7 @@ class UPlotFormatTest {
                                 .add("_time"))
                         .build())
                 .build();
-        final UIOption options = new UIOptionImpl(optionsJson.toString());
+        final UIOption options = new UIOptionImpl(optionsJson);
         final UPlotFormat format = new UPlotFormat(options, resultDataset);
 
         final JsonObject formatted = Assertions.assertDoesNotThrow(()-> format.asJson());
@@ -632,7 +632,7 @@ class UPlotFormatTest {
                         .add("graphType",graphType)
                         .build())
                 .build();
-        final UIOption options = new UIOptionImpl(optionsJson.toString());
+        final UIOption options = new UIOptionImpl(optionsJson);
         final UPlotFormat format = new UPlotFormat(options, resultDataset);
 
         final JsonObject formatted = Assertions.assertDoesNotThrow(()-> format.asJson());
@@ -697,7 +697,7 @@ class UPlotFormatTest {
                         .add("graphType",graphType)
                         .build())
                 .build();
-        final UIOption options = new UIOptionImpl(optionsJson.toString());
+        final UIOption options = new UIOptionImpl(optionsJson);
         final UPlotFormat format = new UPlotFormat(options, resultDataset);
 
         Assertions.assertDoesNotThrow(()->format.asJson());
@@ -719,7 +719,7 @@ class UPlotFormatTest {
                         .add("graphType",graphType)
                         .build())
                 .build();
-        final UIOption options = new UIOptionImpl(optionsJson.toString());
+        final UIOption options = new UIOptionImpl(optionsJson);
         final UPlotFormat format = new UPlotFormat(options, resultDataset);
 
         // Trying to display string data (such as operation name: "create") should result in a dataset where only numerical data is shown, and string data is replaced by JSON nulls.
@@ -765,7 +765,7 @@ class UPlotFormatTest {
                         .add("graphType",graphType)
                         .build())
                 .build();
-        final UIOption options = new UIOptionImpl(optionsJson.toString());
+        final UIOption options = new UIOptionImpl(optionsJson);
         final UPlotFormat format = new UPlotFormat(options, resultDataset);
 
         final JsonObject formatted = Assertions.assertDoesNotThrow(()-> format.asJson());

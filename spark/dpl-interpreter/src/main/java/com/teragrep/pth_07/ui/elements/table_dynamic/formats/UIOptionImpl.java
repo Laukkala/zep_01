@@ -46,7 +46,6 @@
 package com.teragrep.pth_07.ui.elements.table_dynamic.formats;
 
 import jakarta.json.Json;
-import jakarta.json.JsonArray;
 import jakarta.json.JsonObject;
 import jakarta.json.JsonReader;
 
@@ -55,21 +54,34 @@ import java.util.Objects;
 
 public final class UIOptionImpl implements UIOption {
 
-    private final String string;
+    private final JsonObject json;
 
-    public UIOptionImpl(final String string) {
-        this.string = string;
+    public UIOptionImpl(){
+        this(Json.createObjectBuilder()
+                .add("type","dataTables")
+                .add("requestOptions",Json.createObjectBuilder()
+                        .add("draw",1)
+                        .add("start",0)
+                        .add("length",50)
+                        .add("search", Json.createObjectBuilder()
+                                .add("value","")
+                                .add("regex",false)
+                                .add("fixed", Json.createArrayBuilder().build()))
+                        .build())
+                .build());
+    }
+
+    public UIOptionImpl(final JsonObject jsonObject) {
+        this.json = jsonObject;
     }
 
     @Override
     public JsonObject asJson() {
-        try(final JsonReader jsonReader = Json.createReader(new StringReader(string))){
-            return jsonReader.readObject();
-        }
+        return json;
     }
     @Override
     public String toString() {
-        return string;
+        return json.toString();
     }
 
     @Override
@@ -77,12 +89,12 @@ public final class UIOptionImpl implements UIOption {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         UIOptionImpl uiOption = (UIOptionImpl) o;
-        return Objects.equals(string, uiOption.string);
+        return Objects.equals(json, uiOption.json);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(string);
+        return Objects.hash(json);
     }
 }
 
