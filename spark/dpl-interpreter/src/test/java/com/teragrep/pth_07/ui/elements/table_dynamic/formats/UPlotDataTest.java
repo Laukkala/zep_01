@@ -93,7 +93,8 @@ class UPlotDataTest {
         final JsonArray success = Assertions.assertDoesNotThrow(()->json.getJsonArray(3));
         final JsonArray filesModified = Assertions.assertDoesNotThrow(()->json.getJsonArray(4));
 
-        // Data is not aggregated, so X-axis should be 0, others should contain one value for every row
+        // Data is not aggregated, so X-axis should be 0, others should contain one value for every row. Source data has 23 rows of data.
+        Assertions.assertEquals(23 ,rows.size());
         Assertions.assertEquals(0, xAxis.size());
         Assertions.assertEquals(rows.size(), time.size());
         Assertions.assertEquals(rows.size(), operation.size());
@@ -116,7 +117,8 @@ class UPlotDataTest {
         final JsonArray xAxis = Assertions.assertDoesNotThrow(() -> json.getJsonArray(0));
         final JsonArray maxFilesModified = Assertions.assertDoesNotThrow(() -> json.getJsonArray(1));
 
-        // Data is  aggregated, so X-axis should be the same size as rows in the dataset.
+        // Data is  aggregated, so X-axis should be the same size as rows in the dataset. Dataset should contain 14 rows of data after grouping.
+        Assertions.assertEquals(14 ,rows.size());
         Assertions.assertEquals(rows.size(), xAxis.size());
         Assertions.assertEquals(rows.size(), maxFilesModified.size());
 

@@ -57,6 +57,7 @@ import org.apache.spark.sql.types.DataTypes;
 import org.apache.spark.sql.types.MetadataBuilder;
 import org.apache.spark.sql.types.StructField;
 import org.apache.spark.sql.types.StructType;
+import org.junit.Assert;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
@@ -114,6 +115,7 @@ class UPlotMetadataTest {
         final String xAxisLabel = Assertions.assertDoesNotThrow(()->json.getString("xAxisLabel"));
 
         // Data is aggregated, so there should be a label for each row in the dataset. Series count should be one as there is only one aggregation (max) used.
+        Assertions.assertEquals(14,rows.size());
         Assertions.assertEquals(rows.size(), labels.size());
         Assertions.assertEquals(1, series.size());
         Assertions.assertEquals("line", graphType);
