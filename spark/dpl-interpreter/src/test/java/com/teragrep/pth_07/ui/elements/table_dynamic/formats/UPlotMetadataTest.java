@@ -69,8 +69,6 @@ class UPlotMetadataTest {
     private final String sourceDataFile = "src/test/resources/formatTestSourceData.csv";
     private final SparkSession sparkSession = SparkSession.builder()
             .master("local[*]")
-            .config("spark.cleaner.referenceTracking.cleanCheckpoints", "true")
-            .config("checkpointLocation","/tmp/pth_10/test/StackTest/checkpoints/" + UUID.randomUUID() + "/")
             .config("spark.sql.session.timeZone", "UTC")
             .getOrCreate();
 
