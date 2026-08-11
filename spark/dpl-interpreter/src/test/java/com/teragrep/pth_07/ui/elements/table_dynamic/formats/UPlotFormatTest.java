@@ -111,8 +111,8 @@ class UPlotFormatTest {
         Assertions.assertTrue(formatted.containsKey("type"));
 
         // Check data
-        // Data must contain at least two arrays
-        Assertions.assertTrue(formatted.getJsonArray("data").size() > 1);
+        // Data must contain at least two arrays, (1 for x-axis lables, 2 for data series)
+        Assertions.assertEquals(3, formatted.getJsonArray("data").size());
 
         // First array of Data is the indexes for the series names used for X axis. It's length should be the number of unique combinations you can make with the values of the "group by" clause used.
         Assertions.assertEquals(0,formatted.getJsonArray("data").getJsonArray(0).size());
@@ -183,8 +183,8 @@ class UPlotFormatTest {
         Assertions.assertTrue(formatted.containsKey("isAggregated"));
 
         // Check data
-        // Data must contain at least two arrays
-        Assertions.assertTrue(formatted.getJsonArray("data").size() > 1);
+        // Data must contain at least two arrays, (1 for x-axis lables, 2 for data series)
+        Assertions.assertEquals(3, formatted.getJsonArray("data").size());
 
         // First array of Data is the indexes for the series names used for X axis. It's length should be the number of unique combinations you can make with the values of the "group by" clause used.
         // In cases where aggregations are used, the dataset's size should always equal this number. If no aggregations aren't used, the number should be zero
@@ -256,8 +256,8 @@ class UPlotFormatTest {
         Assertions.assertTrue(formatted.containsKey("isAggregated"));
 
         // Check data
-        // Data must contain at least two arrays
-        Assertions.assertTrue(formatted.getJsonArray("data").size() > 1);
+        // Data must contain at least two arrays, (1 for x-axis lables, 1 for data series)
+        Assertions.assertEquals(2, formatted.getJsonArray("data").size());
 
         // First array of Data is the indexes for the series names used for X axis. It's length should be the number of unique combinations you can make with the values of the "group by" clause used.
         // In cases where aggregations are used, the dataset's size should always equal this number. If no aggregations aren't used, the number should be zero
@@ -331,8 +331,8 @@ class UPlotFormatTest {
         Assertions.assertTrue(formatted.containsKey("isAggregated"));
 
         // Check data
-        // Data must contain at least two arrays
-        Assertions.assertTrue(formatted.getJsonArray("data").size() > 1);
+        // Data must contain at least two arrays, (1 for x-axis lables, 9 for data series)
+        Assertions.assertEquals(10, formatted.getJsonArray("data").size());
 
         // First array of Data is the indexes for the series names used for X axis. It's length in timechart commands should be the number of unique dates in the output.
         // In cases where aggregations are used, the dataset's size should always equal this number. If no aggregations aren't used, the number should be zero
@@ -407,8 +407,8 @@ class UPlotFormatTest {
         Assertions.assertTrue(formatted.containsKey("isAggregated"));
 
         // Check data
-        // Data must contain at least two arrays
-        Assertions.assertTrue(formatted.getJsonArray("data").size() > 1);
+        // Data must contain at least two arrays, (1 for x-axis lables, 3 for data series)
+        Assertions.assertEquals(4, formatted.getJsonArray("data").size());
 
         // First array of Data is the indexes for the series names used for X axis. It's length should be the number of unique combinations you can make with the values of the "group by" clause used.
         // In cases where aggregations are used, the dataset's size should always equal this number. If no aggregations aren't used, the number should be zero
@@ -486,8 +486,8 @@ class UPlotFormatTest {
         Assertions.assertTrue(formatted.containsKey("isAggregated"));
 
         // Check data
-        // Data must contain at least two arrays
-        Assertions.assertTrue(formatted.getJsonArray("data").size() > 1);
+        // Data must contain at least two arrays, (1 for x-axis lables, 6 for data series)
+        Assertions.assertEquals(7, formatted.getJsonArray("data").size());
 
         // First array of Data is the indexes for the series names used for X axis. It's length in timechart commands should be the number of unique dates in the output.
         // In cases where aggregations are used, the dataset's size should always equal this number. If no aggregations aren't used, the number should be zero
@@ -565,8 +565,8 @@ class UPlotFormatTest {
         Assertions.assertTrue(formatted.containsKey("isAggregated"));
 
         // Check data
-        // Data must contain at least two arrays
-        Assertions.assertTrue(formatted.getJsonArray("data").size() > 1);
+        // Data must contain at least two arrays, (1 for x-axis lables, 15 for data series)
+        Assertions.assertEquals(16, formatted.getJsonArray("data").size());
 
         // First array of Data is the indexes for the series names used for X axis. It's length in timechart commands should be the number of unique dates in the output.
         // In cases where aggregations are used, the dataset's size should always equal this number. If no aggregations aren't used, the number should be zero
@@ -643,8 +643,8 @@ class UPlotFormatTest {
         Assertions.assertTrue(formatted.containsKey("isAggregated"));
 
         // Check data
-        // Data must contain at least two arrays
-        Assertions.assertTrue(formatted.getJsonArray("data").size() > 1);
+        // Data must contain at least two arrays, (1 for x-axis lables, 3 for data series)
+        Assertions.assertEquals(4, formatted.getJsonArray("data").size());
 
         // First array of Data is the indexes for the series names used for X axis. It's length should be the number of unique combinations you can make with the values of the "group by" clause used.
         // In cases where aggregations are used, the dataset's size should always equal this number. If no aggregations aren't used, the number should be zero
@@ -776,8 +776,8 @@ class UPlotFormatTest {
         Assertions.assertTrue(formatted.containsKey("isAggregated"));
 
         // Check data
-        // Data must contain at least two arrays
-        Assertions.assertTrue(formatted.getJsonArray("data").size() > 1);
+        // Data must contain at least two arrays, (1 for x-axis lables, 1 for data series)
+        Assertions.assertEquals(2, formatted.getJsonArray("data").size());
 
         // First array of Data is the indexes for the series names used for X axis. It's length should be the number of unique combinations you can make with the values of the "group by" clause used.
         // In cases where aggregations are used, the dataset's size should always equal this number. If no aggregations aren't used, the number should be zero
