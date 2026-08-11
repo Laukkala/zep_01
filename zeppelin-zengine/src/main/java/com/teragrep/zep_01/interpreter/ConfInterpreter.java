@@ -69,7 +69,7 @@ public class ConfInterpreter extends Interpreter {
       newProperties.load(new StringReader(st));
       // Verify that every key to be added exists within the Interpreter's defined properties already.
       for (String propertyName : newProperties.stringPropertyNames()){
-        if(finalProperties.getProperty(propertyName) == null){
+        if(!finalProperties.containsKey(propertyName)){
           throw new InterpreterException("Tried to add an unknown key to Interpreter's properties: "+ propertyName + " Please make sure that the key is listed as a property in the Interpreters page.");
         }
       }
