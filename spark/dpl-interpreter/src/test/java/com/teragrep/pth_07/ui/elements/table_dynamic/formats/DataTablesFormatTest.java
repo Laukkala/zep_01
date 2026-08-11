@@ -137,8 +137,11 @@ class DataTablesFormatTest {
         Assertions.assertEquals(InterpreterResult.Type.DATATABLES.label,type);
     }
 
-    // If other Spark methods (such as filter) are called during the creation of the Dataset, the first LogicalPlan of the dataset might not be of type Aggregate, even if aggregations were used at some point.
-    // Verify that if the final operation is not a group by, aggregations are still detected and formatting still works.
+    /**
+     * If other Spark methods (such as filter) are called during the creation of the Dataset, the first LogicalPlan of the dataset might not be of type Aggregate, even if aggregations were used at some point.
+     * Verify that if the final operation is not a group by, aggregations are still detected and formatting still works.
+     */
+
     @Test
     void testAggregatedDatasetFormat(){
         final StructType aggSchema = new StructType(

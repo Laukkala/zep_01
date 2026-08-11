@@ -112,7 +112,9 @@ class UserInterfaceManagerTest {
             .build();
 
 
-    // Call to UserInterfaceManager.updateDataset() should result in a formatted representation of the dataset to be written to InterpreterOutput.
+    /**
+     * Call to UserInterfaceManager.updateDataset() should result in a formatted representation of the dataset to be written to InterpreterOutput.
+     */
     @Test
     void updateDatasetTest() {
 
@@ -188,7 +190,9 @@ class UserInterfaceManagerTest {
         Assertions.assertEquals(expectedUplotOutput,outputList.get(2).toString());
     }
 
-    // Call to UserInterfaceManager.formatDataset() should return a formatted representation of the dataset as a String.
+    /**
+     * Call to UserInterfaceManager.formatDataset() should return a formatted representation of the dataset as a String.
+     */
     @Test
     void formatDatasetTest() {
         final List<AvailableFormat> availableFormatList = new ArrayList<>();
