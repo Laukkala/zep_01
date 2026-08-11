@@ -60,6 +60,7 @@ import org.apache.spark.sql.types.StructType;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -81,6 +82,8 @@ class UPlotMetadataTest {
             }
     );
     private final Dataset<Row> sourceData = sparkSession.read().option("header",true).schema(schema).csv(sourceDataFile);
+
+    private final StructType emptySchema = new StructType();
 
     @Test
     void asJsonTest(){
@@ -115,6 +118,22 @@ class UPlotMetadataTest {
         Assertions.assertEquals(1, series.size());
         Assertions.assertEquals("line", graphType);
         Assertions.assertEquals("_time", xAxisLabel);
+    }
+
+    @Test
+    void emptyAsJsonTest(){
+        final List<Row> rows = new ArrayList<>();
+        final UPlotMetadata metaData = new UPlotMetadata(emptySchema,rows,"","line",false);
+        final JsonObject json = Assertions.assertDoesNotThrow(()->metaData.asJson().asJsonObject());
+        Assertions.assertEquals(4,json.size());
+        final JsonArray series = Assertions.assertDoesNotThrow(()->json.getJsonArray("series"));
+        final JsonArray labels = Assertions.assertDoesNotThrow(()->json.getJsonArray("labels"));
+        final String graphType = Assertions.assertDoesNotThrow(()->json.getString("graphType"));
+
+        // Data is not aggregated, so there should be no labels. Series count should match with schema size
+        Assertions.assertEquals(0, labels.size());
+        Assertions.assertEquals(emptySchema.size(), series.size());
+        Assertions.assertEquals("line", graphType);
     }
 
     @Test

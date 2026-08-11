@@ -66,14 +66,25 @@ class DataTablesMetadataTest {
             .add(new StructField("testColumn2", DataTypes.StringType,false, Metadata.empty()))
             .add(new StructField("testColumn3", DataTypes.BooleanType,false, Metadata.empty()));
 
+    final StructType emptySchema = new StructType();
+
     @Test
-    void asJson() {
+    void asJsonTest() {
         final DataTablesMetadata metadata = new DataTablesMetadata(testSchema);
         final JsonObject expectedJson = Json.createObjectBuilder()
                 .add("headers", Json.createArrayBuilder()
                         .add("testColumn1")
                         .add("testColumn2")
                         .add("testColumn3").build())
+                .build();
+        Assertions.assertEquals(expectedJson, metadata.asJson());
+    }
+
+    @Test
+    void emptyAsJsonTest() {
+        final DataTablesMetadata metadata = new DataTablesMetadata(emptySchema);
+        final JsonObject expectedJson = Json.createObjectBuilder()
+                .add("headers", Json.createArrayBuilder().build())
                 .build();
         Assertions.assertEquals(expectedJson, metadata.asJson());
     }
