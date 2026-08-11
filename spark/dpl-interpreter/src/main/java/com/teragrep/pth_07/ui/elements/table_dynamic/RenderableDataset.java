@@ -87,9 +87,4 @@ public final class RenderableDataset {
     public void unpersist(){
         rowDataset.unpersist();
     }
-
-    public boolean isStub() {
-        return false;
-    }
-
 }
