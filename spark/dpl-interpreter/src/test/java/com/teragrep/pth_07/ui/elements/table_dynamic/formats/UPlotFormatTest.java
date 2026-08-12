@@ -309,7 +309,6 @@ class UPlotFormatTest {
                 .withMetadata("operation", new MetadataBuilder().putBoolean("dpl_internal_isGroupByColumn",true).build());
 
         // Create options and Format objects to be tested
-        // Create options and Format objects to be tested
         final String graphType = "graph";
         final String xAxisLabel = "_time";
         final JsonObject optionsJson = Json.createObjectBuilder()
