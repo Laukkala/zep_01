@@ -9,7 +9,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 
-class EditorSettingTest {
+public final class EditorSettingTest {
 
     @Test
     void asJson() {

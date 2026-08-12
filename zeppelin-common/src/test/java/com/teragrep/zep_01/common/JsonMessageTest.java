@@ -6,7 +6,7 @@ import nl.jqno.equalsverifier.EqualsVerifier;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-class JsonMessageTest {
+public final class JsonMessageTest {
 
     @Test
     public void asJsonTest() {

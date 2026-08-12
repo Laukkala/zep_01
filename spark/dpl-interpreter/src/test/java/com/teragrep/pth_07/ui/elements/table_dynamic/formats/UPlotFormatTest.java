@@ -63,7 +63,7 @@ import org.junit.jupiter.api.Test;
 
 import java.util.*;
 
-class UPlotFormatTest {
+public final class UPlotFormatTest {
     private final String sourceDataFile = "src/test/resources/formatTestSourceData.csv";
     private final SparkSession sparkSession = SparkSession.builder()
             .master("local[*]")

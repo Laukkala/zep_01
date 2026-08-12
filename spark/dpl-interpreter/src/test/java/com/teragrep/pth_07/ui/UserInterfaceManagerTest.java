@@ -68,10 +68,9 @@ import org.junit.jupiter.api.Test;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 
 
-class UserInterfaceManagerTest {
+public final class UserInterfaceManagerTest {
     private final SparkSession sparkSession = SparkSession.builder()
             .master("local[*]")
             .config("spark.sql.session.timeZone", "UTC")
@@ -84,12 +83,12 @@ class UserInterfaceManagerTest {
     );
     private final TestDPLData testDataset = new TestDPLData(sparkSession, testSchema);
     private final Dataset<Row> testDs = testDataset.createDataset(2,0L,0L);
-    String noteId = "testNote";
-    String paragraphId = "testParagraph";
-    String interpreterGroupId = "testInterpreterGroupId";
-    TestInterpreterOutputListener testOutputListener = new TestInterpreterOutputListener();
-    InterpreterOutput testOutput = new InterpreterOutput(testOutputListener);
-    AngularObjectRegistryListener testRegistryListener = new AngularObjectRegistryListener() {
+    private final String noteId = "testNote";
+    private final String paragraphId = "testParagraph";
+    private final String interpreterGroupId = "testInterpreterGroupId";
+    private final TestInterpreterOutputListener testOutputListener = new TestInterpreterOutputListener();
+    private final InterpreterOutput testOutput = new InterpreterOutput(testOutputListener);
+    private final AngularObjectRegistryListener testRegistryListener = new AngularObjectRegistryListener() {
 
         @Override
         public void onAddAngularObject(final String interpreterGroupId, final AngularObject angularObject) {
@@ -260,12 +259,12 @@ class UserInterfaceManagerTest {
         }
     @Test
     void equalsVerifier() {
-        InterpreterContext redInterpreterContext = InterpreterContext.builder().setNoteId("note1").build();
-        InterpreterContext blueInterpreterContext = InterpreterContext.builder().setNoteId("note2").build();
-        JsonObject json = Json.createObjectBuilder()
+        final InterpreterContext redInterpreterContext = InterpreterContext.builder().setNoteId("note1").build();
+        final InterpreterContext blueInterpreterContext = InterpreterContext.builder().setNoteId("note2").build();
+        final JsonObject json = Json.createObjectBuilder()
                 .add("key","value").build();
-        DatasetStore redDatasetStore = new DatasetStore(testDs,new ArrayList<>(),redInterpreterContext,new UIOptionImpl(json));
-        DatasetStore blueDatasetStore = new DatasetStore(testDs,new ArrayList<>(),blueInterpreterContext,new UIOptionImpl(json));
+        final DatasetStore redDatasetStore = new DatasetStore(testDs,new ArrayList<>(),redInterpreterContext,new UIOptionImpl(json));
+        final DatasetStore blueDatasetStore = new DatasetStore(testDs,new ArrayList<>(),blueInterpreterContext,new UIOptionImpl(json));
         EqualsVerifier.forClass(UserInterfaceManager.class)
                 .withPrefabValues(InterpreterContext.class, redInterpreterContext, blueInterpreterContext)
                 .withPrefabValues(DatasetStore.class, redDatasetStore, blueDatasetStore)

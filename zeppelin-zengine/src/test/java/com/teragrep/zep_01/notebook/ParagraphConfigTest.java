@@ -8,7 +8,7 @@ import org.junit.jupiter.api.Test;
 import java.util.HashMap;
 import java.util.Map;
 
-class ParagraphConfigTest {
+public final class ParagraphConfigTest {
 
     @Test
     void asJson() {

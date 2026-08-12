@@ -46,8 +46,6 @@
 package com.teragrep.pth_07.ui.elements.table_dynamic.formats;
 
 import jakarta.json.Json;
-import jakarta.json.JsonArray;
-import jakarta.json.JsonArrayBuilder;
 import jakarta.json.JsonObject;
 import nl.jqno.equalsverifier.EqualsVerifier;
 import org.apache.spark.sql.types.DataTypes;
@@ -57,9 +55,8 @@ import org.apache.spark.sql.types.StructType;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.*;
 
-class DataTablesMetadataTest {
+public final class DataTablesMetadataTest {
 
     final StructType testSchema = new StructType()
             .add(new StructField("testColumn1", DataTypes.LongType,false, Metadata.empty()))

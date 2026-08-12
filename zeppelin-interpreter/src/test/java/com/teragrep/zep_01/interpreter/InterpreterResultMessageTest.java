@@ -7,7 +7,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 
-class InterpreterResultMessageTest {
+public final class InterpreterResultMessageTest {
     /**
      * If the data is in DataTables format, it should contain all the expected keys and presented as a JSON object
      */

@@ -60,11 +60,8 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
-import java.util.UUID;
 
-import static org.junit.jupiter.api.Assertions.*;
-
-class UPlotDataTest {
+public final class UPlotDataTest {
     private final String sourceDataFile = "src/test/resources/formatTestSourceData.csv";
     private final SparkSession sparkSession = SparkSession.builder()
             .master("local[*]")

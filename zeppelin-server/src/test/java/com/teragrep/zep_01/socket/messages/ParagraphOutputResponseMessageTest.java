@@ -6,9 +6,7 @@ import nl.jqno.equalsverifier.EqualsVerifier;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.*;
-
-class ParagraphOutputResponseMessageTest {
+public final class ParagraphOutputResponseMessageTest {
 
     @Test
     void asJsonTest() {

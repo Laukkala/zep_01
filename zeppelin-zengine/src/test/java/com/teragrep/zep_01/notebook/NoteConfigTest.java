@@ -9,7 +9,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 
-public class NoteConfigTest {
+public final class NoteConfigTest {
 
     @Test
     public void asJson(){

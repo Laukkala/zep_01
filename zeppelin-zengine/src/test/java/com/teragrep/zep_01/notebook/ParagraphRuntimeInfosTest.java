@@ -9,7 +9,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 
-class ParagraphRuntimeInfosTest {
+public final class ParagraphRuntimeInfosTest {
 
     @Test
     void asJson() {

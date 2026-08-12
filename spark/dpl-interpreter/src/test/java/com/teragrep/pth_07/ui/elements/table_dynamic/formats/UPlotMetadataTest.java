@@ -57,17 +57,13 @@ import org.apache.spark.sql.types.DataTypes;
 import org.apache.spark.sql.types.MetadataBuilder;
 import org.apache.spark.sql.types.StructField;
 import org.apache.spark.sql.types.StructType;
-import org.junit.Assert;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 
-import static org.junit.jupiter.api.Assertions.*;
-
-class UPlotMetadataTest {
+public final class UPlotMetadataTest {
     private final String sourceDataFile = "src/test/resources/formatTestSourceData.csv";
     private final SparkSession sparkSession = SparkSession.builder()
             .master("local[*]")

@@ -57,10 +57,8 @@ import org.apache.spark.sql.types.*;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-import java.util.*;
 
-
-class DataTablesFormatTest {
+public final class DataTablesFormatTest {
 
     private final String sourceDataFile = "src/test/resources/formatTestSourceData.csv";
     private final SparkSession sparkSession = SparkSession.builder()

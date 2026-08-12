@@ -7,7 +7,7 @@ import nl.jqno.equalsverifier.EqualsVerifier;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-class ParagraphOutputRequestMessageTest {
+public final class ParagraphOutputRequestMessageTest {
 
     @Test
     public void uPlotOutputRequestTest(){

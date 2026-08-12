@@ -58,11 +58,8 @@ import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 
-import static org.junit.jupiter.api.Assertions.*;
-
-class DataTablesDataTest {
+public final class DataTablesDataTest {
     private final SparkSession sparkSession = SparkSession.builder()
             .master("local[*]")
             .config("spark.sql.session.timeZone", "UTC")
