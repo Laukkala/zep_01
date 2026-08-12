@@ -20,7 +20,7 @@ package com.teragrep.zep_01.common;
 import jakarta.json.JsonValue;
 
 /**
- * Can turn itself into a Jakarta JsonObject
+ * Can turn itself into a Jakarta JsonValue
  */
 
 public interface Jsonable {
