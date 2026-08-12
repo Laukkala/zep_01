@@ -37,19 +37,6 @@ public final class JsonMessage implements Jsonable {
   private final String principal;
   private final String roles;
 
-  @Override
-  public boolean equals(final Object o) {
-    if (this == o) return true;
-    if (o == null || getClass() != o.getClass()) return false;
-    final JsonMessage that = (JsonMessage) o;
-    return Objects.equals(id, that.id) && op == that.op && Objects.equals(data, that.data) && Objects.equals(ticket, that.ticket) && Objects.equals(principal, that.principal) && Objects.equals(roles, that.roles);
-  }
-
-  @Override
-  public int hashCode() {
-    return Objects.hash(id, op, data, ticket, principal, roles);
-  }
-
   public JsonMessage(final Message.OP op, final JsonValue data){
     this(new MessageIdStub(), op,data,"anonymous","anonymous","");
   }
@@ -83,5 +70,17 @@ public final class JsonMessage implements Jsonable {
     json.add("principal",principal);
     json.add("roles",roles);
     return json.build();
+  }
+  @Override
+  public boolean equals(final Object o) {
+    if (this == o) return true;
+    if (o == null || getClass() != o.getClass()) return false;
+    final JsonMessage that = (JsonMessage) o;
+    return Objects.equals(id, that.id) && op == that.op && Objects.equals(data, that.data) && Objects.equals(ticket, that.ticket) && Objects.equals(principal, that.principal) && Objects.equals(roles, that.roles);
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(id, op, data, ticket, principal, roles);
   }
 }

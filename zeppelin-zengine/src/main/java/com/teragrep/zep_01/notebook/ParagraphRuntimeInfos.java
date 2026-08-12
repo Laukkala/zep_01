@@ -11,19 +11,6 @@ import java.util.Objects;
 public final class ParagraphRuntimeInfos implements Jsonable {
     private final Map<String,ParagraphRuntimeInfo> runtimeInfoMap;
 
-    @Override
-    public boolean equals(final Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        final ParagraphRuntimeInfos that = (ParagraphRuntimeInfos) o;
-        return Objects.equals(runtimeInfoMap, that.runtimeInfoMap);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(runtimeInfoMap);
-    }
-
     public ParagraphRuntimeInfos(final Map<String, ParagraphRuntimeInfo> runtimeInfoMap){
         this.runtimeInfoMap = runtimeInfoMap;
     }
@@ -38,4 +25,18 @@ public final class ParagraphRuntimeInfos implements Jsonable {
         }
         return runtimeInfos.build();
     }
+
+    @Override
+    public boolean equals(final Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        final ParagraphRuntimeInfos that = (ParagraphRuntimeInfos) o;
+        return Objects.equals(runtimeInfoMap, that.runtimeInfoMap);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(runtimeInfoMap);
+    }
+
 }

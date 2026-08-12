@@ -11,19 +11,6 @@ import java.util.Objects;
 public final class NoteConfig implements Jsonable {
     private final Map<String,Object> configMap;
 
-    @Override
-    public boolean equals(final Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        final NoteConfig that = (NoteConfig) o;
-        return Objects.equals(configMap, that.configMap);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(configMap);
-    }
-
     public NoteConfig(final Map<String,Object> configMap){
         this.configMap = configMap;
     }
@@ -47,4 +34,18 @@ public final class NoteConfig implements Jsonable {
         }
         return configJson.build();
     }
+
+    @Override
+    public boolean equals(final Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        final NoteConfig that = (NoteConfig) o;
+        return Objects.equals(configMap, that.configMap);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(configMap);
+    }
+
 }
