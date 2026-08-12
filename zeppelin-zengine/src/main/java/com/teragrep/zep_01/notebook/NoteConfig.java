@@ -17,20 +17,20 @@ public final class NoteConfig implements Jsonable {
     @Override
     public JsonObject asJson() {
         final JsonObjectBuilder configJson = Json.createObjectBuilder();
-        if(configMap.containsKey("bodyClassName") && configMap.get("bodyClassName") instanceof String){
-            configJson.add("bodyClassName",(String) configMap.get("bodyClassName"));
+        if(configMap.containsKey("bodyClassName")){
+            configJson.add("bodyClassName",configMap.get("bodyClassName").toString());
         }
-        if(configMap.containsKey("cronInput") && configMap.get("cronInput") instanceof String){
-            configJson.add("cronInput",(String) configMap.get("cronInput"));
+        if(configMap.containsKey("cronInput")){
+            configJson.add("cronInput",configMap.get("cronInput").toString());
         }
         if(configMap.containsKey("isZeppelinNotebookCronEnable") && configMap.get("isZeppelinNotebookCronEnable") instanceof Boolean){
             configJson.add("isZeppelinNotebookCronEnable",(Boolean) configMap.get("isZeppelinNotebookCronEnable"));
         }
-        if(configMap.containsKey("looknfeel") && configMap.get("looknfeel") instanceof String){
-            configJson.add("looknfeel",(String) configMap.get("looknfeel"));
+        if(configMap.containsKey("looknfeel")){
+            configJson.add("looknfeel",configMap.get("looknfeel").toString());
         }
-        if(configMap.containsKey("personalizedMode") && configMap.get("personalizedMode") instanceof String){
-            configJson.add("personalizedMode",(String) configMap.get("personalizedMode"));
+        if(configMap.containsKey("personalizedMode")){
+            configJson.add("personalizedMode",configMap.get("personalizedMode").toString());
         }
         return configJson.build();
     }

@@ -16,11 +16,11 @@ public final class EditorSetting implements Jsonable {
     @Override
     public JsonObject asJson() {
         final JsonObjectBuilder editorSettingJson = Json.createObjectBuilder();
-        if(settingMap.containsKey("language") && settingMap.get("language") instanceof String){
+        if(settingMap.containsKey("language")){
             final String language = settingMap.get("language").toString();
             editorSettingJson.add("language",language);
         }
-        if(settingMap.containsKey("completionKey") && settingMap.get("completionKey") instanceof String){
+        if(settingMap.containsKey("completionKey")){
             final String language = settingMap.get("completionKey").toString();
             editorSettingJson.add("completionKey",language);
         }

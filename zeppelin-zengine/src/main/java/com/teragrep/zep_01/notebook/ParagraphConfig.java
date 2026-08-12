@@ -20,7 +20,7 @@ public final class ParagraphConfig implements Jsonable {
             final long columnWidth = ((Number) configMap.get("colWidth")).longValue();
             configJson.add("colWidth",columnWidth);
         }
-        if(configMap.containsKey("editorMode") && configMap.get("editorMode") instanceof String){
+        if(configMap.containsKey("editorMode")){
             final String editorMode = configMap.get("editorMode").toString();
             configJson.add("editorMode",editorMode);
         }
