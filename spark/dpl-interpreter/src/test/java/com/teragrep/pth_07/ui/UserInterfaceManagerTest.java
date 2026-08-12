@@ -86,7 +86,7 @@ public final class UserInterfaceManagerTest {
     private final String noteId = "testNote";
     private final String paragraphId = "testParagraph";
     private final String interpreterGroupId = "testInterpreterGroupId";
-    private final TestInterpreterOutputListener testOutputListener = new TestInterpreterOutputListener();
+    private final FakeInterpreterOutputListener testOutputListener = new FakeInterpreterOutputListener();
     private final InterpreterOutput testOutput = new InterpreterOutput(testOutputListener);
     private final AngularObjectRegistryListener testRegistryListener = new AngularObjectRegistryListener() {
 
@@ -231,32 +231,6 @@ public final class UserInterfaceManagerTest {
         final String expectedOutput = "{\"data\":[[],[0,0],[0,0]],\"options\":{\"labels\":[],\"series\":[\"id\",\"offset\"],\"graphType\":\"line\",\"xAxisLabel\":\"\"},\"isAggregated\":false,\"type\":\"uPlot\"}";
         Assertions.assertEquals(expectedOutput,formatted);
     }
-
-    private final class TestInterpreterOutputListener implements InterpreterOutputListener{
-            private List<InterpreterResultMessage> outputList = new ArrayList<>();
-
-            @Override
-            public void onUpdateAll(final InterpreterOutput out) {
-            }
-
-            @Override
-            public void onAppend(final int index, final InterpreterResultMessageOutput out, final byte[] line) {
-            }
-
-            @Override
-            public void onUpdate(final int index, final InterpreterResultMessageOutput out) {
-                try{
-                    outputList.add(out.toInterpreterResultMessage());
-                }
-                catch (final IOException e){
-                    Assertions.fail("IOException occurred while listening to output messages!");
-                }
-            }
-
-            public List<InterpreterResultMessage> outputs(){
-                return outputList;
-            }
-        }
     @Test
     void equalsVerifier() {
         final InterpreterContext redInterpreterContext = InterpreterContext.builder().setNoteId("note1").build();
