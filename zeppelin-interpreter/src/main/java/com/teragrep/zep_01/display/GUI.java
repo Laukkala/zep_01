@@ -218,12 +218,7 @@ public class GUI implements Serializable, Jsonable {
       for (Map.Entry<String,Object> entry : params.entrySet()) {
         final Object value = entry.getValue();
         // We support only String values for now. Any other kind of object is added as their toString() implementations
-        if(value instanceof String){
-          paramsBuilder.add(entry.getKey(),(String) value);
-        }
-        else {
-          paramsBuilder.add(entry.getKey(),value.toString());
-        }
+        paramsBuilder.add(entry.getKey(),value.toString());
       }
       builder.add("params",paramsBuilder.build());
     }

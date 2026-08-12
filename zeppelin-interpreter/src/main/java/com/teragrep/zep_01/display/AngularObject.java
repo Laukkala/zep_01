@@ -285,12 +285,7 @@ public class AngularObject<T> implements JsonSerializable, Jsonable {
     if (object != null){
       // Currently we only support String type objects.
       // Any other type will be represented with the toString() method of the object.
-      if(object instanceof String){
-        builder.add("object",(String) object);
-      }
-      else {
-        builder.add("object", object.toString());
-      }
+      builder.add("object", object.toString());
     }
     return builder.build();
   }
