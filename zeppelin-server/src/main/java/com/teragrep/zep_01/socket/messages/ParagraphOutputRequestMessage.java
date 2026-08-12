@@ -16,7 +16,7 @@ public final class ParagraphOutputRequestMessage implements Jsonable {
 
     public String data() throws JsonException {
         if(!json.containsKey("data") || !json.get("data").getValueType().equals(JsonValue.ValueType.OBJECT)){
-            throw new JsonException("Json does not contain a msgId!");
+            throw new JsonException("Json does not contain a data object!");
         } else {
             return json.getJsonObject("data").toString();
         }
