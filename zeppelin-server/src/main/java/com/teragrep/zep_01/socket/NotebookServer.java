@@ -1677,35 +1677,32 @@ public class NotebookServer extends WebSocketServlet
   @Override
   public void onOutputUpdated(String noteId, String paragraphId, int index,
                               InterpreterResult.Type type, String output) {
-    if (!sendParagraphStatusToFrontend) {
-      return;
-    }
-    // As formatted data is passed as a String via Thrift, we have to parse it with JsonReader
-    final JsonObject outputJson;
-    try(JsonReader jsonReader = Json.createReader(new StringReader(output))){
-      outputJson = jsonReader.readObject();
-    }
-    final ParagraphOutputResponseMessage paragraphOutputResponse = new ParagraphOutputResponseMessage(noteId,paragraphId,outputJson);
-    final JsonMessage msg = new JsonMessage(OP.PARAGRAPH_OUTPUT, paragraphOutputResponse);
     try {
-      Note note = getNotebook().getNote(noteId);
-      if (note == null) {
-        LOG.warn("Note {} not found", noteId);
-        return;
-      }
-      Paragraph paragraph = note.getParagraph(paragraphId);
-      paragraph.updateOutputBuffer(index, type, output);
       // Only broadcast the first result, as default format is in the first index, other formats are stored in later indexes
-      if(index > 0){
-        return;
-      }
-      if (note.isPersonalizedMode()) {
-        String user = note.getParagraph(paragraphId).getUser();
-        if (null != user) {
-          getConnectionManager().multicastToUser(user, msg.asJson().toString());
+      if(sendParagraphStatusToFrontend && index <= 0){
+        final Note note = getNotebook().getNote(noteId);
+        if (note != null) {
+          final Paragraph paragraph = note.getParagraph(paragraphId);
+          if(paragraph != null){
+            paragraph.updateOutputBuffer(index, type, output);
+            // As formatted data is passed as a String via Thrift, we have to parse it with JsonReader
+            final JsonObject outputJson;
+            try(JsonReader jsonReader = Json.createReader(new StringReader(output))){
+              outputJson = jsonReader.readObject();
+            }
+            final ParagraphOutputResponseMessage paragraphOutputResponse = new ParagraphOutputResponseMessage(noteId,paragraphId,outputJson);
+            final JsonMessage msg = new JsonMessage(OP.PARAGRAPH_OUTPUT, paragraphOutputResponse);
+
+            if (note.isPersonalizedMode()) {
+              final String user = note.getParagraph(paragraphId).getUser();
+              if (null != user) {
+                getConnectionManager().multicastToUser(user, msg.asJson().toString());
+              }
+            } else {
+              getConnectionManager().broadcast(noteId, msg.asJson().toString());
+            }
+          }
         }
-      } else {
-        getConnectionManager().broadcast(noteId, msg.asJson().toString());
       }
     } catch (IOException e) {
       LOG.warn("Fail to call onOutputUpdated", e);
