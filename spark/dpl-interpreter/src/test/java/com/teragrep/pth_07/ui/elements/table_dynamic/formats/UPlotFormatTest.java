@@ -730,20 +730,23 @@ class UPlotFormatTest {
 
         // Check that every non-numerical column is populated with nulls and that numerical columns keep their data.
         Assertions.assertEquals(23,timeColumn.size());
+        for (int i = 0; i < 23; i++) {
+            Assertions.assertEquals(JsonValue.ValueType.NULL,timeColumn.get(i).getValueType());
+        }
+
         Assertions.assertEquals(23,operationColumn.size());
+        for (int i = 0; i < 23; i++) {
+            Assertions.assertEquals(JsonValue.ValueType.NULL,successColumn.get(i).getValueType());
+        }
+
         Assertions.assertEquals(23,successColumn.size());
+        for (int i = 0; i < 23; i++) {
+            Assertions.assertEquals(JsonValue.ValueType.NULL,operationColumn.get(i).getValueType());
+        }
+
         Assertions.assertEquals(23,filesModifiedColumn.size());
-        for (final JsonValue value : timeColumn) {
-            Assertions.assertEquals(JsonValue.ValueType.NULL,value.getValueType());
-        }
-        for (final JsonValue value : successColumn) {
-            Assertions.assertEquals(JsonValue.ValueType.NULL,value.getValueType());
-        }
-        for (final JsonValue value : operationColumn) {
-            Assertions.assertEquals(JsonValue.ValueType.NULL,value.getValueType());
-        }
-        for (final JsonValue value : filesModifiedColumn) {
-            Assertions.assertEquals(JsonValue.ValueType.NUMBER,value.getValueType());
+        for (int i = 0; i < 23; i++) {
+            Assertions.assertEquals(JsonValue.ValueType.NUMBER,filesModifiedColumn.get(i).getValueType());
         }
     }
     @Test
