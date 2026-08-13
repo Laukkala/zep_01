@@ -30,6 +30,7 @@ import com.teragrep.zep_01.notebook.repo.NotebookRepo;
 import com.teragrep.zep_01.scheduler.Scheduler;
 import com.teragrep.zep_01.user.AuthenticationInfo;
 import com.teragrep.zep_01.user.Credentials;
+import jakarta.json.JsonArray;
 import jakarta.json.JsonObject;
 import org.junit.Before;
 import org.junit.Test;
@@ -234,12 +235,28 @@ public class NoteTest {
     Assertions.assertTrue(noteJson.containsKey("config"));
     Assertions.assertTrue(noteJson.containsKey("defaultInterpreterGroup"));
     Assertions.assertTrue(noteJson.containsKey("paragraphs"));
+    Assertions.assertTrue(noteJson.containsKey("dynamicBindings"));
 
-    Assertions.assertEquals("test_note", noteJson.getString("name"));
     Assertions.assertEquals(note.getId(), noteJson.getString("id"));
+    Assertions.assertEquals("test_note", noteJson.getString("name"));
     Assertions.assertEquals("/test_note", noteJson.getString("path"));
+    Assertions.assertEquals("",noteJson.getString("defaultInterpreterGroup"));
+    final JsonArray paragraphs = Assertions.assertDoesNotThrow(()->noteJson.getJsonArray("paragraphs"));
+    Assertions.assertEquals(1, paragraphs.size());
+    final JsonObject paragraph = paragraphs.getJsonObject(0);
+    Assertions.assertEquals(paragraph,p.asJson());
+
     final JsonObject config = Assertions.assertDoesNotThrow(()->noteJson.getJsonObject("config"));
     Assertions.assertEquals(1, config.size());
     Assertions.assertEquals(false, config.getBoolean("isZeppelinNotebookCronEnable"));
+
+    final JsonObject dynamicBindings = Assertions.assertDoesNotThrow(()->noteJson.getJsonObject("dynamicBindings"));
+    Assertions.assertTrue(dynamicBindings.containsKey("ao_1"));
+    Assertions.assertEquals(1,dynamicBindings.getJsonArray("ao_1").size());
+    final JsonObject angularObject = Assertions.assertDoesNotThrow(()->dynamicBindings.getJsonArray("ao_1").getJsonObject(0));
+    Assertions.assertEquals("name_1", angularObject.getString("name"));
+    Assertions.assertEquals(note.getId(), angularObject.getString("noteId"));
+    Assertions.assertEquals(p.getId(), angularObject.getString("paragraphId"));
+    Assertions.assertEquals("value_1", angularObject.getString("object"));
   }
 }
