@@ -43,42 +43,14 @@
  * Teragrep, the applicable Commercial License may apply to this file if you as
  * a licensee so wish it.
  */
+package com.teragrep.pth_07.ui.elements.table_dynamic.formats;
 
-package com.teragrep.pth_07.ui.elements.table_dynamic.pojo;
+import nl.jqno.equalsverifier.EqualsVerifier;
+import org.junit.Test;
 
-import com.google.gson.annotations.Expose;
-import com.google.gson.annotations.SerializedName;
-
-public class Order {
-
-    @SerializedName("column")
-    @Expose
-    private Integer column;
-    @SerializedName("dir")
-    @Expose
-    private String dir;
-
-    public Integer getColumn() {
-        return column;
-    }
-
-    public void setColumn(Integer column) {
-        this.column = column;
-    }
-
-    public String getDir() {
-        return dir;
-    }
-
-    public void setDir(String dir) {
-        this.dir = dir;
-    }
-
-    @Override
-    public String toString() {
-        return "Order{" +
-                "column=" + column +
-                ", dir='" + dir + '\'' +
-                '}';
+public final class UPlotAvailableFormatTest {
+    @Test
+    public void testContract(){
+        EqualsVerifier.forClass(UPlotAvailableFormat.class).verify();
     }
 }

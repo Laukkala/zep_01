@@ -43,45 +43,52 @@
  * Teragrep, the applicable Commercial License may apply to this file if you as
  * a licensee so wish it.
  */
-package com.teragrep.pth_07.ui.elements.table_dynamic;
+package com.teragrep.pth_07.ui.elements.table_dynamic.formats;
 
-import java.util.List;
+import jakarta.json.JsonObject;
+import jakarta.json.JsonValue;
+import org.apache.spark.sql.Dataset;
+import org.apache.spark.sql.Row;
+
 import java.util.Objects;
 
-final class DTPagination {
+public final class UPlotAvailableFormat implements AvailableFormat {
 
-    private final List<String> rowList;
-    public DTPagination(List<String> rowList){
-        this.rowList = rowList;
+    private final RenderFormat renderFormatStub;
+
+    public UPlotAvailableFormat(){
+        this(new RenderFormatStub());
     }
-    public List<String> paginate(int pageSize, int pageStart) {
-        // ranges must be greater than 0
-        int fromIndex = Math.max(pageStart, 0);
-        int toIndex = Math.max(fromIndex + pageSize, 0);
 
-        // list must end at the maximum size
-        if (toIndex > rowList.size()) {
-            toIndex = rowList.size();
-        }
-
-        // list range must be positive
-        if (fromIndex > toIndex) {
-            fromIndex = toIndex;
-        }
-
-        return rowList.subList(fromIndex, toIndex);
+    public UPlotAvailableFormat(final RenderFormat renderFormatStub){
+        this.renderFormatStub = renderFormatStub;
     }
 
     @Override
-    public boolean equals(Object o) {
+    public boolean isStub() {
+        return false;
+    }
+
+    @Override
+    public RenderFormat asRenderFormat(final UIOption uiOption, final Dataset<Row> rowDataset) {
+        RenderFormat rv = renderFormatStub;
+        final JsonObject json = uiOption.asJson();
+        if(json.containsKey("type") && json.get("type").getValueType().equals(JsonValue.ValueType.STRING) && json.getString("type").equals("uPlot")){
+            rv = new UPlotFormat(uiOption, rowDataset);
+        }
+        return rv;
+    }
+
+    @Override
+    public boolean equals(final Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        DTPagination that = (DTPagination) o;
-        return Objects.equals(rowList, that.rowList);
+        final UPlotAvailableFormat that = (UPlotAvailableFormat) o;
+        return Objects.equals(renderFormatStub, that.renderFormatStub);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(rowList);
+        return Objects.hash(renderFormatStub);
     }
 }

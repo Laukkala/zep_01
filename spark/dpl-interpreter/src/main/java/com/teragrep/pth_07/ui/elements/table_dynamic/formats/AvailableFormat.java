@@ -43,41 +43,19 @@
  * Teragrep, the applicable Commercial License may apply to this file if you as
  * a licensee so wish it.
  */
-package com.teragrep.pth_07.ui.elements;
+package com.teragrep.pth_07.ui.elements.table_dynamic.formats;
 
-import com.teragrep.zep_01.interpreter.InterpreterContext;
 
-import java.io.IOException;
+import com.teragrep.stb_01.Stubable;
+import org.apache.spark.sql.Dataset;
+import org.apache.spark.sql.Row;
 
-public class OutputContent extends AbstractUserInterfaceElement {
+/**
+ * Implement this interface to declare a new RenderFormat to which a Spark Dataset may be formatted to.
+ * RenderFormats require a Spark Dataset to instantiate, but an AvailableFormat can be instantiated without one.
+ */
+public interface AvailableFormat extends Stubable {
 
-    private String outputContent = "";
+    RenderFormat asRenderFormat(UIOption uiOption, Dataset<Row> rowDataset);
 
-    public OutputContent(InterpreterContext interpreterContext) {
-        super(interpreterContext);
-    }
-
-    @Override
-    protected void draw() {
-        getInterpreterContext().out().clear(false);
-        try {
-            getInterpreterContext().out().write(outputContent);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    @Override
-    public void emit() {
-        // no angular in this one
-    }
-
-    public void setOutputContent(String outputContent) {
-        this.outputContent = outputContent;
-        draw();
-    }
-
-    public void clear() {
-        getInterpreterContext().out().clear(true);
-    }
 }
