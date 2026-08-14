@@ -16,6 +16,8 @@
  */
 package com.teragrep.zep_01.interpreter.remote;
 
+import com.teragrep.zep_01.interpreter.util.ProcessId;
+import com.teragrep.zep_01.interpreter.util.ProcessIdStub;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -100,6 +102,12 @@ public class RemoteInterpreterRunningProcess extends RemoteInterpreterProcess {
   @Override
   public boolean isRunning() {
     return RemoteInterpreterUtils.checkIfRemoteEndpointAccessible(getHost(), getPort());
+  }
+
+  // ProcessId for runningProcess is not supported
+  @Override
+  public ProcessId processId() {
+    return new ProcessIdStub();
   }
 
   @Override

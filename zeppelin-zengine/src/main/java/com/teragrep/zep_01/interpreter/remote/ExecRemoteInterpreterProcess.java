@@ -22,6 +22,7 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import com.teragrep.zep_01.interpreter.util.ProcessId;
 import org.apache.commons.exec.CommandLine;
 import org.apache.commons.exec.ExecuteException;
 import org.apache.hadoop.yarn.util.ConverterUtils;
@@ -119,6 +120,11 @@ public class ExecRemoteInterpreterProcess extends RemoteInterpreterManagedProces
     super.processStarted(port, host);
     // for yarn cluster it may be transitioned from COMPLETED to RUNNING.
     interpreterProcessLauncher.onProcessRunning();
+  }
+
+  @Override
+  public ProcessId processId(){
+    return interpreterProcessLauncher.processId();
   }
 
   @Override

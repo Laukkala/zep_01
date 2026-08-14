@@ -18,6 +18,7 @@ package com.teragrep.zep_01.interpreter.remote;
 
 import com.google.gson.Gson;
 import com.teragrep.zep_01.interpreter.InterpreterException;
+import com.teragrep.zep_01.interpreter.util.ProcessId;
 import org.apache.thrift.protocol.TBinaryProtocol;
 import org.apache.thrift.protocol.TProtocol;
 import org.apache.thrift.transport.TSocket;
@@ -130,7 +131,7 @@ public abstract class RemoteInterpreterProcess implements InterpreterClient, Aut
       return false;
     }
   }
-
+  public abstract ProcessId processId();
 
   /**
    * called by RemoteInterpreterEventServer to notify that RemoteInterpreter Process is started
