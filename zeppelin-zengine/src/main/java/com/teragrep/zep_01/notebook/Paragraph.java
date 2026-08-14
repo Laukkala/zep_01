@@ -29,9 +29,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import com.teragrep.zep_01.common.DefaultDateFormatPattern;
 import com.teragrep.zep_01.common.Jsonable;
 import jakarta.json.Json;
-import jakarta.json.JsonArray;
 import jakarta.json.JsonObject;
 import jakarta.json.JsonObjectBuilder;
 import org.apache.commons.lang3.StringUtils;
@@ -101,6 +101,7 @@ public class Paragraph extends JobWithProgressPoller<InterpreterResult> implemen
 
   private Map<String, ParagraphRuntimeInfo> runtimeInfos = new HashMap<>();
   private transient List<InterpreterResultMessage> outputBuffer = new ArrayList<>();
+  private transient final DefaultDateFormatPattern dateFormat = new DefaultDateFormatPattern();
 
 
   @VisibleForTesting
@@ -151,21 +152,20 @@ public class Paragraph extends JobWithProgressPoller<InterpreterResult> implemen
       builder.add("jobName",getJobName());
     }
 
-    final String dateFormatPattern = "yyyy-MM-dd'T'HH:mm:ssZ"; // This should really be configured somewhere else. Previously this format was hardcoded into ConnectionManagers and NotebookServers Gson initialization.
     if(dateUpdated != null){
-      final String dateUpdated = new SimpleDateFormat(dateFormatPattern).format(this.dateUpdated);
+      final String dateUpdated = dateFormat.format(this.dateUpdated);
       builder.add("dateUpdated",dateUpdated);
     }
     if(getDateStarted() != null){
-      final String dateStarted  = new SimpleDateFormat(dateFormatPattern).format(getDateStarted());
+      final String dateStarted  = dateFormat.format(getDateStarted());
       builder.add("dateStarted",dateStarted);
     }
     if(getDateCreated() != null){
-      final String dateCreated  = new SimpleDateFormat(dateFormatPattern).format(getDateCreated());
+      final String dateCreated  = dateFormat.format(getDateCreated());
       builder.add("dateCreated",dateCreated);
     }
     if(getDateFinished() != null){
-      final String dateFinished = new SimpleDateFormat(dateFormatPattern).format(getDateFinished());
+      final String dateFinished = dateFormat.format(getDateFinished());
       builder.add("dateFinished",dateFinished);
     }
     if(runtimeInfos != null){
