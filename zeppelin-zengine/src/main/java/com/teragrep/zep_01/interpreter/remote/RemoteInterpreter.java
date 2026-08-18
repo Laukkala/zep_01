@@ -21,6 +21,11 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.teragrep.zep_01.interpreter.*;
+import com.teragrep.zep_01.interpreter.status.InterpreterStatus;
+import com.teragrep.zep_01.interpreter.status.InterpreterStatusImpl;
+import com.teragrep.zep_01.interpreter.status.InterpreterStatusStub;
+import jakarta.json.Json;
+import jakarta.json.JsonObject;
 import org.apache.thrift.TException;
 import com.teragrep.zep_01.display.AngularObject;
 import com.teragrep.zep_01.display.AngularObjectRegistry;
@@ -39,6 +44,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.io.StringReader;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -276,6 +282,34 @@ public class RemoteInterpreter extends Interpreter {
           formType = FormType.valueOf(client.getFormType(sessionId, className));
           return formType;
     });
+  }
+
+  /**
+   * Defers Interpreter status request to interpreter within RemoteInterpreterProcess
+   * @return
+   */
+  @Override
+  public InterpreterStatus status() {
+    final InterpreterStatus rv;
+    try{
+      if(!isOpened || interpreterProcess == null){
+        rv = new InterpreterStatusImpl("offline",0,0,0);
+      }
+      else {
+        String statusString = interpreterProcess.status(sessionId,className);
+        JsonObject statusJson = Json.createReader(new StringReader(statusString)).readObject();
+        rv = new InterpreterStatusImpl(
+                statusJson.getString("state")
+                ,statusJson.getJsonNumber("memoryUsed").longValue()
+                ,statusJson.getJsonNumber("uptime").longValue()
+                ,statusJson.getJsonNumber("cpuLoad").doubleValue());
+      }
+    }
+    catch (InterpreterException exception){
+      LOGGER.error("failed to retrieve interpreter status data!", exception);
+      return new InterpreterStatusStub();
+    }
+    return rv;
   }
 
 

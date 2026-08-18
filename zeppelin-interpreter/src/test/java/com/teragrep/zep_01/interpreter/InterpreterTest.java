@@ -17,6 +17,7 @@
 
 package com.teragrep.zep_01.interpreter;
 
+import com.teragrep.zep_01.interpreter.status.InterpreterStatus;
 import org.junit.Test;
 
 import java.util.Properties;

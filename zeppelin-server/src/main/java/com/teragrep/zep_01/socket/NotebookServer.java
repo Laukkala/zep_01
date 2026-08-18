@@ -38,9 +38,12 @@ import com.teragrep.zep_01.display.*;
 import com.teragrep.zep_01.interpreter.*;
 import com.teragrep.zep_01.interpreter.remote.RemoteInterpreter;
 import com.teragrep.zep_01.interpreter.thrift.*;
+import com.teragrep.zep_01.interpreter.status.InterpreterStatus;
 import com.teragrep.zep_01.rest.exception.BadRequestException;
 import com.teragrep.zep_01.socket.messages.ParagraphOutputResponseMessage;
+import jakarta.json.JsonArrayBuilder;
 import jakarta.json.*;
+import jakarta.json.JsonObjectBuilder;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.thrift.TException;
@@ -1161,6 +1164,50 @@ public class NotebookServer extends WebSocketServlet
       final JsonMessage msg = new JsonMessage(new MessageIdImpl(msgId), OP.INTERPRETER_ERROR, errorJson);
       conn.send(msg.asJson().toString());
     }
+  }
+
+  private void interpreterStatus(NotebookSocket conn,
+                                     ServiceContext context,
+                                     Message fromMessage) throws IOException, InterpreterException {
+    final Map<String,InterpreterStatus> statuses = new HashMap<>();
+    final String noteId = (String) fromMessage.get("noteId");
+    final Note note = getNotebook().getNote(noteId);
+    if(note == null) {
+      throw new BadRequestException("No such note: " + noteId);
+    }
+    else {
+      // If paragraphId was provided, only report on the associated interpreter
+      if(fromMessage.get("paragraphId") != null){
+        final String paragraphId = (String) fromMessage.get("paragraphId");
+        final Paragraph paragraph = note.getParagraph(paragraphId);
+        if(paragraph == null){
+          throw new BadRequestException("No such paragraph: " + paragraphId);
+        }
+        else {
+          RemoteInterpreter interpreter = ((RemoteInterpreter)paragraph.getBindedInterpreter()); //TODO: this might get the last user's interpreter isntead of requesters. check which one comes out
+          String sessionId = interpreter.getSessionId();
+          InterpreterStatus status = interpreter.status();
+          statuses.put(sessionId,status);
+        }
+      }
+      // If paragraphId was not provided, provide status of all Interpreters in the notebook
+      else {
+        for (Paragraph paragraph:note.getParagraphs()) {
+          RemoteInterpreter interpreter = ((RemoteInterpreter)paragraph.getBindedInterpreter()); //TODO: this might get the last user's interpreter isntead of requesters. check which one comes out
+          String sessionId = interpreter.getSessionId();
+          InterpreterStatus status = interpreter.status();
+          statuses.put(sessionId,status);
+        }
+      }
+    }
+    JsonObjectBuilder statusJsonBuilder = Json.createObjectBuilder();
+    for (Map.Entry<String,InterpreterStatus> status :statuses.entrySet()) {
+      statusJsonBuilder.add(status.getKey(),status.getValue().asJson());
+    }
+    JsonObject statusJson = statusJsonBuilder.build();
+    Message msg = new Message(Message.OP.INTERPRETER_STATUS)
+              .put("status",statusJson);
+    conn.send(serializeMessage(msg));
   }
 
   private void clearAllParagraphOutput(NotebookSocket conn,

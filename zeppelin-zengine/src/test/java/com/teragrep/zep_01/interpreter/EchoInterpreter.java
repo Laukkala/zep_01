@@ -44,6 +44,9 @@ public class EchoInterpreter extends Interpreter {
     if (Boolean.parseBoolean(getProperty("zeppelin.interpreter.echo.fail", "false"))) {
       return new InterpreterResult(InterpreterResult.Code.ERROR);
     } else {
+      for (int i = 0; i < 1000; i++) {
+        System.out.println("test");
+      }
       return new InterpreterResult(InterpreterResult.Code.SUCCESS, st);
     }
   }

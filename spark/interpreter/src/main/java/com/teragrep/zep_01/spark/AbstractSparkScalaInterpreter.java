@@ -18,11 +18,16 @@
 package com.teragrep.zep_01.spark;
 
 import com.google.common.collect.Lists;
+import com.teragrep.zep_01.interpreter.status.InterpreterStatus;
+import com.teragrep.zep_01.interpreter.status.InterpreterStatusImpl;
+import com.teragrep.zep_01.interpreter.status.InterpreterStatusStub;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.hadoop.yarn.api.records.ApplicationReport;
+import org.apache.hadoop.yarn.api.records.ApplicationResourceUsageReport;
 import org.apache.hadoop.yarn.client.api.YarnClient;
 import org.apache.hadoop.yarn.conf.YarnConfiguration;
 import org.apache.hadoop.yarn.exceptions.YarnException;
@@ -250,6 +255,35 @@ public abstract class AbstractSparkScalaInterpreter {
       useYarnProxyURLIfNeeded();
     }
     InterpreterContext.get().getIntpEventClient().sendWebUrlInfo(this.sparkUrl);
+  }
+
+  public InterpreterStatus status(){
+    final InterpreterStatus rv;
+    if(sparkSession != null){
+      String appId = sparkSession.sparkContext().applicationId();
+      YarnClient yarnClient = YarnClient.createYarnClient();
+      YarnConfiguration yarnConf = new YarnConfiguration();
+      yarnClient.init(yarnConf);
+      yarnClient.start();
+      try{
+        ApplicationReport applicationReport = yarnClient.getApplicationReport(ApplicationId.fromString(appId));
+        String state = applicationReport.getYarnApplicationState().toString();
+        ApplicationResourceUsageReport resourceUsageReport = applicationReport.getApplicationResourceUsageReport();
+        float cpuUsage = resourceUsageReport.getClusterUsagePercentage();
+        long startTime = applicationReport.getStartTime();
+        long finishTime = applicationReport.getFinishTime() > 0 ? applicationReport.getFinishTime(): System.currentTimeMillis();
+        long uptime = finishTime - startTime;
+        long memoryUsed = resourceUsageReport.getUsedResources().getMemorySize() * 1024L * 1024; // Reports in megabytes so we multiply by 1024 * 1024 to stay consistent with JVM-based performance metrics.
+        rv = new InterpreterStatusImpl(state, memoryUsed, uptime, cpuUsage);
+      } catch (YarnException | IOException exception){
+        LOGGER.error("failed to retrieve interpreter status data!", exception);
+        return new InterpreterStatusStub();
+      }
+    }
+    else {
+      rv = new InterpreterStatusImpl("offline",0,0,0);
+    }
+    return rv;
   }
 
   private String getSparkMaster() {

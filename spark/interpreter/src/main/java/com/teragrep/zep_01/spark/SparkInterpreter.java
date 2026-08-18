@@ -17,6 +17,7 @@
 
 package com.teragrep.zep_01.spark;
 
+import com.teragrep.zep_01.interpreter.status.InterpreterStatus;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.spark.SparkConf;
 import org.apache.spark.SparkContext;
@@ -225,6 +226,10 @@ public class SparkInterpreter extends AbstractInterpreter {
     return FormType.NATIVE;
   }
 
+  @Override
+  public InterpreterStatus status(){
+    return innerInterpreter.status();
+  }
   @Override
   public int getProgress(InterpreterContext context) throws InterpreterException {
     return innerInterpreter.getProgress(context);

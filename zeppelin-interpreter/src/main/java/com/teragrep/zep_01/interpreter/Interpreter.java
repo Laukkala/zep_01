@@ -18,6 +18,8 @@
 package com.teragrep.zep_01.interpreter;
 
 
+import com.teragrep.zep_01.interpreter.status.InterpreterStatus;
+import com.teragrep.zep_01.interpreter.status.InterpreterStatusImpl;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.reflect.FieldUtils;
 import com.teragrep.zep_01.annotation.Experimental;
@@ -28,6 +30,7 @@ import com.teragrep.zep_01.scheduler.SchedulerFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.lang.management.*;
 import java.lang.reflect.Field;
 import java.net.URL;
 import java.util.*;
@@ -98,6 +101,24 @@ public abstract class Interpreter {
    */
   @ZeppelinApi
   public abstract FormType getFormType() throws InterpreterException;
+
+  /**
+   * Base method reports JVM performance metrics. Override to provide custom metrics from other Interpreter types.
+   * @return
+   */
+  @ZeppelinApi
+  public InterpreterStatus status(){
+    MemoryMXBean memoryBean = ManagementFactory.getMemoryMXBean();
+    MemoryUsage heapMemoryUsage = memoryBean.getHeapMemoryUsage();
+    RuntimeMXBean runtimeBean = ManagementFactory.getRuntimeMXBean();
+    OperatingSystemMXBean osBean = ManagementFactory.getOperatingSystemMXBean();
+
+    long memoryUsedMb = heapMemoryUsage.getUsed();
+    long uptimeMillis = runtimeBean.getUptime();
+    double cpuLoad = osBean.getSystemLoadAverage();
+
+    return new InterpreterStatusImpl("running",memoryUsedMb,uptimeMillis,cpuLoad);
+  }
 
   /**
    * get interpret() method running process in percentage.

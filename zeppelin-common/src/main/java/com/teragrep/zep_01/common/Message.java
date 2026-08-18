@@ -186,6 +186,7 @@ public class Message implements JsonSerializable {
 
     GET_INTERPRETER_SETTINGS,     // [c-s] get interpreter settings
     INTERPRETER_SETTINGS,         // [s-c] interpreter settings
+    INTERPRETER_STATUS,           // [s-c] interpreter status information
     ERROR_INFO,                   // [s-c] error information to be sent
     SESSION_LOGOUT,               // [s-c] error information to be sent
     WATCHER,                      // [s-c] Change websocket to watcher mode.

@@ -17,6 +17,8 @@
 
 package com.teragrep.zep_01.interpreter;
 
+import com.teragrep.zep_01.interpreter.status.InterpreterStatus;
+import com.teragrep.zep_01.interpreter.status.InterpreterStatusStub;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -85,6 +87,11 @@ public class ConfInterpreter extends Interpreter {
   @Override
   public FormType getFormType() throws InterpreterException {
     return FormType.NATIVE;
+  }
+
+  @Override
+  public InterpreterStatus status() {
+    return new InterpreterStatusStub();
   }
 
   @Override

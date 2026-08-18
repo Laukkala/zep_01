@@ -21,6 +21,9 @@ import java.net.URL;
 import java.util.List;
 import java.util.Properties;
 
+import com.teragrep.zep_01.interpreter.status.InterpreterStatus;
+import com.teragrep.zep_01.interpreter.status.InterpreterStatusImpl;
+import com.teragrep.zep_01.interpreter.status.InterpreterStatusStub;
 import com.teragrep.zep_01.interpreter.thrift.InterpreterCompletion;
 import com.teragrep.zep_01.scheduler.Scheduler;
 
@@ -122,6 +125,22 @@ public class LazyOpenInterpreter
   @Override
   public FormType getFormType() throws InterpreterException {
     return intp.getFormType();
+  }
+
+  /**
+   * Defers Interpreter status request to wrapped interpreter
+   * @return
+   */
+  @Override
+  public InterpreterStatus status() {
+    final InterpreterStatus rv;
+    if(!opened){
+      rv = new InterpreterStatusImpl("offline",0,0,0);
+    }
+    else {
+      rv = intp.status();
+    }
+    return rv;
   }
 
   @Override

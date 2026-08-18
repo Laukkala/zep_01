@@ -17,6 +17,7 @@
 
 package com.teragrep.zep_01.interpreter.remote;
 
+import com.teragrep.zep_01.interpreter.status.InterpreterStatus;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.thrift.transport.TTransportException;
 import com.teragrep.zep_01.conf.ZeppelinConfiguration;
@@ -38,6 +39,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -404,6 +406,29 @@ public class RemoteInterpreterTest extends AbstractInterpreterTest {
     interpreter.interpret("text", context);
     assertArrayEquals(expected.values().toArray(), gui.getForms().values().toArray());
   }
+
+  @Test
+  public void testStatus() throws InterpreterException {
+    Interpreter interpreter = interpreterSetting.getDefaultInterpreter("user1", "note1");
+    InterpreterContext context = createDummyInterpreterContext();
+
+    InterpreterStatus closedStatus = interpreter.status();
+    interpreter.interpret("text", context);
+
+    InterpreterStatus openStatus = interpreter.status();
+    Assertions.assertEquals("offline",closedStatus.asJson().getString("state"));
+    Assertions.assertEquals(0,closedStatus.asJson().getJsonNumber("memoryUsed").longValue());
+    Assertions.assertEquals(0,closedStatus.asJson().getJsonNumber("uptime").longValue());
+    Assertions.assertEquals(0f,closedStatus.asJson().getJsonNumber("cpuLoad").doubleValue());
+
+    Assertions.assertEquals("running",openStatus.asJson().getString("state"));
+    Assertions.assertTrue(openStatus.asJson().getJsonNumber("memoryUsed").longValue() > 0);
+    Assertions.assertTrue(openStatus.asJson().getJsonNumber("uptime").longValue() > 0);
+    Assertions.assertTrue(openStatus.asJson().getJsonNumber("cpuLoad").doubleValue() > 0);
+    System.out.println(closedStatus.asJson());
+    System.out.println(openStatus.asJson());
+  }
+
 
   @Ignore(value="Seems to depend on SleepInterpreter")
   @Test

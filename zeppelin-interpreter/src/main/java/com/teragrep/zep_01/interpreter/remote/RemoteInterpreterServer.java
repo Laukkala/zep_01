@@ -386,6 +386,12 @@ public class RemoteInterpreterServer extends Thread
   }
 
   @Override
+  public String status(String sessionId, String className) throws InterpreterRPCException, TException {
+    Interpreter interpreter = getInterpreter(sessionId, className);
+    return interpreter.status().asJson().toString();
+  }
+
+  @Override
   public void open(String sessionId, String className) throws InterpreterRPCException, TException {
     LOGGER.info("Open Interpreter {} for session {}", className, sessionId);
     Interpreter intp = getInterpreter(sessionId, className);

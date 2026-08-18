@@ -52,6 +52,9 @@ import com.teragrep.pth_07.ui.elements.table_dynamic.formats.*;
 import com.teragrep.pth_15.DPLExecutor;
 import com.teragrep.pth_15.DPLExecutorFactory;
 import com.teragrep.pth_15.DPLExecutorResult;
+import com.teragrep.zep_01.interpreter.status.InterpreterStatus;
+import com.teragrep.zep_01.interpreter.status.InterpreterStatusImpl;
+import com.teragrep.zep_01.interpreter.status.InterpreterStatusStub;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
 import jakarta.json.Json;
@@ -279,6 +282,14 @@ public class DPLInterpreter extends AbstractInterpreter {
     @Override
     public FormType getFormType() {
         return FormType.NATIVE;
+    }
+
+    @Override
+    public InterpreterStatus status() {
+        if(sparkInterpreter != null){
+            return sparkInterpreter.status();
+        }
+        return new InterpreterStatusImpl("offline",0,0,0);
     }
 
     @Override

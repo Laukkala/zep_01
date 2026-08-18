@@ -117,6 +117,18 @@ public abstract class RemoteInterpreterProcess implements InterpreterClient, Aut
     }
   }
 
+  public String status(String sessionId, String className) throws InterpreterException {
+    try{
+      String status = callRemoteFunction(client -> {
+        return client.status(sessionId, className);
+      });
+      return status;
+    } catch (Exception e){
+      // Re-throw any Exception received via Thrift.
+      throw new InterpreterException("Failed to get interpreter status from RemoteInterpreter!",e);
+    }
+  }
+
   @Override
   public boolean recover() {
     try {
