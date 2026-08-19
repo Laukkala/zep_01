@@ -364,7 +364,6 @@ public class NotebookServer extends WebSocketServlet
           break;
         case PARAGRAPH_CLEAR_OUTPUT:
           clearParagraphOutput(conn, context, receivedMessage);
-          interpreterStatus(conn, context, receivedMessage);
           break;
         case PARAGRAPH_CLEAR_ALL_OUTPUT:
           clearAllParagraphOutput(conn, context, receivedMessage);
@@ -1169,8 +1168,8 @@ public class NotebookServer extends WebSocketServlet
                                      ServiceContext context,
                                      Message fromMessage) throws IOException, InterpreterException {
     // Casting is required to get Message parameters in correct format, as GSON parses all numbers as Doubles, and Message.get() returns a generic Object.
-    final String paragraphId = (String) fromMessage.get("id");
-    final String noteId = getConnectionManager().getAssociatedNoteId(conn);
+    final String noteId = (String) fromMessage.get("noteId");
+    final String paragraphId = (String) fromMessage.get("paragraphId");
 
     Note note = getNotebook().getNote(noteId);
     if(note == null){
