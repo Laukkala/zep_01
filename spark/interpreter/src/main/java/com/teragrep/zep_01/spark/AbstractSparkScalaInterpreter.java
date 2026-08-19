@@ -18,6 +18,7 @@
 package com.teragrep.zep_01.spark;
 
 import com.google.common.collect.Lists;
+import com.teragrep.zep_01.conf.ZeppelinConfiguration;
 import com.teragrep.zep_01.interpreter.status.InterpreterStatus;
 import com.teragrep.zep_01.interpreter.status.InterpreterStatusImpl;
 import com.teragrep.zep_01.interpreter.status.InterpreterStatusStub;
@@ -25,6 +26,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.security.KerberosAuthException;
+import org.apache.hadoop.security.UserGroupInformation;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.hadoop.yarn.api.records.ApplicationReport;
 import org.apache.hadoop.yarn.api.records.ApplicationResourceUsageReport;
@@ -261,11 +264,21 @@ public abstract class AbstractSparkScalaInterpreter {
     final InterpreterStatus rv;
     if(sparkSession != null){
       String appId = sparkSession.sparkContext().applicationId();
-      YarnClient yarnClient = YarnClient.createYarnClient();
-      YarnConfiguration yarnConf = new YarnConfiguration();
-      yarnClient.init(yarnConf);
-      yarnClient.start();
       try{
+        // Login to Kerberos
+        ZeppelinConfiguration zConf = ZeppelinConfiguration.create();
+        String keytab = zConf.getString(
+                ZeppelinConfiguration.ConfVars.ZEPPELIN_SERVER_KERBEROS_KEYTAB);
+        String principal = zConf.getString(
+                ZeppelinConfiguration.ConfVars.ZEPPELIN_SERVER_KERBEROS_PRINCIPAL);
+        UserGroupInformation.loginUserFromKeytab(principal, keytab);
+
+        YarnClient yarnClient = YarnClient.createYarnClient();
+        YarnConfiguration yarnConf = new YarnConfiguration();
+        yarnClient.init(yarnConf);
+        yarnClient.start();
+
+        // get application report
         ApplicationReport applicationReport = yarnClient.getApplicationReport(ApplicationId.fromString(appId));
         String state = applicationReport.getYarnApplicationState().toString();
         ApplicationResourceUsageReport resourceUsageReport = applicationReport.getApplicationResourceUsageReport();
@@ -275,8 +288,18 @@ public abstract class AbstractSparkScalaInterpreter {
         long uptime = finishTime - startTime;
         long memoryUsed = resourceUsageReport.getUsedResources().getMemorySize() * 1024L * 1024; // Reports in megabytes so we multiply by 1024 * 1024 to stay consistent with JVM-based performance metrics.
         rv = new InterpreterStatusImpl(state, memoryUsed, uptime, cpuUsage);
-      } catch (YarnException | IOException exception){
-        LOGGER.error("failed to retrieve interpreter status data!", exception);
+        yarnClient.close();
+      }
+      catch (YarnException yarnException ){
+        LOGGER.error("YarnException while trying to retrieve interpreter status data!", yarnException);
+        return new InterpreterStatusStub();
+      }
+      catch (KerberosAuthException kerberosAuthException){
+        LOGGER.error("KerberosAuthException while trying to retrieve interpreter status data!", kerberosAuthException);
+        return new InterpreterStatusStub();
+      }
+      catch (IOException ioException){
+        LOGGER.error("IOException while trying to retrieve interpreter status data!", ioException);
         return new InterpreterStatusStub();
       }
     }
