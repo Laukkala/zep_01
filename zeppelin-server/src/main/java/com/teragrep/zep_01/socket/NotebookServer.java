@@ -366,6 +366,7 @@ public class NotebookServer extends WebSocketServlet
           break;
         case PARAGRAPH_CLEAR_OUTPUT:
           clearParagraphOutput(conn, context, receivedMessage);
+          interpreterStatus(conn, context, receivedMessage);
           break;
         case PARAGRAPH_CLEAR_ALL_OUTPUT:
           clearAllParagraphOutput(conn, context, receivedMessage);
@@ -1170,14 +1171,14 @@ public class NotebookServer extends WebSocketServlet
                                      ServiceContext context,
                                      Message fromMessage) throws IOException, InterpreterException {
     final Map<String,InterpreterStatus> statuses = new HashMap<>();
-    final String noteId = (String) fromMessage.get("noteId");
+    final String noteId = getConnectionManager().getAssociatedNoteId(conn);
     final Note note = getNotebook().getNote(noteId);
     if(note == null) {
       throw new BadRequestException("No such note: " + noteId);
     }
     else {
       // If paragraphId was provided, only report on the associated interpreter
-      if(fromMessage.get("paragraphId") != null){
+      if(fromMessage.get("id") != null){
         final String paragraphId = (String) fromMessage.get("paragraphId");
         final Paragraph paragraph = note.getParagraph(paragraphId);
         if(paragraph == null){
