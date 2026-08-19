@@ -37,7 +37,6 @@ import com.teragrep.zep_01.socket.messages.ParagraphOutputRequestMessage;
 import com.teragrep.zep_01.display.*;
 import com.teragrep.zep_01.interpreter.*;
 import com.teragrep.zep_01.interpreter.remote.RemoteInterpreter;
-import com.teragrep.zep_01.interpreter.util.ProcessId;
 import com.teragrep.zep_01.interpreter.thrift.*;
 import com.teragrep.zep_01.rest.exception.BadRequestException;
 import com.teragrep.zep_01.socket.messages.ParagraphOutputResponseMessage;
@@ -1162,43 +1161,6 @@ public class NotebookServer extends WebSocketServlet
       final JsonMessage msg = new JsonMessage(new MessageIdImpl(msgId), OP.INTERPRETER_ERROR, errorJson);
       conn.send(msg.asJson().toString());
     }
-  }
-
-  private void interpreterStatus(NotebookSocket conn,
-                                     ServiceContext context,
-                                     Message fromMessage) throws IOException, InterpreterException {
-    // Casting is required to get Message parameters in correct format, as GSON parses all numbers as Doubles, and Message.get() returns a generic Object.
-    final String noteId = (String) fromMessage.get("noteId");
-    final String paragraphId = (String) fromMessage.get("paragraphId");
-
-    Note note = getNotebook().getNote(noteId);
-    if(note == null){
-      throw new BadRequestException("No such note: "+noteId);
-    }
-    Paragraph paragraph = note.getParagraph(paragraphId);
-    if(paragraph == null){
-      throw new BadRequestException("No such paragraph: " + paragraphId);
-    }
-    Interpreter interpreter = paragraph.getBindedInterpreter();
-    if(interpreter == null){
-      throw new BadRequestException("Paragraph "+paragraphId+" has no binded interpreter!");
-    }
-    InterpreterGroup interpreterGroup = interpreter.getInterpreterGroup();
-    if(interpreterGroup == null){
-      throw new BadRequestException("Paragraph "+paragraphId+"'s interpreter has no InterpreterGroup assigned!");
-    }
-
-    ProcessId processId = ((ManagedInterpreterGroup)interpreterGroup).getProcessId();
-    Message msg;
-    if(!processId.isStub()){
-      msg = new Message(Message.OP.INTERPRETER_STATUS)
-              .put("processId",processId.asLong());
-    }
-    else {
-      msg = new Message(OP.INTERPRETER_STATUS)
-              .put("processId","stub");
-    }
-    conn.send(serializeMessage(msg));
   }
 
   private void clearAllParagraphOutput(NotebookSocket conn,

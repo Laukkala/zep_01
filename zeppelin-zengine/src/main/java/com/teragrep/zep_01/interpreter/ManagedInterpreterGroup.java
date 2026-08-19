@@ -20,7 +20,6 @@ package com.teragrep.zep_01.interpreter;
 
 import com.teragrep.zep_01.conf.ZeppelinConfiguration;
 import com.teragrep.zep_01.interpreter.remote.RemoteInterpreterProcess;
-import com.teragrep.zep_01.interpreter.util.ProcessId;
 import com.teragrep.zep_01.scheduler.Job;
 import com.teragrep.zep_01.scheduler.Scheduler;
 import com.teragrep.zep_01.scheduler.SchedulerFactory;
@@ -189,11 +188,6 @@ public class ManagedInterpreterGroup extends InterpreterGroup {
     }
     return remoteInterpreterProcess.formatDataset(sessionId, classname, noteId, paragraphId, options);
   }
-
-  public ProcessId getProcessId(){
-    return remoteInterpreterProcess.processId();
-  }
-
   public boolean isEmpty() {
     return this.sessions.isEmpty();
   }

@@ -31,8 +31,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.util.Map;
 
 /**
@@ -57,16 +55,12 @@ public abstract class ProcessLauncher implements ExecuteResultHandler {
   protected String errorMessage = null;
   protected volatile State state = State.NEW;
   private boolean launchTimeout = false;
-  private ProcessId processId;
-  private PidExecutor executor;
 
   public ProcessLauncher(CommandLine commandLine,
                          Map<String, String> envs) {
     this.commandLine = commandLine;
     this.envs = envs;
     this.processOutput = new ProcessLogOutputStream();
-    this.processId = new ProcessIdStub();
-    this.executor = new PidExecutor();
   }
 
   public ProcessLauncher(CommandLine commandLine,
@@ -75,8 +69,6 @@ public abstract class ProcessLauncher implements ExecuteResultHandler {
     this.commandLine = commandLine;
     this.envs = envs;
     this.processOutput = processLogOutput;
-    this.processId = new ProcessIdStub();
-    this.executor = new PidExecutor();
   }
 
   /**
@@ -94,7 +86,7 @@ public abstract class ProcessLauncher implements ExecuteResultHandler {
   }
 
   public void launch() {
-    executor = new PidExecutor();
+    DefaultExecutor executor = new DefaultExecutor();
     executor.setStreamHandler(new PumpStreamHandler(processOutput));
     this.watchdog = new ExecuteWatchdog(ExecuteWatchdog.INFINITE_TIMEOUT);
     executor.setWatchdog(watchdog);
@@ -176,9 +168,6 @@ public abstract class ProcessLauncher implements ExecuteResultHandler {
     processOutput.stopCatchLaunchOutput();
   }
 
-  public ProcessId processId(){
-    return executor.processId();
-  }
   public static class ProcessLogOutputStream extends LogOutputStream {
 
     private boolean catchLaunchOutput = true;

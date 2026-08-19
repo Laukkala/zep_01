@@ -17,8 +17,6 @@
 
 package com.teragrep.zep_01.interpreter.launcher;
 
-import com.teragrep.zep_01.interpreter.util.ProcessId;
-import com.teragrep.zep_01.interpreter.util.ProcessIdStub;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.io.FileUtils;
 
@@ -148,12 +146,6 @@ public class YarnRemoteInterpreterProcess extends RemoteInterpreterProcess {
     } catch (IOException e) {
       throw new RuntimeException("Fail to create FileSystem", e);
     }
-  }
-
-  // ProcessId for yarnProcess is not supported
-  @Override
-  public ProcessId processId() {
-    return new ProcessIdStub();
   }
 
   @Override
