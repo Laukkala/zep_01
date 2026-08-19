@@ -1179,7 +1179,7 @@ public class NotebookServer extends WebSocketServlet
     else {
       // If paragraphId was provided, only report on the associated interpreter
       if(fromMessage.get("id") != null){
-        final String paragraphId = (String) fromMessage.get("paragraphId");
+        final String paragraphId = (String) fromMessage.get("id");
         final Paragraph paragraph = note.getParagraph(paragraphId);
         if(paragraph == null){
           throw new BadRequestException("No such paragraph: " + paragraphId);
