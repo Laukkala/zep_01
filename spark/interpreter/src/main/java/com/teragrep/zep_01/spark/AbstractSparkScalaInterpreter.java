@@ -35,10 +35,7 @@ import org.apache.hadoop.yarn.client.api.YarnClient;
 import org.apache.hadoop.yarn.conf.YarnConfiguration;
 import org.apache.hadoop.yarn.exceptions.YarnException;
 import org.apache.hadoop.yarn.util.ConverterUtils;
-import org.apache.spark.SparkConf;
-import org.apache.spark.SparkContext;
-import org.apache.spark.SparkJobInfo;
-import org.apache.spark.SparkStageInfo;
+import org.apache.spark.*;
 import org.apache.spark.sql.SQLContext;
 import org.apache.spark.sql.SparkSession;
 import com.teragrep.zep_01.interpreter.*;
@@ -262,46 +259,16 @@ public abstract class AbstractSparkScalaInterpreter {
 
   public InterpreterStatus status(){
     final InterpreterStatus rv;
-    if(sparkSession != null){
-      String appId = sparkSession.sparkContext().applicationId();
-      try{
-        // Login to Kerberos
-        ZeppelinConfiguration zConf = ZeppelinConfiguration.create();
-        String keytab = zConf.getString(
-                ZeppelinConfiguration.ConfVars.ZEPPELIN_SERVER_KERBEROS_KEYTAB);
-        String principal = zConf.getString(
-                ZeppelinConfiguration.ConfVars.ZEPPELIN_SERVER_KERBEROS_PRINCIPAL);
-        UserGroupInformation.loginUserFromKeytab(principal, keytab);
-
-        YarnClient yarnClient = YarnClient.createYarnClient();
-        YarnConfiguration yarnConf = new YarnConfiguration();
-        yarnClient.init(yarnConf);
-        yarnClient.start();
-
-        // get application report
-        ApplicationReport applicationReport = yarnClient.getApplicationReport(ApplicationId.fromString(appId));
-        String state = applicationReport.getYarnApplicationState().toString();
-        ApplicationResourceUsageReport resourceUsageReport = applicationReport.getApplicationResourceUsageReport();
-        float cpuUsage = resourceUsageReport.getClusterUsagePercentage();
-        long startTime = applicationReport.getStartTime();
-        long finishTime = applicationReport.getFinishTime() > 0 ? applicationReport.getFinishTime(): System.currentTimeMillis();
-        long uptime = finishTime - startTime;
-        long memoryUsed = resourceUsageReport.getUsedResources().getMemorySize() * 1024L * 1024; // Reports in megabytes so we multiply by 1024 * 1024 to stay consistent with JVM-based performance metrics.
-        rv = new InterpreterStatusImpl(state, memoryUsed, uptime, cpuUsage);
-        yarnClient.close();
+    if(sc != null){
+      final long uptime = System.currentTimeMillis() - sc.startTime();
+      long memoryUsed = 0;
+      // Add up memory used across all executors
+      for (SparkExecutorInfo executorInfo:sc.statusTracker().getExecutorInfos()) {
+        memoryUsed = memoryUsed + executorInfo.usedOnHeapStorageMemory();
       }
-      catch (YarnException yarnException ){
-        LOGGER.error("YarnException while trying to retrieve interpreter status data!", yarnException);
-        return new InterpreterStatusStub();
-      }
-      catch (KerberosAuthException kerberosAuthException){
-        LOGGER.error("KerberosAuthException while trying to retrieve interpreter status data!", kerberosAuthException);
-        return new InterpreterStatusStub();
-      }
-      catch (IOException ioException){
-        LOGGER.error("IOException while trying to retrieve interpreter status data!", ioException);
-        return new InterpreterStatusStub();
-      }
+      // CPU usage not reported via SparkContext
+      final float cpuUsage = 0;
+      rv = new InterpreterStatusImpl("online", memoryUsed, uptime, cpuUsage);
     }
     else {
       rv = new InterpreterStatusImpl("offline",0,0,0);
