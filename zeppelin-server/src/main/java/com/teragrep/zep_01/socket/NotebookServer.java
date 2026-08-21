@@ -40,6 +40,8 @@ import com.teragrep.zep_01.interpreter.remote.RemoteInterpreter;
 import com.teragrep.zep_01.interpreter.thrift.*;
 import com.teragrep.zep_01.interpreter.status.InterpreterStatus;
 import com.teragrep.zep_01.rest.exception.BadRequestException;
+import com.teragrep.zep_01.service.*;
+import jakarta.json.Json;
 import com.teragrep.zep_01.socket.messages.ParagraphOutputResponseMessage;
 import jakarta.json.JsonArrayBuilder;
 import jakarta.json.*;
@@ -62,11 +64,6 @@ import com.teragrep.zep_01.notebook.repo.NotebookRepoWithVersionControl.Revision
 import com.teragrep.zep_01.common.Message.OP;
 import com.teragrep.zep_01.rest.exception.ForbiddenException;
 import com.teragrep.zep_01.scheduler.Job.Status;
-import com.teragrep.zep_01.service.ConfigurationService;
-import com.teragrep.zep_01.service.JobManagerService;
-import com.teragrep.zep_01.service.NotebookService;
-import com.teragrep.zep_01.service.ServiceContext;
-import com.teragrep.zep_01.service.SimpleServiceCallback;
 import com.teragrep.zep_01.ticket.TicketContainer;
 import com.teragrep.zep_01.types.InterpreterSettingsList;
 import com.teragrep.zep_01.user.AuthenticationInfo;
@@ -129,6 +126,7 @@ public class NotebookServer extends WebSocketServlet
 
   private Provider<Notebook> notebookProvider;
   private Provider<NotebookService> notebookServiceProvider;
+  private Provider<InterpreterStatusService> interpreterStatusServiceProvider;
   private Provider<AuthorizationService> authorizationServiceProvider;
   private Provider<ConfigurationService> configurationServiceProvider;
   private Provider<JobManagerService> jobManagerServiceProvider;
@@ -155,6 +153,13 @@ public class NotebookServer extends WebSocketServlet
       Provider<NotebookService> notebookServiceProvider) {
     this.notebookServiceProvider = notebookServiceProvider;
     LOG.info("Injected NotebookServiceProvider");
+  }
+
+  @Inject
+  public void setInterpreterStatusService(
+          Provider<InterpreterStatusService> interpreterStatusServiceProvider) {
+    this.interpreterStatusServiceProvider = interpreterStatusServiceProvider;
+    LOG.info("Injected InterpreterStatusServiceProvider");
   }
 
   @Inject
@@ -197,6 +202,8 @@ public class NotebookServer extends WebSocketServlet
   public NotebookService getNotebookService() {
     return notebookServiceProvider.get();
   }
+
+  public InterpreterStatusService getInterpreterStatusService(){return interpreterStatusServiceProvider.get();}
 
   public ConfigurationService getConfigurationService() {
     return configurationServiceProvider.get();
@@ -1170,19 +1177,20 @@ public class NotebookServer extends WebSocketServlet
   private void interpreterStatus(NotebookSocket conn,
                                      ServiceContext context,
                                      Message fromMessage) throws IOException {
+    getInterpreterStatusService();
     final JsonObjectBuilder interpreterGroupJson = Json.createObjectBuilder();
     final List<ManagedInterpreterGroup> interpreterGroups = getNotebook().getInterpreterSettingManager().getAllInterpreterGroup();
     for (ManagedInterpreterGroup interpreterGroup: interpreterGroups) {
       final JsonObjectBuilder sessionJson = Json.createObjectBuilder();
       for (Map.Entry<String, List<Interpreter>> session : interpreterGroup.sessions().entrySet()) {
-        final JsonArrayBuilder interpreterJsonArray = Json.createArrayBuilder();
+        final JsonObjectBuilder interpreterJson = Json.createObjectBuilder();
         for (Interpreter interpreter : session.getValue()){
           final InterpreterStatus status = interpreter.status();
           if(!status.isStub()){
-            interpreterJsonArray.add(status.asJson());
+            interpreterJson.add(interpreter.getClassName(),status.asJson());
           }
         }
-        sessionJson.add(session.getKey(),interpreterJsonArray.build());
+        sessionJson.add(session.getKey(),interpreterJson.build());
       }
       interpreterGroupJson.add(interpreterGroup.getId(),sessionJson);
     }

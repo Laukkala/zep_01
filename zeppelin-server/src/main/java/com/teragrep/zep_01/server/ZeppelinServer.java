@@ -197,6 +197,7 @@ public class ZeppelinServer extends ResourceConfig {
                 .to(NoteEventListener.class)
                 .to(WebSocketServlet.class)
                 .in(Singleton.class);
+            bindAsContract(InterpreterStatusService.class).in(Singleton.class);
             if (conf.isZeppelinNotebookCronEnable()) {
               bind(QuartzSchedulerService.class).to(SchedulerService.class).in(Singleton.class);
             } else {
@@ -266,6 +267,11 @@ public class ZeppelinServer extends ResourceConfig {
       }
       System.exit(0);
     }
+
+    // Start Interpreter Status Service after server has been initialized
+    InterpreterStatusService interpreterStatusService = ServiceLocatorUtilities.getService(
+            sharedServiceLocator, InterpreterStatusService.class.getName());
+    interpreterStatusService.init();
 
     jettyWebServer.join();
     if (!conf.isRecoveryEnabled()) {
