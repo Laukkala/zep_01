@@ -28,7 +28,8 @@ public class InterpreterStatusServiceTest {
         FakeNotebook fakeNotebook = Assertions.assertDoesNotThrow(()->new FakeNotebook(conf, fakeInterpreterSettingManager));
         FakeConnectionManager fakeConnectionManager = Assertions.assertDoesNotThrow(()->new FakeConnectionManager());
         InterpreterStatusService statusService = new InterpreterStatusService(fakeNotebook,fakeConnectionManager);
-        Assertions.assertDoesNotThrow(()->Thread.sleep(10000));
+        statusService.init();
+        Assertions.assertDoesNotThrow(()->Thread.sleep(5000));
         List<Message> messages = fakeConnectionManager.messageList();
         Assertions.assertTrue(messages.size() > 0);
     }
@@ -49,7 +50,6 @@ public class InterpreterStatusServiceTest {
 
         @Override
         public void broadcast(Message m) {
-            System.out.println("YUUHUP! YALL RECEIVED SOME POST COWBOY:\n"+m.toJson());
             messageList.add(m);
         }
 
