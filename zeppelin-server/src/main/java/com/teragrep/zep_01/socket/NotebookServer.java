@@ -1169,45 +1169,25 @@ public class NotebookServer extends WebSocketServlet
 
   private void interpreterStatus(NotebookSocket conn,
                                      ServiceContext context,
-                                     Message fromMessage) throws IOException, InterpreterException {
-    final Map<String,InterpreterStatus> statuses = new HashMap<>();
-    final String noteId = getConnectionManager().getAssociatedNoteId(conn);
-    final Note note = getNotebook().getNote(noteId);
-    if(note == null) {
-      throw new BadRequestException("No such note: " + noteId);
-    }
-    else {
-      // If paragraphId was provided, only report on the associated interpreter
-      if(fromMessage.get("id") != null){
-        final String paragraphId = (String) fromMessage.get("id");
-        final Paragraph paragraph = note.getParagraph(paragraphId);
-        if(paragraph == null){
-          throw new BadRequestException("No such paragraph: " + paragraphId);
+                                     Message fromMessage) throws IOException {
+    final JsonObjectBuilder interpreterGroupJson = Json.createObjectBuilder();
+    final List<ManagedInterpreterGroup> interpreterGroups = getNotebook().getInterpreterSettingManager().getAllInterpreterGroup();
+    for (ManagedInterpreterGroup interpreterGroup: interpreterGroups) {
+      final JsonObjectBuilder sessionJson = Json.createObjectBuilder();
+      for (Map.Entry<String, List<Interpreter>> session : interpreterGroup.sessions().entrySet()) {
+        final JsonArrayBuilder interpreterJsonArray = Json.createArrayBuilder();
+        for (Interpreter interpreter : session.getValue()){
+          final InterpreterStatus status = interpreter.status();
+          if(!status.isStub()){
+            interpreterJsonArray.add(status.asJson());
+          }
         }
-        else {
-          RemoteInterpreter interpreter = ((RemoteInterpreter)paragraph.getBindedInterpreter()); //TODO: this might get the last user's interpreter isntead of requesters. check which one comes out
-          String sessionId = interpreter.getSessionId();
-          InterpreterStatus status = interpreter.status();
-          statuses.put(sessionId,status);
-        }
+        sessionJson.add(session.getKey(),interpreterJsonArray.build());
       }
-      // If paragraphId was not provided, provide status of all Interpreters in the notebook
-      else {
-        for (Paragraph paragraph:note.getParagraphs()) {
-          RemoteInterpreter interpreter = ((RemoteInterpreter)paragraph.getBindedInterpreter()); //TODO: this might get the last user's interpreter isntead of requesters. check which one comes out
-          String sessionId = interpreter.getSessionId();
-          InterpreterStatus status = interpreter.status();
-          statuses.put(sessionId,status);
-        }
-      }
+      interpreterGroupJson.add(interpreterGroup.getId(),sessionJson);
     }
-    JsonObjectBuilder statusJsonBuilder = Json.createObjectBuilder();
-    for (Map.Entry<String,InterpreterStatus> status :statuses.entrySet()) {
-      statusJsonBuilder.add(status.getKey(),status.getValue().asJson());
-    }
-    JsonObject statusJson = statusJsonBuilder.build();
     Message msg = new Message(Message.OP.INTERPRETER_STATUS)
-              .put("status",statusJson);
+              .put("status",interpreterGroupJson);
     conn.send(serializeMessage(msg));
   }
 

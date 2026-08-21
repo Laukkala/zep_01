@@ -22,10 +22,7 @@ import com.teragrep.zep_01.resource.ResourcePool;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.security.SecureRandom;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -110,6 +107,9 @@ public class InterpreterGroup {
   //For now just keep this method to reduce code change
   public Collection<List<Interpreter>> values() {
     return sessions.values();
+  }
+  public Map<String,List<Interpreter>> sessions(){
+    return sessions;
   }
 
   public AngularObjectRegistry getAngularObjectRegistry() {
