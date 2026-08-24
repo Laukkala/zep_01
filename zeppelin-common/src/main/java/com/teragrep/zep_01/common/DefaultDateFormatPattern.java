@@ -1,29 +1,43 @@
 package com.teragrep.zep_01.common;
 
+import java.text.DateFormat;
+import java.text.FieldPosition;
+import java.text.ParsePosition;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Objects;
 
-public final class DefaultDateFormatPattern {
-    private final SimpleDateFormat format;
-
+public final class DefaultDateFormatPattern extends DateFormat {
+    private final DateFormat origin;
     public DefaultDateFormatPattern(){
-        this.format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ");
+        this(new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ"));
     }
-    public String format(final Date date){
-        return format.format(date);
-    };
+
+    public DefaultDateFormatPattern(SimpleDateFormat format){
+        this.origin = format;
+    }
 
     @Override
-    public boolean equals(final Object o) {
+    public StringBuffer format(Date date, StringBuffer toAppendTo, FieldPosition fieldPosition) {
+        return origin.format(date, toAppendTo, fieldPosition);
+    }
+
+    @Override
+    public Date parse(String source, ParsePosition pos) {
+        return origin.parse(source, pos);
+    }
+
+    @Override
+    public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        final DefaultDateFormatPattern that = (DefaultDateFormatPattern) o;
-        return Objects.equals(format, that.format);
+        if (!super.equals(o)) return false;
+        DefaultDateFormatPattern pattern = (DefaultDateFormatPattern) o;
+        return Objects.equals(origin, pattern.origin);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(format);
+        return Objects.hash(super.hashCode(), origin);
     }
 }
