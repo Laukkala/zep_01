@@ -9,9 +9,9 @@ public final class Revision {
  * Represents the 'Revision' a point in life of the notebook
  */
 
-    public final String id;
-    public final String message;
-    public final int time;
+    private final String id;
+    private final String message;
+    private final int time;
 
     public Revision() {
         this(StringUtils.EMPTY, StringUtils.EMPTY, 0);
