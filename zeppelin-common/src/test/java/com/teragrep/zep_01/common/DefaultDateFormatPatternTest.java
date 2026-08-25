@@ -4,7 +4,6 @@ import nl.jqno.equalsverifier.EqualsVerifier;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.util.Date;
 import java.util.regex.Pattern;
@@ -20,5 +19,10 @@ class DefaultDateFormatPatternTest {
         // Formatted time should always contain 24 characters in format yyyy-mm-ddThh:mm:ss+timezone
         final Pattern regexPattern = Pattern.compile("\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}[+-]\\d{4}");
         Assertions.assertTrue(regexPattern.matcher(formatted).matches());
+    }
+
+    @Test
+    public void testContract(){
+        EqualsVerifier.forClass(DefaultDateFormatPattern.class).verify();
     }
 }
