@@ -101,8 +101,6 @@ public class Paragraph extends JobWithProgressPoller<InterpreterResult> implemen
 
   private Map<String, ParagraphRuntimeInfo> runtimeInfos = new HashMap<>();
   private transient List<InterpreterResultMessage> outputBuffer = new ArrayList<>();
-  private transient final DefaultDateFormatPattern dateFormat = new DefaultDateFormatPattern();
-
 
   @VisibleForTesting
   Paragraph() {
@@ -153,19 +151,19 @@ public class Paragraph extends JobWithProgressPoller<InterpreterResult> implemen
     }
 
     if(dateUpdated != null){
-      final String dateUpdated = dateFormat.format(this.dateUpdated);
+      final String dateUpdated = new DefaultDateFormatPattern(this.dateUpdated).format();
       builder.add("dateUpdated",dateUpdated);
     }
     if(getDateStarted() != null){
-      final String dateStarted  = dateFormat.format(getDateStarted());
+      final String dateStarted = new DefaultDateFormatPattern(getDateStarted()).format();
       builder.add("dateStarted",dateStarted);
     }
     if(getDateCreated() != null){
-      final String dateCreated  = dateFormat.format(getDateCreated());
+      final String dateCreated = new DefaultDateFormatPattern(getDateCreated()).format();
       builder.add("dateCreated",dateCreated);
     }
     if(getDateFinished() != null){
-      final String dateFinished = dateFormat.format(getDateFinished());
+      final String dateFinished = new DefaultDateFormatPattern(getDateFinished()).format();
       builder.add("dateFinished",dateFinished);
     }
     if(runtimeInfos != null){

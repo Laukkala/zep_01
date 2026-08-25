@@ -12,9 +12,9 @@ class DefaultDateFormatPatternTest {
 
     @Test
     void testFormat() {
-        final DefaultDateFormatPattern pattern = new DefaultDateFormatPattern();
         final Date date = Date.from(Instant.ofEpochSecond(1000000000L));
-        final String formatted = pattern.format(date);
+        final DefaultDateFormatPattern pattern = new DefaultDateFormatPattern(date);
+        final String formatted = pattern.format();
 
         // Formatted time should always contain 24 characters in format yyyy-mm-ddThh:mm:ss+timezone
         final Pattern regexPattern = Pattern.compile("\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}[+-]\\d{4}");
