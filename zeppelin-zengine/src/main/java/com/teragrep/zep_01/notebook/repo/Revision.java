@@ -27,6 +27,18 @@ public final class Revision {
         return (id.isEmpty() && message.isEmpty() && time == 0);
     }
 
+    public String id(){
+        return id;
+    }
+
+    public String message(){
+        return message;
+    }
+
+    public int time(){
+        return time;
+    }
+
     @Override
     public boolean equals(final Object o) {
         if (this == o) return true;
