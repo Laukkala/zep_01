@@ -19,7 +19,6 @@ package com.teragrep.zep_01.notebook;
 
 import java.io.IOException;
 import java.security.SecureRandom;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -29,7 +28,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import com.teragrep.zep_01.common.DefaultDateFormatPattern;
+import com.teragrep.zep_01.common.DefaultFormatDate;
 import com.teragrep.zep_01.common.Jsonable;
 import jakarta.json.Json;
 import jakarta.json.JsonObject;
@@ -151,19 +150,19 @@ public class Paragraph extends JobWithProgressPoller<InterpreterResult> implemen
     }
 
     if(dateUpdated != null){
-      final String dateUpdated = new DefaultDateFormatPattern(this.dateUpdated).format();
+      final String dateUpdated = new DefaultFormatDate(this.dateUpdated).asFormattedString();
       builder.add("dateUpdated",dateUpdated);
     }
     if(getDateStarted() != null){
-      final String dateStarted = new DefaultDateFormatPattern(getDateStarted()).format();
+      final String dateStarted = new DefaultFormatDate(getDateStarted()).asFormattedString();
       builder.add("dateStarted",dateStarted);
     }
     if(getDateCreated() != null){
-      final String dateCreated = new DefaultDateFormatPattern(getDateCreated()).format();
+      final String dateCreated = new DefaultFormatDate(getDateCreated()).asFormattedString();
       builder.add("dateCreated",dateCreated);
     }
     if(getDateFinished() != null){
-      final String dateFinished = new DefaultDateFormatPattern(getDateFinished()).format();
+      final String dateFinished = new DefaultFormatDate(getDateFinished()).asFormattedString();
       builder.add("dateFinished",dateFinished);
     }
     if(runtimeInfos != null){

@@ -8,13 +8,13 @@ import java.time.Instant;
 import java.util.Date;
 import java.util.regex.Pattern;
 
-class DefaultDateFormatPatternTest {
+class DefaultFormatDateTest {
 
     @Test
     void testFormat() {
         final Date date = Date.from(Instant.ofEpochSecond(1000000000L));
-        final DefaultDateFormatPattern pattern = new DefaultDateFormatPattern(date);
-        final String formatted = pattern.format();
+        final DefaultFormatDate defaultFormat = new DefaultFormatDate(date);
+        final String formatted = defaultFormat.asFormattedString();
 
         // Formatted time should always contain 24 characters in format yyyy-mm-ddThh:mm:ss+timezone
         final Pattern regexPattern = Pattern.compile("\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}[+-]\\d{4}");
@@ -23,6 +23,6 @@ class DefaultDateFormatPatternTest {
 
     @Test
     public void testContract(){
-        EqualsVerifier.forClass(DefaultDateFormatPattern.class).verify();
+        EqualsVerifier.forClass(DefaultFormatDate.class).verify();
     }
 }
