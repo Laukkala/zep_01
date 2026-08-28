@@ -48,7 +48,7 @@ package com.teragrep.pth_07.ui;
 import com.teragrep.pth_07.ui.elements.table_dynamic.DatasetStore;
 import com.teragrep.pth_07.ui.elements.table_dynamic.formats.*;
 import com.teragrep.pth_07.ui.elements.table_dynamic.testdata.TestDPLData;
-import com.teragrep.zep_01.display.AngularObject;
+import com.teragrep.zep_01.display.FakeAngularObjectRegistryListener;
 import com.teragrep.zep_01.display.AngularObjectRegistry;
 import com.teragrep.zep_01.display.AngularObjectRegistryListener;
 import com.teragrep.zep_01.interpreter.*;
@@ -65,7 +65,6 @@ import org.apache.spark.sql.types.StructType;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -88,21 +87,8 @@ public final class UserInterfaceManagerTest {
     private final String interpreterGroupId = "testInterpreterGroupId";
     private final FakeInterpreterOutputListener testOutputListener = new FakeInterpreterOutputListener();
     private final InterpreterOutput testOutput = new InterpreterOutput(testOutputListener);
-    private final AngularObjectRegistryListener testRegistryListener = new AngularObjectRegistryListener() {
-
-        @Override
-        public void onAddAngularObject(final String interpreterGroupId, final AngularObject angularObject) {
-        }
-
-        @Override
-        public void onUpdateAngularObject(final String interpreterGroupId, final AngularObject angularObject) {
-        }
-
-        @Override
-        public void onRemoveAngularObject(final String interpreterGroupId, final AngularObject angularObject) {
-        }
-    };
-    AngularObjectRegistry registry = new AngularObjectRegistry(interpreterGroupId, testRegistryListener);
+    private final AngularObjectRegistryListener registryListener = new FakeAngularObjectRegistryListener();
+    AngularObjectRegistry registry = new AngularObjectRegistry(interpreterGroupId, registryListener);
     InterpreterContext context = InterpreterContext.builder()
             .setNoteId(noteId)
             .setParagraphId(paragraphId)
