@@ -157,9 +157,9 @@ public class InputTest {
     // textbox
     final String script = "${input_form=}";
     final Map<String, Input> forms = Input.extractSimpleQueryForm(script, false);
-    assertEquals(1, forms.size());
+    Assertions.assertEquals(1, forms.size());
     final Input form = forms.get("input_form");
-    assertTrue(form instanceof TextBox);
+    Assertions.assertTrue(form.getClass().equals(TextBox.class));
     final JsonObject json = form.asJson();
     Assertions.assertEquals(form.getName(), json.getString("name"));
     Assertions.assertEquals(form.getDisplayName(), json.getString("displayName"));
@@ -170,7 +170,7 @@ public class InputTest {
     final String script = "${password:my_pwd(My Password)}";
     final Map<String, Input> forms = Input.extractSimpleQueryForm(script, false);
     final Input form = forms.get("my_pwd");
-    assertTrue(form instanceof Password);
+    Assertions.assertTrue(form.getClass().equals(Password.class));
     final JsonObject json = form.asJson();
     Assertions.assertEquals(form.getName(), json.getString("name"));
     Assertions.assertEquals(form.getDisplayName(), json.getString("displayName"));
@@ -181,10 +181,10 @@ public class InputTest {
     // selection
     final String script = "${select_form(Selection Form)=op1,op1|op2(Option 2)|op3}";
     final Input form = Input.extractSimpleQueryForm(script, false).get("select_form");
-    assertEquals("select_form", form.name);
-    assertEquals("op1", form.defaultValue);
-    assertEquals("Selection Form", form.getDisplayName());
-    assertTrue(form instanceof Select);
+    Assertions.assertEquals("select_form", form.name);
+    Assertions.assertEquals("op1", form.defaultValue);
+    Assertions.assertEquals("Selection Form", form.getDisplayName());
+    Assertions.assertTrue(form.getClass().equals(Select.class));
     final JsonObject json = form.asJson();
     Assertions.assertEquals(form.getName(), json.getString("name"));
     Assertions.assertEquals(form.getDisplayName(), json.getString("displayName"));
@@ -195,9 +195,9 @@ public class InputTest {
     // checkbox
     final String script = "${checkbox:checkbox_form=op1,op1|op2|op3}";
     final Input form = Input.extractSimpleQueryForm(script, false).get("checkbox_form");
-    assertEquals("checkbox_form", form.name);
-    assertEquals("checkbox_form", form.displayName);
-    assertTrue(form instanceof CheckBox);
+    Assertions.assertEquals("checkbox_form", form.name);
+    Assertions.assertEquals("checkbox_form", form.displayName);
+    Assertions.assertTrue(form.getClass().equals(CheckBox.class));
     final JsonObject json = form.asJson();
     Assertions.assertEquals(form.getName(),json.getString("name"));
     Assertions.assertEquals(form.getDisplayName(),json.getString("displayName"));
