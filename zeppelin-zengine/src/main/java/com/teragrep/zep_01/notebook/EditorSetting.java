@@ -34,17 +34,23 @@ public final class EditorSetting implements Jsonable {
         }
         return editorSettingJson.build();
     }
+
     @Override
     public boolean equals(final Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        final EditorSetting that = (EditorSetting) o;
-        return Objects.equals(settingMap, that.settingMap);
+        final boolean equals;
+        if (this == o) {
+            equals = true;
+        } else if (o == null || getClass() != o.getClass()) {
+            equals = false;
+        } else {
+            final EditorSetting that = (EditorSetting) o;
+            equals = Objects.equals(settingMap, that.settingMap);
+        }
+        return equals;
     }
 
     @Override
     public int hashCode() {
         return Objects.hash(settingMap);
     }
-
 }

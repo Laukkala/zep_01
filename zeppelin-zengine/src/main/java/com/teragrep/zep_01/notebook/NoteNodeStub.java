@@ -70,11 +70,17 @@ public final class NoteNodeStub implements NoteNode {
     }
 
     @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        NoteNodeStub that = (NoteNodeStub) o;
-        return isStub == that.isStub;
+    public boolean equals(final Object o) {
+        final boolean equals;
+        if (this == o) {
+            equals = true;
+        } else if (o == null || getClass() != o.getClass()) {
+            equals = false;
+        } else {
+            final NoteNodeStub that = (NoteNodeStub) o;
+            equals = isStub == that.isStub;
+        }
+        return equals;
     }
 
     @Override

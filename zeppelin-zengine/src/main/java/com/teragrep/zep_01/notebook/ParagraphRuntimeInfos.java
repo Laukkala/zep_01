@@ -28,15 +28,20 @@ public final class ParagraphRuntimeInfos implements Jsonable {
 
     @Override
     public boolean equals(final Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        final ParagraphRuntimeInfos that = (ParagraphRuntimeInfos) o;
-        return Objects.equals(runtimeInfoMap, that.runtimeInfoMap);
+        final boolean equals;
+        if (this == o) {
+            equals = true;
+        } else if (o == null || getClass() != o.getClass()) {
+            equals = false;
+        } else {
+            final ParagraphRuntimeInfos that = (ParagraphRuntimeInfos) o;
+            equals = Objects.equals(runtimeInfoMap, that.runtimeInfoMap);
+        }
+        return equals;
     }
 
     @Override
     public int hashCode() {
         return Objects.hash(runtimeInfoMap);
     }
-
 }

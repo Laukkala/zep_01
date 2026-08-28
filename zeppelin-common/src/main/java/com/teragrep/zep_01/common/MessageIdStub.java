@@ -27,10 +27,16 @@ public final class MessageIdStub implements MessageId{
 
     @Override
     public boolean equals(final Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        final MessageIdStub that = (MessageIdStub) o;
-        return isStub == that.isStub;
+        final boolean equals;
+        if (this == o) {
+            equals = true;
+        } else if (o == null || getClass() != o.getClass()) {
+            equals = false;
+        } else {
+            final MessageIdStub that = (MessageIdStub) o;
+            equals = isStub == that.isStub;
+        }
+        return equals;
     }
 
     @Override

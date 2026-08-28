@@ -80,10 +80,16 @@ public final class DataTablesMetadata implements Jsonable {
 
     @Override
     public boolean equals(final Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        final DataTablesMetadata that = (DataTablesMetadata) o;
-        return Objects.equals(schema, that.schema);
+        final boolean equals;
+        if (this == o) {
+            equals = true;
+        } else if (o == null || getClass() != o.getClass()) {
+            equals = false;
+        } else {
+            final DataTablesMetadata that = (DataTablesMetadata) o;
+            equals = Objects.equals(schema, that.schema);
+        }
+        return equals;
     }
 
     @Override

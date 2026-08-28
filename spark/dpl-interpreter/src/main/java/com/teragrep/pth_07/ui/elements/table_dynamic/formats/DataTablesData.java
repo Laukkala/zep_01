@@ -140,11 +140,17 @@ public final class DataTablesData implements Jsonable {
     }
 
     @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        DataTablesData that = (DataTablesData) o;
-        return draw == that.draw && pageStart == that.pageStart && pageLength == that.pageLength && Objects.equals(collectedData, that.collectedData) && Objects.equals(searchString, that.searchString);
+    public boolean equals(final Object o) {
+        final boolean equals;
+        if (this == o) {
+            equals = true;
+        } else if (o == null || getClass() != o.getClass()) {
+            equals = false;
+        } else {
+            final DataTablesData that = (DataTablesData) o;
+            equals = draw == that.draw && pageStart == that.pageStart && pageLength == that.pageLength && Objects.equals(collectedData, that.collectedData) && Objects.equals(searchString, that.searchString);
+        }
+        return equals;
     }
 
     @Override

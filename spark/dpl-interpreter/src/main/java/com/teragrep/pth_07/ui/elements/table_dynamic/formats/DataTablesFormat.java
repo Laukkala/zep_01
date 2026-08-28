@@ -118,10 +118,16 @@ public final class DataTablesFormat implements RenderFormat{
 
     @Override
     public boolean equals(final Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        final DataTablesFormat format = (DataTablesFormat) o;
-        return Objects.equals(option, format.option) && Objects.equals(dataset, format.dataset);
+        final boolean equals;
+        if (this == o) {
+            equals = true;
+        } else if (o == null || getClass() != o.getClass()) {
+            equals = false;
+        } else {
+            final DataTablesFormat format = (DataTablesFormat) o;
+            equals = Objects.equals(option, format.option) && Objects.equals(dataset, format.dataset);
+        }
+        return equals;
     }
 
     @Override

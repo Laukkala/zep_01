@@ -85,11 +85,17 @@ public final class UIOptionImpl implements UIOption {
     }
 
     @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        UIOptionImpl uiOption = (UIOptionImpl) o;
-        return Objects.equals(json, uiOption.json);
+    public boolean equals(final Object o) {
+        final boolean equals;
+        if (this == o) {
+            equals = true;
+        } else if (o == null || getClass() != o.getClass()) {
+            equals = false;
+        } else {
+            final UIOptionImpl uiOption = (UIOptionImpl) o;
+            equals = Objects.equals(json, uiOption.json);
+        }
+        return equals;
     }
 
     @Override

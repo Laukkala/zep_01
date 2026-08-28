@@ -23,10 +23,16 @@ public final class MessageIdImpl implements MessageId{
 
     @Override
     public boolean equals(final Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        final MessageIdImpl that = (MessageIdImpl) o;
-        return Objects.equals(id, that.id);
+        final boolean equals;
+        if (this == o) {
+            equals = true;
+        } else if (o == null || getClass() != o.getClass()) {
+            equals = false;
+        } else {
+            final MessageIdImpl messageId = (MessageIdImpl) o;
+            equals = Objects.equals(id, messageId.id);
+        }
+        return equals;
     }
 
     @Override

@@ -172,13 +172,17 @@ public final class UPlotData implements Jsonable {
     }
 
     @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        UPlotData uPlotData = (UPlotData) o;
-        return aggsUsed == uPlotData.aggsUsed
-                && Objects.equals(collectedData, uPlotData.collectedData)
-                && Objects.equals(cachedJson != null ? cachedJson.get() : null, uPlotData.cachedJson != null ? uPlotData.cachedJson.get() : null);
+    public boolean equals(final Object o) {
+        final boolean equals;
+        if (this == o) {
+            equals = true;
+        } else if (o == null || getClass() != o.getClass()) {
+            equals = false;
+        } else {
+            final UPlotData uPlotData = (UPlotData) o;
+            equals = aggsUsed == uPlotData.aggsUsed && Objects.equals(collectedData, uPlotData.collectedData) && Objects.equals(cachedJson, uPlotData.cachedJson);
+        }
+        return equals;
     }
 
     @Override

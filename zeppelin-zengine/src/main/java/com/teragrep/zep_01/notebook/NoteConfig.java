@@ -37,15 +37,20 @@ public final class NoteConfig implements Jsonable {
 
     @Override
     public boolean equals(final Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        final NoteConfig that = (NoteConfig) o;
-        return Objects.equals(configMap, that.configMap);
+        final boolean equals;
+        if (this == o) {
+            equals = true;
+        } else if (o == null || getClass() != o.getClass()) {
+            equals = false;
+        } else {
+            final NoteConfig that = (NoteConfig) o;
+            equals = Objects.equals(configMap, that.configMap);
+        }
+        return equals;
     }
 
     @Override
     public int hashCode() {
         return Objects.hash(configMap);
     }
-
 }

@@ -76,16 +76,21 @@ public final class RenderFormatStub implements RenderFormat {
     }
 
     @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        RenderFormatStub that = (RenderFormatStub) o;
-        return isStub == that.isStub;
+    public boolean equals(final Object o) {
+        final boolean equals;
+        if (this == o) {
+            equals = true;
+        } else if (o == null || getClass() != o.getClass()) {
+            equals = false;
+        } else {
+            final RenderFormatStub that = (RenderFormatStub) o;
+            equals = isStub == that.isStub;
+        }
+        return equals;
     }
 
     @Override
     public int hashCode() {
         return Objects.hash(isStub);
     }
-
 }

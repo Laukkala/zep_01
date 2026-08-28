@@ -21,11 +21,17 @@ public final class DefaultFormatDate {
     };
 
     @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        DefaultFormatDate pattern = (DefaultFormatDate) o;
-        return Objects.equals(format, pattern.format) && Objects.equals(date, pattern.date);
+    public boolean equals(final Object o) {
+        final boolean equals;
+        if (this == o) {
+            equals = true;
+        } else if (o == null || getClass() != o.getClass()) {
+            equals = false;
+        } else {
+            final DefaultFormatDate that = (DefaultFormatDate) o;
+            equals = Objects.equals(format, that.format) && Objects.equals(date, that.date);
+        }
+        return equals;
     }
 
     @Override

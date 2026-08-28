@@ -46,15 +46,20 @@ public final class ParagraphConfig implements Jsonable {
 
     @Override
     public boolean equals(final Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        final ParagraphConfig config = (ParagraphConfig) o;
-        return Objects.equals(configMap, config.configMap);
+        final boolean equals;
+        if (this == o) {
+            equals = true;
+        } else if (o == null || getClass() != o.getClass()) {
+            equals = false;
+        } else {
+            final ParagraphConfig config = (ParagraphConfig) o;
+            equals = Objects.equals(configMap, config.configMap);
+        }
+        return equals;
     }
 
     @Override
     public int hashCode() {
         return Objects.hash(configMap);
     }
-
 }

@@ -86,11 +86,17 @@ public final class ParagraphRuntimeInfo implements Jsonable {
   }
 
   @Override
-  public boolean equals(Object o) {
-    if (this == o) return true;
-    if (o == null || getClass() != o.getClass()) return false;
-    ParagraphRuntimeInfo that = (ParagraphRuntimeInfo) o;
-    return Objects.equals(propertyName, that.propertyName) && Objects.equals(label, that.label) && Objects.equals(tooltip, that.tooltip) && Objects.equals(group, that.group) && Objects.equals(values, that.values) && Objects.equals(interpreterSettingId, that.interpreterSettingId);
+  public boolean equals(final Object o) {
+    final boolean equals;
+    if (this == o) {
+      equals = true;
+    } else if (o == null || getClass() != o.getClass()) {
+      equals = false;
+    } else {
+      final ParagraphRuntimeInfo that = (ParagraphRuntimeInfo) o;
+      equals = Objects.equals(propertyName, that.propertyName) && Objects.equals(label, that.label) && Objects.equals(tooltip, that.tooltip) && Objects.equals(group, that.group) && Objects.equals(values, that.values) && Objects.equals(interpreterSettingId, that.interpreterSettingId);
+    }
+    return equals;
   }
 
   @Override

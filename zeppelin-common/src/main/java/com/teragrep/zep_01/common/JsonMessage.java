@@ -71,12 +71,19 @@ public final class JsonMessage implements Jsonable {
     json.add("roles",roles);
     return json.build();
   }
+
   @Override
   public boolean equals(final Object o) {
-    if (this == o) return true;
-    if (o == null || getClass() != o.getClass()) return false;
-    final JsonMessage that = (JsonMessage) o;
-    return Objects.equals(id, that.id) && op == that.op && Objects.equals(data, that.data) && Objects.equals(ticket, that.ticket) && Objects.equals(principal, that.principal) && Objects.equals(roles, that.roles);
+    final boolean equals;
+    if (this == o) {
+      equals = true;
+    } else if (o == null || getClass() != o.getClass()) {
+      equals = false;
+    } else {
+      final JsonMessage that = (JsonMessage) o;
+      equals = Objects.equals(id, that.id) && op == that.op && Objects.equals(data, that.data) && Objects.equals(ticket, that.ticket) && Objects.equals(principal, that.principal) && Objects.equals(roles, that.roles);
+    }
+    return equals;
   }
 
   @Override

@@ -132,11 +132,17 @@ public final class UPlotMetadata implements Jsonable {
     }
 
     @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        UPlotMetadata that = (UPlotMetadata) o;
-        return isAggregated == that.isAggregated && Objects.equals(schema, that.schema) && Objects.equals(collectedData, that.collectedData) && Objects.equals(graphType, that.graphType) && Objects.equals(xAxisLabel, that.xAxisLabel);
+    public boolean equals(final Object o) {
+        final boolean equals;
+        if (this == o) {
+            equals = true;
+        } else if (o == null || getClass() != o.getClass()) {
+            equals = false;
+        } else {
+            final UPlotMetadata that = (UPlotMetadata) o;
+            equals = isAggregated == that.isAggregated && Objects.equals(schema, that.schema) && Objects.equals(collectedData, that.collectedData) && Objects.equals(graphType, that.graphType) && Objects.equals(xAxisLabel, that.xAxisLabel);
+        }
+        return equals;
     }
 
     @Override
