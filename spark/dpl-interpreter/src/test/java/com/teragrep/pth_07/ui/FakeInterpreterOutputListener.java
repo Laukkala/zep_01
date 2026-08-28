@@ -72,7 +72,7 @@ public final class FakeInterpreterOutputListener implements InterpreterOutputLis
                 outputList.add(out.toInterpreterResultMessage());
             }
             catch (final IOException e){
-                Assertions.fail("IOException occurred while listening to output messages!");
+                throw new RuntimeException("IOException occurred while listening to output messages!",e);
             }
         }
 
