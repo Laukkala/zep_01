@@ -17,7 +17,7 @@ public final class MessageIdStub implements MessageId{
 
     @Override
     public boolean isStub() {
-        return true;
+        return isStub;
     }
 
     @Override

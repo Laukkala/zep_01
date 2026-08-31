@@ -66,7 +66,7 @@ public final class NoteNodeStub implements NoteNode {
 
     @Override
     public boolean isStub() {
-        return true;
+        return isStub;
     }
 
     @Override
