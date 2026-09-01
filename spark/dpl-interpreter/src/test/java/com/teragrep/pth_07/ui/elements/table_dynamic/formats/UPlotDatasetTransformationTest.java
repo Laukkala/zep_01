@@ -56,7 +56,6 @@ import org.apache.spark.sql.types.StructField;
 import org.apache.spark.sql.types.StructType;
 import org.junit.Test;
 import org.junit.jupiter.api.Assertions;
-import org.apache.spark.sql.functions.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -69,7 +68,7 @@ public final class UPlotDatasetTransformationTest {
             .config("spark.sql.session.timeZone", "UTC")
             .getOrCreate();
 
-    StructType schema = new StructType(
+    private final StructType schema = new StructType(
             new StructField[] {
                     new StructField("_time", DataTypes.TimestampType, false, new MetadataBuilder().build()),
                     new StructField("operation", DataTypes.StringType, false, new MetadataBuilder().build()),
@@ -129,24 +128,24 @@ public final class UPlotDatasetTransformationTest {
 
     @Test
     public void testStandardTransformation(){
-        List<String> xAxisColumnNames = new ArrayList();
-        List<String> groupByColumnNames = new ArrayList();
-        List<String> valueColumnNames = new ArrayList();
+        final List<String> xAxisColumnNames = new ArrayList();
+        final List<String> groupByColumnNames = new ArrayList();
+        final List<String> valueColumnNames = new ArrayList();
 
         xAxisColumnNames.add("_time");
         groupByColumnNames.add("success");
         valueColumnNames.add("operation");
         valueColumnNames.add("filesModified");
 
-        UPlotDatasetTransformation transformation = new UPlotDatasetTransformation(sourceData,xAxisColumnNames,groupByColumnNames,valueColumnNames);
-        Dataset<Row> transformedDataset = transformation.apply();
+        final UPlotDatasetTransformation transformation = new UPlotDatasetTransformation(sourceData,xAxisColumnNames,groupByColumnNames,valueColumnNames);
+        final Dataset<Row> transformedDataset = transformation.apply();
 
         // Transformed dataset with xAxisColumnNames should create a new Column called "label" containing each unique value of columns listed in xAxisColumnNames
-        StructType transformedSchema = transformedDataset.schema();
+        final StructType transformedSchema = transformedDataset.schema();
         Assertions.assertEquals("label",transformedSchema.fieldNames()[0]);
 
         // Within the created "label" column, each row should contain every unique value contained in the "groupByColumn".
-        List<Row> label = transformedDataset.select(functions.col("label")).sort(functions.col("label")).collectAsList();
+        final List<Row> label = transformedDataset.select(functions.col("label")).sort(functions.col("label")).collectAsList();
         Assertions.assertEquals(14,label.size());
         Assertions.assertEquals("2025-01-01 12:00:00", label.get(0).getString(0));
         Assertions.assertEquals("2025-01-02 12:00:00", label.get(1).getString(0));
@@ -170,7 +169,7 @@ public final class UPlotDatasetTransformationTest {
         Assertions.assertEquals("true.filesModified",transformedSchema.fieldNames()[4]);
 
         // Check that transformed columns contains proper values, and that cells that wouldn't have a value in the base dataset are represented by nulls.
-        List<Row> failedOperations = transformedDataset.sort(functions.col("label")).select(functions.col("`false.operation`")).collectAsList();
+        final List<Row> failedOperations = transformedDataset.sort(functions.col("label")).select(functions.col("`false.operation`")).collectAsList();
         Assertions.assertEquals("delete", failedOperations.get(0).getString(0));
         Assertions.assertEquals("delete", failedOperations.get(1).getString(0));
         Assertions.assertEquals("update", failedOperations.get(2).getString(0));
@@ -186,7 +185,7 @@ public final class UPlotDatasetTransformationTest {
         Assertions.assertEquals("delete", failedOperations.get(12).getString(0));
         Assertions.assertEquals("delete", failedOperations.get(13).getString(0));
 
-        List<Row> failedFileModificationCount = transformedDataset.sort(functions.col("label")).select(functions.col("`false.filesModified`")).collectAsList();
+        final List<Row> failedFileModificationCount = transformedDataset.sort(functions.col("label")).select(functions.col("`false.filesModified`")).collectAsList();
         Assertions.assertEquals(4, failedFileModificationCount.get(0).get(0));
         Assertions.assertEquals(5, failedFileModificationCount.get(1).get(0));
         Assertions.assertEquals(1, failedFileModificationCount.get(2).get(0));
@@ -202,7 +201,7 @@ public final class UPlotDatasetTransformationTest {
         Assertions.assertEquals(1, failedFileModificationCount.get(12).get(0));
         Assertions.assertEquals(1, failedFileModificationCount.get(13).get(0));
 
-        List<Row> successfulOperations = transformedDataset.sort(functions.col("label")).select(functions.col("`true.operation`")).collectAsList();
+        final List<Row> successfulOperations = transformedDataset.sort(functions.col("label")).select(functions.col("`true.operation`")).collectAsList();
         Assertions.assertEquals("create", successfulOperations.get(0).getString(0));
         Assertions.assertEquals("update", successfulOperations.get(1).getString(0));
         Assertions.assertTrue(successfulOperations.get(2).isNullAt(0));
@@ -218,7 +217,7 @@ public final class UPlotDatasetTransformationTest {
         Assertions.assertTrue(successfulOperations.get(12).isNullAt(0));
         Assertions.assertTrue(successfulOperations.get(13).isNullAt(0));
 
-        List<Row> successfulFileModifications = transformedDataset.sort(functions.col("label")).select(functions.col("`true.filesModified`")).collectAsList();
+        final List<Row> successfulFileModifications = transformedDataset.sort(functions.col("label")).select(functions.col("`true.filesModified`")).collectAsList();
         Assertions.assertEquals(1, successfulFileModifications.get(0).get(0));
         Assertions.assertEquals(1, successfulFileModifications.get(1).get(0));
         Assertions.assertTrue(successfulFileModifications.get(2).isNullAt(0));
@@ -240,12 +239,12 @@ public final class UPlotDatasetTransformationTest {
      */
     @Test
     public void testNoArguments(){
-        List<String> xAxisColumnNames = new ArrayList();
-        List<String> groupByColumnNames = new ArrayList();
-        List<String> valueColumnNames = new ArrayList();
+        final List<String> xAxisColumnNames = new ArrayList();
+        final List<String> groupByColumnNames = new ArrayList();
+        final List<String> valueColumnNames = new ArrayList();
 
-        UPlotDatasetTransformation transformation = new UPlotDatasetTransformation(sourceData,xAxisColumnNames,groupByColumnNames,valueColumnNames);
-        Dataset<Row> transformedDataset = transformation.apply();
+        final UPlotDatasetTransformation transformation = new UPlotDatasetTransformation(sourceData,xAxisColumnNames,groupByColumnNames,valueColumnNames);
+        final Dataset<Row> transformedDataset = transformation.apply();
         Assertions.assertEquals(sourceData,transformedDataset);
     }
 
