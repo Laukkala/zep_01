@@ -734,12 +734,12 @@ public final class UPlotFormatTest {
             Assertions.assertEquals(JsonValue.ValueType.NULL,timeColumn.get(i).getValueType());
         }
 
-        Assertions.assertEquals(23,operationColumn.size());
+        Assertions.assertEquals(23,successColumn.size());
         for (int i = 0; i < 23; i++) {
             Assertions.assertEquals(JsonValue.ValueType.NULL,successColumn.get(i).getValueType());
         }
 
-        Assertions.assertEquals(23,successColumn.size());
+        Assertions.assertEquals(23,operationColumn.size());
         for (int i = 0; i < 23; i++) {
             Assertions.assertEquals(JsonValue.ValueType.NULL,operationColumn.get(i).getValueType());
         }
