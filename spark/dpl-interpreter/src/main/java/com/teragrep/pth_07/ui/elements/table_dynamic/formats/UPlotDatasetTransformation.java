@@ -71,14 +71,14 @@ public class UPlotDatasetTransformation {
     }
 
     public Dataset<Row> apply(){
-        final Dataset<Row> concatenatedDataset = concatenateGroupByColumns(dataset,xAxisColumnNames);
+        final Dataset<Row> datasetWithConcatenatedColumns = concatenateGroupByColumns(dataset,xAxisColumnNames);
         final Dataset<Row> transformedDataset;
         if(!groupByColumnNames.isEmpty()){
             groupByColumnNames.add("label");
-            transformedDataset = pivotByColumns(concatenatedDataset,groupByColumnNames,valueColumnNames);
+            transformedDataset = pivotByColumns(datasetWithConcatenatedColumns,groupByColumnNames,valueColumnNames);
         }
         else {
-            transformedDataset = concatenatedDataset;
+            transformedDataset = datasetWithConcatenatedColumns;
         }
         return transformedDataset;
     }
@@ -136,27 +136,30 @@ public class UPlotDatasetTransformation {
     }
 
     /**
-     * Creates a transformed dataset when a dataset's X-axis should consist of the combinations of all used grouping labels.
-     * This method transforms the dataset so that
+     * Creates a transformed dataset where a new column called 'label' contains the combinations of all used grouping labels in the dataset. These correspond with the x-axis labels of the uPlot graph.
      * @param dataset Dataset to transform
      * @param groupByColumnNames List of names used in group by clauses
      * @return A new dataset ready for formatting.
      */
 
     private Dataset<Row> concatenateGroupByColumns(final Dataset<Row> dataset, final List<String> groupByColumnNames){
-        final Dataset<Row> transformedDataset;
-        // If trying to concatenate less than two columns, we don't need to do any transformations to the data,
+        final Dataset<Row> datasetWithConcatenatedColumns;
         // Get columns that were used in grouping of data. These will be concatenated to a new column and then dropped.
-        final List<Column> groupByColumns = new ArrayList<>();
-        for (final String columnName:groupByColumnNames) {
-            groupByColumns.add(dataset.col(columnName));
+        // If data is not grouped, no transformation is necessary and the given dataset is returned as-is
+        if(!groupByColumnNames.isEmpty()){
+            final List<Column> xAxisColumns = new ArrayList<>();
+            for (final String columnName:groupByColumnNames) {
+                xAxisColumns.add(dataset.col(columnName));
+            }
+            // Create a Dataset containing the concatenated groupBy column. Copy metadata as well since it's being used later when creating labels.
+            datasetWithConcatenatedColumns = dataset.withColumn("label", functions.concat_ws(".",xAxisColumns.toArray(new Column[]{})))
+                    .drop(groupByColumnNames.toArray(new String[0]))
+                    .withMetadata("label",new MetadataBuilder().putBoolean("dpl_internal_isGroupByColumn",true).build());
         }
-
-        // Create a Dataset containing the concatenated groupBy column. Copy metadata as well since it's being used later when creating labels.
-        transformedDataset = dataset.withColumn("label", functions.concat_ws(".",groupByColumns.toArray(new Column[]{})))
-                .drop(groupByColumnNames.toArray(new String[0]))
-                .withMetadata("label",new MetadataBuilder().putBoolean("dpl_internal_isGroupByColumn",true).build());
-        return transformedDataset;
+        else {
+            datasetWithConcatenatedColumns = dataset;
+        }
+        return datasetWithConcatenatedColumns;
     }
 
     @Override
