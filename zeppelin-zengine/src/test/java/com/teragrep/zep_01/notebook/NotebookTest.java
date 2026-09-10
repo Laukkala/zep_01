@@ -834,7 +834,7 @@ public class NotebookTest extends AbstractInterpreterTest implements ParagraphJo
   }
 
   @Test
-  public void testExportAndImportNote() throws Exception {
+  public void testImportNote() throws Exception {
     Note note = notebook.createNote("note1", anonymous);
 
     final Paragraph p = note.addNewParagraph(AuthenticationInfo.ANONYMOUS);
@@ -843,7 +843,7 @@ public class NotebookTest extends AbstractInterpreterTest implements ParagraphJo
 
     note.runAll(anonymous, true, false, new HashMap<>());
 
-    String exportedNoteJson = notebook.exportNote(note.getId());
+    String exportedNoteJson = note.toJson();
 
     Note importedNote = notebook.importNote(exportedNoteJson, "Title", anonymous);
 
