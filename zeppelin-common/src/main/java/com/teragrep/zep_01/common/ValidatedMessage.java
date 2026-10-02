@@ -21,6 +21,7 @@ import com.google.gson.internal.LinkedTreeMap;
 
 import java.util.Objects;
 
+//TODO: remove
 public final class ValidatedMessage {
   private final Message messageToValidate;
 

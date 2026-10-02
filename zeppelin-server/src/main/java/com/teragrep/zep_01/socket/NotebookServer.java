@@ -20,6 +20,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
 import java.io.IOException;
+import java.io.StringReader;
 import java.lang.reflect.Type;
 import java.net.URISyntaxException;
 import java.net.UnknownHostException;
@@ -231,7 +232,8 @@ public class NotebookServer extends WebSocketServlet
   @Override
   public void onMessage(NotebookSocket conn, String msg) {
     try {
-      Message receivedMessage = deserializeMessage(msg);
+      Message receivedMessage = deserializeMessage(msg); //TODO: remove once all message types are refacctored
+      JsonObject msgAsJson = deserializeJsonMessage(msg);
 
       // Send pong back regardless of logged in status and stop processing
       if (receivedMessage.op == OP.PING) {
@@ -466,6 +468,11 @@ public class NotebookServer extends WebSocketServlet
     getConnectionManager().removeUserConnection(conn.getUser(), conn);
   }
 
+  protected JsonObject deserializeJsonMessage(String msg) {
+    return Json.createReader(new StringReader(msg)).readObject();
+  }
+
+  //TODO: remove
   protected Message deserializeMessage(String msg) {
     return gson.fromJson(msg, Message.class);
   }
