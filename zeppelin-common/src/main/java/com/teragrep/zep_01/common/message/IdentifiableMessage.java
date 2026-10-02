@@ -1,6 +1,7 @@
 package com.teragrep.zep_01.common.message;
 
 import jakarta.json.Json;
+import jakarta.json.JsonObject;
 import jakarta.json.JsonObjectBuilder;
 
 public final class IdentifiableMessage implements JsonMessage{
@@ -33,12 +34,8 @@ public final class IdentifiableMessage implements JsonMessage{
     }
 
     @Override
-    public JsonValue asJson() {
-        final JsonValue value = origin.asJson();
-        if(!value.getValueType().equals(JsonValue.ValueType.OBJECT)){
-            throw new RuntimeException("Decorated Message's Json type is not of JsonObject!");
-        }
-        final JsonObjectBuilder builder = Json.createObjectBuilder(origin.asJson().asJsonObject());
+    public JsonObject asJsonObject() {
+        final JsonObjectBuilder builder = Json.createObjectBuilder(origin.asJsonObject());
         builder.add("msgId",id);
         return builder.build();
     }

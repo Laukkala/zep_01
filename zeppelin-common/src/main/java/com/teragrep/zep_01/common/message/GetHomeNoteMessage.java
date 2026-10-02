@@ -1,6 +1,7 @@
 package com.teragrep.zep_01.common.message;
 
 import jakarta.json.Json;
+import jakarta.json.JsonObject;
 import jakarta.json.JsonObjectBuilder;
 import jakarta.json.JsonValue;
 
@@ -43,7 +44,7 @@ public final class GetHomeNoteMessage implements JsonMessage {
     }
 
     @Override
-    public JsonValue asJson() {
+    public JsonObject asJsonObject() {
         final JsonObjectBuilder json = Json.createObjectBuilder();
         json.add("op",op);
         json.add("data",data);

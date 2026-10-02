@@ -15,7 +15,7 @@ public final class IdentifiableMessageTest {
         final String messageId = "msgId";
         final JsonMessage originalMessage = new GetHomeNoteMessage(principal,ticket,roles);
         final IdentifiableMessage decoratedMessage = new IdentifiableMessage(originalMessage,messageId);
-        final JsonObject decoratedJson = Assertions.assertDoesNotThrow(()->decoratedMessage.asJson().asJsonObject());
+        final JsonObject decoratedJson = Assertions.assertDoesNotThrow(()->decoratedMessage.asJsonObject().asJsonObject());
         Assertions.assertEquals(principal,decoratedJson.getString("principal"));
         Assertions.assertEquals(ticket,decoratedJson.getString("ticket"));
         Assertions.assertEquals(roles,decoratedJson.getString("roles"));
