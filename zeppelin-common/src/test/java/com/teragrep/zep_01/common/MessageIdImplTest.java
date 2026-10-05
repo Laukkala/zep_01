@@ -63,6 +63,6 @@ class MessageIdImplTest {
     }
     @Test
     void equalsVerifier() {
-        EqualsVerifier.forClass(JsonMessage.class).verify();
+        EqualsVerifier.forClass(MessageIdImpl.class).verify();
     }
 }
