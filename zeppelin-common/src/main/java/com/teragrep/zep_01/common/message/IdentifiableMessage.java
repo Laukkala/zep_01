@@ -4,11 +4,11 @@ import jakarta.json.Json;
 import jakarta.json.JsonObject;
 import jakarta.json.JsonObjectBuilder;
 
-public final class IdentifiableMessage implements JsonMessage{
+public final class IdentifiableMessage implements Message {
 
-    private final JsonMessage origin;
+    private final Message origin;
     private final String id;
-    public IdentifiableMessage(final JsonMessage origin, final String id){
+    public IdentifiableMessage(final Message origin, final String id){
         this.origin = origin;
         this.id = id;
     }
@@ -19,23 +19,8 @@ public final class IdentifiableMessage implements JsonMessage{
     }
 
     @Override
-    public String ticket() {
-        return origin.ticket();
-    }
-
-    @Override
-    public String principal() {
-        return origin.principal();
-    }
-
-    @Override
-    public String roles() {
-        return origin.roles();
-    }
-
-    @Override
-    public JsonObject asJsonObject() {
-        final JsonObjectBuilder builder = Json.createObjectBuilder(origin.asJsonObject());
+    public JsonObject asJson() {
+        final JsonObjectBuilder builder = Json.createObjectBuilder(origin.asJson());
         builder.add("msgId",id);
         return builder.build();
     }

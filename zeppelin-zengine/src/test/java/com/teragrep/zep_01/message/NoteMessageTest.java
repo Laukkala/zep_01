@@ -12,9 +12,6 @@ public class NoteMessageTest {
     @Test
     public void testSerialization(){
         String expectedOp = "NOTE";
-        String expectedPrincipal = "anonymous";
-        String expectedTicket = "anonymous";
-        String expectedRoles = "";
         Note note = new Note();
         String expectedNoteId = note.getId();
         String expectedName = "";
@@ -25,13 +22,10 @@ public class NoteMessageTest {
         JsonObject expectedConfig = JsonValue.EMPTY_JSON_OBJECT;
         JsonObject expectedInfo = JsonValue.EMPTY_JSON_OBJECT;
 
-        NoteMessage noteMessage = new NoteMessage(expectedPrincipal,expectedTicket,expectedRoles,note);
-        JsonObject noteJson = noteMessage.asJsonObject();
+        NoteMessage noteMessage = new NoteMessage(note);
+        JsonObject noteJson = noteMessage.asJson();
 
         Assertions.assertEquals(expectedOp,noteJson.getString("op"));
-        Assertions.assertEquals(expectedPrincipal,noteJson.getString("principal"));
-        Assertions.assertEquals(expectedTicket,noteJson.getString("ticket"));
-        Assertions.assertEquals(expectedRoles,noteJson.getString("roles"));
 
         Assertions.assertEquals(expectedNoteId,noteJson.getJsonObject("data").getJsonObject("note").getString("id"));
         Assertions.assertEquals(expectedName,noteJson.getJsonObject("data").getJsonObject("note").getString("name"));

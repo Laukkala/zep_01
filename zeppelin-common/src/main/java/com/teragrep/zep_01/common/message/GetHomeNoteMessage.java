@@ -1,26 +1,20 @@
 package com.teragrep.zep_01.common.message;
 
+import com.teragrep.zep_01.common.exception.MalformedMessageException;
 import jakarta.json.Json;
 import jakarta.json.JsonObject;
 import jakarta.json.JsonObjectBuilder;
-import jakarta.json.JsonValue;
 
 import java.util.Objects;
 
-public final class GetHomeNoteMessage implements JsonMessage {
+public final class GetHomeNoteMessage implements Message {
 
+    final JsonObject json;
     final String op;
-    final JsonValue data;
-    final String principal;
-    final String ticket;
-    final String roles;
 
-    public GetHomeNoteMessage(String principal, String ticket, String roles){
+    public GetHomeNoteMessage(JsonObject json){
+        this.json = json;
         this.op = "GET_HOME_NOTE";
-        this.data = JsonValue.EMPTY_JSON_OBJECT;
-        this.principal = principal;
-        this.ticket = ticket;
-        this.roles = roles;
     }
 
     @Override
@@ -29,28 +23,10 @@ public final class GetHomeNoteMessage implements JsonMessage {
     }
 
     @Override
-    public String principal() {
-        return principal;
-    }
-
-    @Override
-    public String ticket() {
-        return ticket;
-    }
-
-    @Override
-    public String roles() {
-        return roles;
-    }
-
-    @Override
-    public JsonObject asJsonObject() {
+    public JsonObject asJson() {
         final JsonObjectBuilder json = Json.createObjectBuilder();
         json.add("op",op);
-        json.add("data",data);
-        json.add("ticket",ticket);
-        json.add("principal",principal);
-        json.add("roles",roles);
+        json.add("data",Json.createObjectBuilder());
         return json.build();
     }
 
@@ -63,13 +39,13 @@ public final class GetHomeNoteMessage implements JsonMessage {
             equals = false;
         } else {
             final GetHomeNoteMessage that = (GetHomeNoteMessage) o;
-            equals = Objects.equals(op, that.op) && Objects.equals(data, that.data) && Objects.equals(principal, that.principal) && Objects.equals(ticket, that.ticket) && Objects.equals(roles, that.roles);
+            equals = Objects.equals(json, that.json) && Objects.equals(op, that.op);
         }
         return equals;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(op, data, principal, ticket, roles);
+        return Objects.hash(json, op);
     }
 }

@@ -14,20 +14,17 @@ public class GetNoteMessageTest {
 
         final String expectedOp = "GET_NOTE";
         final String expectedNoteId = "testNote";
-        final JsonValue expectedData = Json.createObjectBuilder().add("id",expectedNoteId).build();
-        final String expectedPrincipal = "anonymous";
-        final String expectedTicket = "anonymous";
-        final String expectedRoles = "";
-
-        JsonObject json = Json.createObjectBuilder()
+        final JsonValue expectedData = Json.createObjectBuilder().add("noteId",expectedNoteId).build();
+        JsonObject expectedJson = Json.createObjectBuilder()
                 .add("op",expectedOp)
                 .add("data",expectedData)
-                .add("principal",expectedPrincipal)
-                .add("ticket",expectedTicket)
-                .add("roles",expectedRoles).build();
+                .build();
 
-        final GetNoteMessage getNoteMessage = new GetNoteMessage(expectedPrincipal,expectedTicket,expectedRoles,expectedNoteId);
-        Assertions.assertEquals(json,getNoteMessage.asJsonObject());
+        JsonObject inputJson = Json.createObjectBuilder()
+                .add("noteId",expectedNoteId).build();
+
+        final GetNoteMessage getNoteMessage = new GetNoteMessage(inputJson);
+        Assertions.assertEquals(expectedJson,getNoteMessage.asJson());
     }
 
     @Test

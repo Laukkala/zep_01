@@ -14,19 +14,17 @@ public class GetHomeNoteMessageTest {
 
         final String expectedOp = "GET_HOME_NOTE";
         final JsonValue expectedData = JsonValue.EMPTY_JSON_OBJECT;
-        final String expectedPrincipal = "anonymous";
-        final String expectedTicket = "anonymous";
-        final String expectedRoles = "";
 
-        JsonObject json = Json.createObjectBuilder()
+        JsonObject expectedJson = Json.createObjectBuilder()
                 .add("op",expectedOp)
                 .add("data",expectedData)
-                .add("principal",expectedPrincipal)
-                .add("ticket",expectedTicket)
-                .add("roles",expectedRoles).build();
+                .build();
 
-        final GetHomeNoteMessage getHomeNoteMessage = new GetHomeNoteMessage(expectedPrincipal,expectedTicket,expectedRoles);
-        Assertions.assertEquals(json,getHomeNoteMessage.asJsonObject());
+        JsonObject inputJson = Json.createObjectBuilder().build();
+
+        final GetHomeNoteMessage getHomeNoteMessage = new GetHomeNoteMessage(inputJson);
+        Assertions.assertEquals(expectedOp,getHomeNoteMessage.op);
+        Assertions.assertEquals(expectedJson,getHomeNoteMessage.asJson());
     }
     @Test
     public void testContract(){

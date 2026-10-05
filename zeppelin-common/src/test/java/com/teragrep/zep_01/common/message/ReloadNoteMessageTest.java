@@ -15,19 +15,17 @@ public class ReloadNoteMessageTest {
         final String expectedOp = "RELOAD_NOTE";
         final String expectedNoteId = "testNote";
         final JsonValue expectedData = Json.createObjectBuilder().add("id",expectedNoteId).build();
-        final String expectedPrincipal = "anonymous";
-        final String expectedTicket = "anonymous";
-        final String expectedRoles = "";
-
-        JsonObject json = Json.createObjectBuilder()
+        JsonObject expectedJson = Json.createObjectBuilder()
                 .add("op",expectedOp)
                 .add("data",expectedData)
-                .add("principal",expectedPrincipal)
-                .add("ticket",expectedTicket)
-                .add("roles",expectedRoles).build();
+                .build();
 
-        final ReloadNoteMessage reloadNoteMessage = new ReloadNoteMessage(expectedPrincipal,expectedTicket,expectedRoles,expectedNoteId);
-        Assertions.assertEquals(json,reloadNoteMessage.asJsonObject());
+
+        JsonObject inputJson = Json.createObjectBuilder()
+                .add("noteId",expectedNoteId).build();
+
+        final ReloadNoteMessage reloadNoteMessage = new ReloadNoteMessage(inputJson);
+        Assertions.assertEquals(expectedJson,reloadNoteMessage.asJson());
     }
 
     @Test

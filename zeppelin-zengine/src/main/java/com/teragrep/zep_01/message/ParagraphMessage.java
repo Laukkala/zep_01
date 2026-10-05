@@ -1,7 +1,6 @@
 package com.teragrep.zep_01.message;
 
-import com.teragrep.zep_01.common.message.JsonMessage;
-import com.teragrep.zep_01.notebook.Note;
+import com.teragrep.zep_01.common.message.Message;
 import com.teragrep.zep_01.notebook.Paragraph;
 import jakarta.json.Json;
 import jakarta.json.JsonObject;
@@ -11,20 +10,14 @@ import jakarta.json.JsonReader;
 import java.io.StringReader;
 import java.util.Objects;
 
-public final class ParagraphMessage implements JsonMessage {
+public final class ParagraphMessage implements Message {
 
     final String op;
-    final String principal;
-    final String ticket;
-    final String roles;
     // This class must reside in zeppelin-zengine in order to get access to Paragraph object.
     final Paragraph paragraph;
 
-    public ParagraphMessage(String principal, String ticket, String roles, Paragraph paragraph){
+    public ParagraphMessage(Paragraph paragraph){
         this.op = "PARAGRAPH";
-        this.principal = principal;
-        this.ticket = ticket;
-        this.roles = roles;
         this.paragraph = paragraph;
     }
 
@@ -34,29 +27,11 @@ public final class ParagraphMessage implements JsonMessage {
     }
 
     @Override
-    public String principal() {
-        return principal;
-    }
-
-    @Override
-    public String ticket() {
-        return ticket;
-    }
-
-    @Override
-    public String roles() {
-        return roles;
-    }
-
-    @Override
-    public JsonObject asJsonObject() {
+    public JsonObject asJson() {
         final JsonObjectBuilder json = Json.createObjectBuilder();
         try(JsonReader paragraphJsonReader = Json.createReader(new StringReader(paragraph.toJson()))){
             json.add("op",op);
             json.add("data",Json.createObjectBuilder().add("paragraph",paragraphJsonReader.readObject()));
-            json.add("ticket",ticket);
-            json.add("principal",principal);
-            json.add("roles",roles);
             return json.build();
         }
     }
@@ -70,13 +45,13 @@ public final class ParagraphMessage implements JsonMessage {
             equals = false;
         } else {
             final ParagraphMessage that = (ParagraphMessage) o;
-            equals = Objects.equals(op, that.op) && Objects.equals(principal, that.principal) && Objects.equals(ticket, that.ticket) && Objects.equals(roles, that.roles) && Objects.equals(paragraph, that.paragraph);
+            equals = Objects.equals(op, that.op) && Objects.equals(paragraph, that.paragraph);
         }
         return equals;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(op, principal, ticket, roles, paragraph);
+        return Objects.hash(op, paragraph);
     }
 }

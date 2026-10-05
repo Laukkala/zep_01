@@ -18,9 +18,6 @@ public class ParagraphMessageTest {
     @Test
     public void testSerialization(){
         String expectedOp = "PARAGRAPH";
-        String expectedPrincipal = "anonymous";
-        String expectedTicket = "anonymous";
-        String expectedRoles = "";
         Note note = new Note();
         Paragraph paragraph = new Paragraph(note,null);
 
@@ -36,13 +33,10 @@ public class ParagraphMessageTest {
         String expectedJobName = paragraph.getJobName();
         String expectedStatus = paragraph.getStatus().name();
 
-        ParagraphMessage paragraphMessage = new ParagraphMessage(expectedPrincipal,expectedTicket,expectedRoles,paragraph);
-        JsonObject paragraphJson = paragraphMessage.asJsonObject();
+        ParagraphMessage paragraphMessage = new ParagraphMessage(paragraph);
+        JsonObject paragraphJson = paragraphMessage.asJson();
 
         Assertions.assertEquals(expectedOp,paragraphJson.getString("op"));
-        Assertions.assertEquals(expectedPrincipal,paragraphJson.getString("principal"));
-        Assertions.assertEquals(expectedTicket,paragraphJson.getString("ticket"));
-        Assertions.assertEquals(expectedRoles,paragraphJson.getString("roles"));
 
         Assertions.assertEquals(expectedId,paragraphJson.getJsonObject("data").getJsonObject("paragraph").getString("id"));
         Assertions.assertEquals(expectedParagraphTitle,paragraphJson.getJsonObject("data").getJsonObject("paragraph").getString("title"));
