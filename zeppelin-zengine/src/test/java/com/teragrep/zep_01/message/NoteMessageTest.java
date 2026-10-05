@@ -1,5 +1,6 @@
 package com.teragrep.zep_01.message;
 
+import com.teragrep.zep_01.common.MessageIdStub;
 import com.teragrep.zep_01.notebook.Note;
 import jakarta.json.JsonArray;
 import jakarta.json.JsonObject;
@@ -22,7 +23,7 @@ public class NoteMessageTest {
         JsonObject expectedConfig = JsonValue.EMPTY_JSON_OBJECT;
         JsonObject expectedInfo = JsonValue.EMPTY_JSON_OBJECT;
 
-        NoteMessage noteMessage = new NoteMessage(note);
+        NoteMessage noteMessage = new NoteMessage(note, new MessageIdStub());
         JsonObject noteJson = noteMessage.asJson();
 
         Assertions.assertEquals(expectedOp,noteJson.getString("op"));

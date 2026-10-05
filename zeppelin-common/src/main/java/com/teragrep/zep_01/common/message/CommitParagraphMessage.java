@@ -1,6 +1,7 @@
 package com.teragrep.zep_01.common.message;
 
 import com.google.gson.Gson;
+import com.teragrep.zep_01.common.MessageId;
 import com.teragrep.zep_01.common.exception.MalformedMessageException;
 import jakarta.json.*;
 
@@ -11,61 +12,78 @@ import java.util.Objects;
 public final class CommitParagraphMessage implements Message {
 
     final String op;
-    // This class must reside in zeppelin-zengine in order to get access to Paragraph object.
     final JsonObject json;
+    final MessageId msgId;
 
-    public CommitParagraphMessage(JsonObject json){
+    public CommitParagraphMessage(JsonObject json, MessageId msgId){
         this.op = "COMMIT_PARAGRAPH";
         this.json = json;
+        this.msgId = msgId;
     }
 
     public String paragraphId() {
+        if(!json.containsKey("data") || !json.get("data").getValueType().equals(JsonValue.ValueType.OBJECT)){
+            throw new MalformedMessageException(op+" message does not contain a data field!");
+        }
+        JsonObject payload = json.getJsonObject("data");
         final String jsonKey = "id";
-        if(json.containsKey(jsonKey) && json.get(jsonKey).getValueType().equals(JsonValue.ValueType.STRING)){
-            return json.getString(jsonKey);
+        if(payload.containsKey(jsonKey) && payload.get(jsonKey).getValueType().equals(JsonValue.ValueType.STRING)){
+            return payload.getString(jsonKey);
         }
         else {
-            throw new MalformedMessageException(op+" message does not contain a "+jsonKey+" field!");
+            throw new MalformedMessageException(op+" message data does not contain a "+jsonKey+" field!");
         }
     }
 
     public String noteId() {
+        if(!json.containsKey("data") || !json.get("data").getValueType().equals(JsonValue.ValueType.OBJECT)){
+            throw new MalformedMessageException(op+" message does not contain a data field!");
+        }
+        JsonObject payload = json.getJsonObject("data");
         final String jsonKey = "noteId";
-        if(json.containsKey(jsonKey) && json.get(jsonKey).getValueType().equals(JsonValue.ValueType.STRING)){
-            return json.getString(jsonKey);
+        if(payload.containsKey(jsonKey) && payload.get(jsonKey).getValueType().equals(JsonValue.ValueType.STRING)){
+            return payload.getString(jsonKey);
         }
         else {
-            throw new MalformedMessageException(op+" message does not contain a "+jsonKey+" field!");
+            throw new MalformedMessageException(op+" message data does not contain a "+jsonKey+" field!");
         }
     }
 
     public String title() {
+        if(!json.containsKey("data") || !json.get("data").getValueType().equals(JsonValue.ValueType.OBJECT)){
+            throw new MalformedMessageException(op+" message does not contain a data field!");
+        }
+        JsonObject payload = json.getJsonObject("data");
         final String jsonKey = "title";
-        if(json.containsKey(jsonKey) && json.get(jsonKey).getValueType().equals(JsonValue.ValueType.STRING)){
-            return json.getString(jsonKey);
+        if(payload.containsKey(jsonKey) && payload.get(jsonKey).getValueType().equals(JsonValue.ValueType.STRING)){
+            return payload.getString(jsonKey);
         }
         else {
-            throw new MalformedMessageException(op+" message does not contain a "+jsonKey+" field!");
+            throw new MalformedMessageException(op+" message data does not contain a "+jsonKey+" field!");
         }
     }
 
     public String paragraphText() {
-        final String jsonKey = "paragraph";
-        if(json.containsKey(jsonKey) && json.get(jsonKey).getValueType().equals(JsonValue.ValueType.STRING)){
-            return json.getString(jsonKey);
+        if(!json.containsKey("data") || !json.get("data").getValueType().equals(JsonValue.ValueType.OBJECT)){
+            throw new MalformedMessageException(op+" message does not contain a data field!");
+        }
+        JsonObject payload = json.getJsonObject("paragraph");
+        final String jsonKey = "noteId";
+        if(payload.containsKey(jsonKey) && payload.get(jsonKey).getValueType().equals(JsonValue.ValueType.STRING)){
+            return payload.getString(jsonKey);
         }
         else {
-            throw new MalformedMessageException(op+" message does not contain a "+jsonKey+" field!");
+            throw new MalformedMessageException(op+" message data does not contain a "+jsonKey+" field!");
         }
     }
 
     //TODO: Need to refactor 'config' field in Paragraph to take specific Config objects instead of Generic Map<String,Object>. Meanwhile we must rely on GSON's auto-parsing to maintain compatibility.
     public Map<String, Object> config() {
-        return new Gson().fromJson(json.getJsonObject("config").toString(),Map.class);
+        return new Gson().fromJson(json.getJsonObject("data").getJsonObject("config").toString(),Map.class);
     }
     //TODO: Need to refactor 'params' field in Paragraph to take specific Params objects instead of Generic Map<String,Object>. Meanwhile we must rely on GSON's auto-parsing to maintain compatibility.
     public Map<String, Object> params() {
-        return new Gson().fromJson(json.getJsonObject("params").toString(),Map.class);
+        return new Gson().fromJson(json.getJsonObject("data").getJsonObject("params").toString(),Map.class);
     }
 
     @Override
@@ -85,8 +103,16 @@ public final class CommitParagraphMessage implements Message {
                             .add("title",title())
                             .add("params",this.json.getJsonObject("params"))
                             .add("config",this.json.getJsonObject("config")));
+            if(!msgId.isStub()){
+                json.add("msgId",msgId.asJson());
+            }
             return json.build();
         }
+    }
+
+    @Override
+    public MessageId msgId() {
+        return msgId;
     }
 
     @Override
@@ -98,13 +124,13 @@ public final class CommitParagraphMessage implements Message {
             equals = false;
         } else {
             final CommitParagraphMessage that = (CommitParagraphMessage) o;
-            equals = Objects.equals(op, that.op) && Objects.equals(json, that.json);
+            equals = Objects.equals(op, that.op) && Objects.equals(json, that.json) && Objects.equals(msgId, that.msgId);
         }
         return equals;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(op, json);
+        return Objects.hash(op, json, msgId);
     }
 }

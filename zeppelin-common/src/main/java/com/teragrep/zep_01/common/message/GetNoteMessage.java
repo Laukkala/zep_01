@@ -1,5 +1,6 @@
 package com.teragrep.zep_01.common.message;
 
+import com.teragrep.zep_01.common.MessageId;
 import com.teragrep.zep_01.common.exception.MalformedMessageException;
 import jakarta.json.Json;
 import jakarta.json.JsonObject;
@@ -12,10 +13,12 @@ public final class GetNoteMessage implements Message {
 
     final String op;
     final JsonObject json;
+    final MessageId msgId;
 
-    public GetNoteMessage(JsonObject json){
+    public GetNoteMessage(JsonObject json, MessageId msgId){
         this.op = "GET_NOTE";
         this.json = json;
+        this.msgId = msgId;
     }
 
     @Override
@@ -28,16 +31,28 @@ public final class GetNoteMessage implements Message {
         final JsonObjectBuilder json = Json.createObjectBuilder();
         json.add("op",op);
         json.add("data",Json.createObjectBuilder().add("noteId",noteId()));
+        if(!msgId.isStub()){
+            json.add("msgId",msgId.asJson());
+        }
         return json.build();
     }
 
+    @Override
+    public MessageId msgId() {
+        return msgId;
+    }
+
     public String noteId() {
+        if(!json.containsKey("data") || !json.get("data").getValueType().equals(JsonValue.ValueType.OBJECT)){
+            throw new MalformedMessageException(op+" message does not contain a data field!");
+        }
+        JsonObject payload = json.getJsonObject("data");
         final String jsonKey = "noteId";
-        if(json.containsKey(jsonKey) && json.get(jsonKey).getValueType().equals(JsonValue.ValueType.STRING)){
-            return json.getString(jsonKey);
+        if(payload.containsKey(jsonKey) && payload.get(jsonKey).getValueType().equals(JsonValue.ValueType.STRING)){
+            return payload.getString(jsonKey);
         }
         else {
-            throw new MalformedMessageException(op+" message does not contain a "+jsonKey+" field!");
+            throw new MalformedMessageException(op+" message data does not contain a "+jsonKey+" field!");
         }
     }
 
@@ -50,13 +65,13 @@ public final class GetNoteMessage implements Message {
             equals = false;
         } else {
             final GetNoteMessage that = (GetNoteMessage) o;
-            equals = Objects.equals(op, that.op) && Objects.equals(json, that.json);
+            equals = Objects.equals(op, that.op) && Objects.equals(json, that.json) && Objects.equals(msgId, that.msgId);
         }
         return equals;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(op, json);
+        return Objects.hash(op, json, msgId);
     }
 }

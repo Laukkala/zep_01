@@ -32,13 +32,18 @@ import javax.inject.Inject;
 import javax.inject.Provider;
 import javax.servlet.http.HttpServletRequest;
 
-import com.teragrep.zep_01.common.ValidatedMessage;
+import com.teragrep.zep_01.common.*;
+import com.teragrep.zep_01.common.Message;
+import com.teragrep.zep_01.common.message.*;
 import com.teragrep.zep_01.display.*;
 import com.teragrep.zep_01.interpreter.*;
 import com.teragrep.zep_01.interpreter.remote.RemoteInterpreter;
+import com.teragrep.zep_01.message.ParagraphMessage;
 import com.teragrep.zep_01.rest.exception.BadRequestException;
 import jakarta.json.Json;
 import jakarta.json.JsonObject;
+import jakarta.json.JsonObjectBuilder;
+import jakarta.json.JsonReader;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.thrift.TException;
@@ -56,6 +61,7 @@ import com.teragrep.zep_01.notebook.NotebookImportDeserializer;
 import com.teragrep.zep_01.notebook.Paragraph;
 import com.teragrep.zep_01.notebook.ParagraphJobListener;
 import com.teragrep.zep_01.notebook.AuthorizationService;
+import com.teragrep.zep_01.notebook.repo.NotebookRepoWithVersionControl.Revision;
 import com.teragrep.zep_01.notebook.repo.Revision;
 import com.teragrep.zep_01.common.Message;
 import com.teragrep.zep_01.common.Message.OP;
@@ -234,6 +240,7 @@ public class NotebookServer extends WebSocketServlet
     try {
       Message receivedMessage = deserializeMessage(msg); //TODO: remove once all message types are refacctored
       JsonObject msgAsJson = deserializeJsonMessage(msg);
+      MessageId msgId = msgAsJson.containsKey("msgId") ? new MessageIdImpl(msgAsJson.getString("msgId")) : new MessageIdStub();
 
       // Send pong back regardless of logged in status and stop processing
       if (receivedMessage.op == OP.PING) {
@@ -297,10 +304,12 @@ public class NotebookServer extends WebSocketServlet
           getHomeNote(conn, context);
           break;
         case GET_NOTE:
-          getNote(conn, context, receivedMessage);
+          GetNoteMessage getNoteMessage = new GetNoteMessage(msgAsJson, msgId);
+          getNote(conn, context, getNoteMessage);
           break;
         case RELOAD_NOTE:
-          reloadNote(conn, context, receivedMessage);
+          ReloadNoteMessage reloadNoteMessage = new ReloadNoteMessage(msgAsJson, msgId);
+          reloadNote(conn, context, reloadNoteMessage);
           break;
         case NEW_NOTE:
           createNote(conn, context, receivedMessage);
@@ -338,7 +347,8 @@ public class NotebookServer extends WebSocketServlet
         case CONVERT_NOTE_NBFORMAT:
           throw new UnsupportedOperationException("CONVERT_NOTE_NBFORMAT no longer supported");
         case COMMIT_PARAGRAPH:
-          updateParagraph(conn, context, receivedMessage);
+          CommitParagraphMessage commitParagraphMessage = new CommitParagraphMessage(msgAsJson, msgId);
+          updateParagraph(conn, context, commitParagraphMessage);
           break;
         case RUN_PARAGRAPH:
           runParagraph(conn, context, receivedMessage);
@@ -356,10 +366,12 @@ public class NotebookServer extends WebSocketServlet
           moveParagraph(conn, context, receivedMessage);
           break;
         case INSERT_PARAGRAPH:
-          insertParagraph(conn, context, receivedMessage);
+          InsertParagraphMessage insertParagraphMessage = new InsertParagraphMessage(msgAsJson, msgId);
+          insertParagraph(conn, context, insertParagraphMessage);
           break;
         case COPY_PARAGRAPH:
-          copyParagraph(conn, context, receivedMessage);
+          CopyParagraphMessage copyParagraphMessage = new CopyParagraphMessage(msgAsJson, msgId);
+          copyParagraph(conn, context, copyParagraphMessage);
           break;
         case PARAGRAPH_REMOVE:
           removeParagraph(conn, context, receivedMessage);
@@ -469,7 +481,9 @@ public class NotebookServer extends WebSocketServlet
   }
 
   protected JsonObject deserializeJsonMessage(String msg) {
-    return Json.createReader(new StringReader(msg)).readObject();
+    try(JsonReader jsonReader = Json.createReader(new StringReader(msg))){
+      return jsonReader.readObject();
+    }
   }
 
   //TODO: remove
@@ -697,11 +711,8 @@ public class NotebookServer extends WebSocketServlet
     return true;
   }
 
-  private void getNote(NotebookSocket conn, ServiceContext context, Message fromMessage) throws IOException {
-    String noteId = (String) fromMessage.get("id");
-    if (noteId == null) {
-      return;
-    }
+  private void getNote(NotebookSocket conn, ServiceContext context, GetNoteMessage fromMessage) throws IOException {
+    String noteId = fromMessage.noteId();
     getNotebookService().getNote(noteId, context,
         new WebSocketServiceCallback<Note>(conn) {
           @Override
@@ -714,11 +725,8 @@ public class NotebookServer extends WebSocketServlet
         });
   }
 
-  private void reloadNote(NotebookSocket conn, ServiceContext context, Message fromMessage) throws IOException {
-    String noteId = (String) fromMessage.get("id");
-    if (noteId == null) {
-      return;
-    }
+  private void reloadNote(NotebookSocket conn, ServiceContext context, ReloadNoteMessage reloadNoteMessage) throws IOException {
+    String noteId = reloadNoteMessage.noteId();
     getNotebookService().getNote(noteId, true, context,
             new WebSocketServiceCallback<Note>(conn) {
               @Override
@@ -1018,29 +1026,38 @@ public class NotebookServer extends WebSocketServlet
 
   private void updateParagraph(NotebookSocket conn,
                                ServiceContext context,
-                               Message fromMessage) throws IOException {
-    String paragraphId = (String) fromMessage.get("id");
+                               CommitParagraphMessage commitParagraphMessage) throws IOException {
+    String paragraphId = commitParagraphMessage.paragraphId();
     String noteId = getConnectionManager().getAssociatedNoteId(conn);
     if (noteId == null) {
-      noteId = (String) fromMessage.get("noteId");
+      noteId = commitParagraphMessage.paragraphId();
     }
-    String title = (String) fromMessage.get("title");
-    String text = (String) fromMessage.get("paragraph");
-    Map<String, Object> params = (Map<String, Object>) fromMessage.get("params");
-    Map<String, Object> config = (Map<String, Object>) fromMessage.get("config");
+    String title = commitParagraphMessage.title();
+    String text = commitParagraphMessage.paragraphText();
+    Map<String, Object> params = commitParagraphMessage.params();
+    Map<String, Object> config = commitParagraphMessage.config();
+    MessageId msgId = commitParagraphMessage.msgId();
 
     getNotebookService().updateParagraph(noteId, paragraphId, title, text, params, config, context,
         new WebSocketServiceCallback<Paragraph>(conn) {
           @Override
           public void onSuccess(Paragraph p, ServiceContext context) throws IOException {
             super.onSuccess(p, context);
-            if (p.getNote().isPersonalizedMode()) {
+            Note note = p.getNote();
+            if (note.isPersonalizedMode()) {
               Map<String, Paragraph> userParagraphMap =
-                  p.getNote().getParagraph(paragraphId).getUserParagraphMap();
-              broadcastParagraphs(userParagraphMap, p, fromMessage.msgId);
+                  note.getParagraph(paragraphId).getUserParagraphMap();
+              if (null != userParagraphMap) {
+                for (String user : userParagraphMap.keySet()) {
+                  ParagraphMessage message = new ParagraphMessage(userParagraphMap.get(user),msgId);
+                  getConnectionManager().multicastToUser(user, message.asJson().toString());
+                }
+              }
             } else {
-              broadcastParagraph(p.getNote(), p, fromMessage.msgId);
-            }
+                broadcastNoteForms(note);
+                ParagraphMessage message = new ParagraphMessage(p,msgId);
+                getConnectionManager().broadcast(note.getId(), message.asJson().toString());
+              }
           }
         });
   }
@@ -1428,15 +1445,13 @@ public class NotebookServer extends WebSocketServlet
 
   private String insertParagraph(NotebookSocket conn,
                                  ServiceContext context,
-                                 Message fromMessage) throws IOException {
-    final int index = (int) Double.parseDouble(fromMessage.get("index").toString());
+                                 InsertParagraphMessage insertParagraphMessage) throws IOException {
     String noteId = getConnectionManager().getAssociatedNoteId(conn);
-    Map<String, Object> config;
-    if (fromMessage.get("config") != null) {
-      config = (Map<String, Object>) fromMessage.get("config");
-    } else {
+    Map<String, Object> config = insertParagraphMessage.config();
+    if (config == null) {
       config = new HashMap<>();
     }
+    int index = insertParagraphMessage.index();
 
     Paragraph newPara = getNotebookService().insertParagraph(noteId, index, config, context,
         new WebSocketServiceCallback<Paragraph>(conn) {
@@ -1452,15 +1467,18 @@ public class NotebookServer extends WebSocketServlet
 
   private void copyParagraph(NotebookSocket conn,
                              ServiceContext context,
-                             Message fromMessage) throws IOException {
-    String newParaId = insertParagraph(conn, context, fromMessage);
+                             CopyParagraphMessage fromMessage) throws IOException {
+    InsertParagraphMessage insertParagraphMessage = new InsertParagraphMessage(fromMessage.asJson(),fromMessage.msgId());
+    String newParaId = insertParagraph(conn, context, insertParagraphMessage);
 
     if (newParaId == null) {
       return;
     }
-    fromMessage.put("id", newParaId);
 
-    updateParagraph(conn, context, fromMessage);
+    JsonObjectBuilder builder = Json.createObjectBuilder(fromMessage.asJson()).add("id",newParaId);
+    CommitParagraphMessage commitParagraphMessage = new CommitParagraphMessage(builder.build(),fromMessage.msgId());
+
+    updateParagraph(conn, context, commitParagraphMessage);
   }
 
   private void cancelParagraph(NotebookSocket conn, ServiceContext context, Message fromMessage) throws IOException {

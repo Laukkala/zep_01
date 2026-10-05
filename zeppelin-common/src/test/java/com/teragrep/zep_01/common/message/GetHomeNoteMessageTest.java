@@ -1,5 +1,6 @@
 package com.teragrep.zep_01.common.message;
 
+import com.teragrep.zep_01.common.MessageIdStub;
 import jakarta.json.Json;
 import jakarta.json.JsonObject;
 import jakarta.json.JsonValue;
@@ -22,7 +23,7 @@ public class GetHomeNoteMessageTest {
 
         JsonObject inputJson = Json.createObjectBuilder().build();
 
-        final GetHomeNoteMessage getHomeNoteMessage = new GetHomeNoteMessage(inputJson);
+        final GetHomeNoteMessage getHomeNoteMessage = new GetHomeNoteMessage(inputJson, new MessageIdStub());
         Assertions.assertEquals(expectedOp,getHomeNoteMessage.op);
         Assertions.assertEquals(expectedJson,getHomeNoteMessage.asJson());
     }

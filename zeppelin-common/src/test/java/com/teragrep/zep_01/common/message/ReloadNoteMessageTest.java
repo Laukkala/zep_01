@@ -1,5 +1,6 @@
 package com.teragrep.zep_01.common.message;
 
+import com.teragrep.zep_01.common.MessageIdStub;
 import jakarta.json.Json;
 import jakarta.json.JsonObject;
 import jakarta.json.JsonValue;
@@ -21,10 +22,10 @@ public class ReloadNoteMessageTest {
                 .build();
 
 
-        JsonObject inputJson = Json.createObjectBuilder()
-                .add("noteId",expectedNoteId).build();
+        JsonObject inputJson = Json.createObjectBuilder().add("data",Json.createObjectBuilder()
+                .add("noteId",expectedNoteId)).build();
 
-        final ReloadNoteMessage reloadNoteMessage = new ReloadNoteMessage(inputJson);
+        final ReloadNoteMessage reloadNoteMessage = new ReloadNoteMessage(inputJson, new MessageIdStub());
         Assertions.assertEquals(expectedJson,reloadNoteMessage.asJson());
     }
 

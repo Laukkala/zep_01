@@ -1,5 +1,6 @@
 package com.teragrep.zep_01.message;
 
+import com.teragrep.zep_01.common.MessageId;
 import com.teragrep.zep_01.common.message.Message;
 import com.teragrep.zep_01.notebook.Note;
 import jakarta.json.Json;
@@ -15,10 +16,12 @@ public final class NoteMessage implements Message {
     final String op;
     // This class must reside in zeppelin-zengine in order to get access to Note object.
     final Note note;
+    final MessageId msgId;
 
-    public NoteMessage(Note note){
+    public NoteMessage(Note note, MessageId msgId){
         this.op = "NOTE";
         this.note = note;
+        this.msgId = msgId;
     }
 
     @Override
@@ -37,6 +40,11 @@ public final class NoteMessage implements Message {
     }
 
     @Override
+    public MessageId msgId() {
+        return msgId;
+    }
+
+    @Override
     public boolean equals(final Object o) {
         final boolean equals;
         if (this == o) {
@@ -45,13 +53,13 @@ public final class NoteMessage implements Message {
             equals = false;
         } else {
             final NoteMessage that = (NoteMessage) o;
-            equals = Objects.equals(op, that.op) && Objects.equals(note, that.note);
+            equals = Objects.equals(op, that.op) && Objects.equals(note, that.note) && Objects.equals(msgId, that.msgId);
         }
         return equals;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(op, note);
+        return Objects.hash(op, note, msgId);
     }
 }

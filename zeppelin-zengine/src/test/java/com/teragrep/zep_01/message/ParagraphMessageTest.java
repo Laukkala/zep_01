@@ -1,5 +1,6 @@
 package com.teragrep.zep_01.message;
 
+import com.teragrep.zep_01.common.MessageIdStub;
 import com.teragrep.zep_01.notebook.Note;
 import com.teragrep.zep_01.notebook.Paragraph;
 import jakarta.json.Json;
@@ -33,7 +34,7 @@ public class ParagraphMessageTest {
         String expectedJobName = paragraph.getJobName();
         String expectedStatus = paragraph.getStatus().name();
 
-        ParagraphMessage paragraphMessage = new ParagraphMessage(paragraph);
+        ParagraphMessage paragraphMessage = new ParagraphMessage(paragraph, new MessageIdStub());
         JsonObject paragraphJson = paragraphMessage.asJson();
 
         Assertions.assertEquals(expectedOp,paragraphJson.getString("op"));

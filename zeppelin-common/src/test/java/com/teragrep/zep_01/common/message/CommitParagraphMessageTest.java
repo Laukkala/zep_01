@@ -1,5 +1,6 @@
 package com.teragrep.zep_01.common.message;
 
+import com.teragrep.zep_01.common.MessageIdStub;
 import jakarta.json.Json;
 import jakarta.json.JsonObject;
 import jakarta.json.JsonValue;
@@ -22,15 +23,15 @@ public class CommitParagraphMessageTest {
         final Map<String,Object> expectedConfig = new HashMap<String,Object>();
         final Map<String,Object> expectedParams = new HashMap<String,Object>();
 
-        JsonObject inputJson = Json.createObjectBuilder()
-                .add("id",expectedParagraphId)
-                .add("noteId",expectedNoteId)
-                .add("title",expectedTitle)
-                .add("config",JsonValue.EMPTY_JSON_OBJECT)
-                .add("params",JsonValue.EMPTY_JSON_OBJECT)
+        JsonObject inputJson = Json.createObjectBuilder().add("data",Json.createObjectBuilder()
+                        .add("id",expectedParagraphId)
+                        .add("noteId",expectedNoteId)
+                        .add("title",expectedTitle)
+                        .add("config",JsonValue.EMPTY_JSON_OBJECT)
+                        .add("params",JsonValue.EMPTY_JSON_OBJECT))
                 .build();
 
-        final CommitParagraphMessage commitParagraphMessage = new CommitParagraphMessage(inputJson);
+        final CommitParagraphMessage commitParagraphMessage = new CommitParagraphMessage(inputJson, new MessageIdStub());
         Assertions.assertEquals(expectedOp,commitParagraphMessage.op());
         Assertions.assertEquals(expectedNoteId,commitParagraphMessage.noteId());
         Assertions.assertEquals(expectedParagraphId,commitParagraphMessage.paragraphId());
