@@ -1152,6 +1152,8 @@ public class NotebookServer extends WebSocketServlet
       }
       final ParagraphOutputResponseMessage paragraphOutputResponse = new ParagraphOutputResponseMessage(noteId, paragraphId, outputJson);
       final JsonMessage msg = new JsonMessage(new MessageIdImpl(msgId), OP.PARAGRAPH_OUTPUT, paragraphOutputResponse);
+      // save note to resolve resetting of selected format when receiving COMMIT_PARAGRAPH message
+      getNotebook().saveNote(paragraph.getNote(), paragraph.getAuthenticationInfo());
       conn.send(msg.asJson().toString());
     } catch (InterpreterException e) {
       LOG.error("Failed to retrieve output for note: {} paragraph: {} cause: {}", noteId, paragraphId, e.getCause(), e);
