@@ -87,21 +87,14 @@ public final class UPlotFormat implements RenderFormat{
         final boolean aggsUsed = !groupByColumnNames.isEmpty();
         // Datasets grouped by _time column (such as those created using timechart command) require different formatting than datasets without such grouping.
 
-
         final List<String> xAxisColumnNames = new ArrayList<>();
-        if(!requestOptions.containsKey("xAxisFields")){
+        if(!groupByColumnNames.contains("_time")){
             xAxisColumnNames.addAll(groupByColumnNames);
             groupByColumnNames.clear();
         }
         else {
-            final JsonArray xAxisFields = requestOptions.getJsonArray("xAxisFields");
-            for (final JsonValue value : xAxisFields) {
-                if(value.getValueType().equals(JsonValue.ValueType.STRING)){
-                    final String stringValue = ((JsonString)value).getString();
-                    xAxisColumnNames.add(stringValue);
-                    groupByColumnNames.remove(stringValue);
-                }
-            }
+            xAxisColumnNames.add("_time");
+            groupByColumnNames.remove("_time");
         }
 
         final UPlotDatasetTransformation transformation = new UPlotDatasetTransformation(dataset, xAxisColumnNames, groupByColumnNames, valueColumnNames);
