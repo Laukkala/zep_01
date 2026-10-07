@@ -1151,6 +1151,11 @@ public class NotebookServer extends WebSocketServlet
         outputJson = jsonReader.readObject();
       }
       final ParagraphOutputResponseMessage paragraphOutputResponse = new ParagraphOutputResponseMessage(noteId, paragraphId, outputJson);
+      //TODO: This exists only due to a bug with UI reverting back to format saved on disk on COMMIT_PARAGRAPH message. It can be removed once COMMIT_PARAGRAPH responses do not contain the entire Paragraph contents.
+      InterpreterResult.Type type = InterpreterResult.Type.valueOf(outputJson.getString("type").toUpperCase());
+      paragraph.updateOutputBuffer(0, type,outputJson.toString());
+      paragraph.checkpointOutput();
+      //TODO: end COMMIT_PARAGRAPH workaround
       final JsonMessage msg = new JsonMessage(new MessageIdImpl(msgId), OP.PARAGRAPH_OUTPUT, paragraphOutputResponse);
       // save note to resolve resetting of selected format when receiving COMMIT_PARAGRAPH message
       getNotebook().saveNote(paragraph.getNote(), paragraph.getAuthenticationInfo());
