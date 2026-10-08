@@ -88,13 +88,9 @@ public final class UPlotFormat implements RenderFormat{
         // Datasets grouped by _time column (such as those created using timechart command) require different formatting than datasets without such grouping.
 
         final List<String> xAxisColumnNames = new ArrayList<>();
-        if(!groupByColumnNames.contains("_time")){
-            xAxisColumnNames.addAll(groupByColumnNames);
-            groupByColumnNames.clear();
-        }
-        else {
-            xAxisColumnNames.add("_time");
-            groupByColumnNames.remove("_time");
+        if(groupByColumnNames.size() > 0){
+            xAxisColumnNames.add(groupByColumnNames.get(0));
+            groupByColumnNames.remove(0);
         }
 
         final UPlotDatasetTransformation transformation = new UPlotDatasetTransformation(dataset, xAxisColumnNames, groupByColumnNames, valueColumnNames);

@@ -385,7 +385,7 @@ public final class UPlotFormatTest {
 
         // Create options and Format objects to be tested
         final String graphType = "graph";
-        final String xAxisLabel = "operation.success";
+        final String xAxisLabel = "operation";
         final JsonObject optionsJson = Json.createObjectBuilder()
                 .add("type","uPlot")
                 .add("requestOptions",Json.createObjectBuilder()
@@ -403,20 +403,20 @@ public final class UPlotFormatTest {
         Assertions.assertTrue(formatted.containsKey("isAggregated"));
 
         // Check data
-        // Data must contain at least two arrays, (1 for x-axis lables, 3 for data series)
-        Assertions.assertEquals(4, formatted.getJsonArray("data").size());
+        // Data must contain at least two arrays, (1 for x-axis lables, 6 for data series)
+        Assertions.assertEquals(7, formatted.getJsonArray("data").size());
 
         // First array of Data is the indexes for the series names used for X axis. It's length should be the number of unique combinations you can make with the values of the "group by" clause used.
         // In cases where aggregations are used, the dataset's size should always equal this number. If no aggregations aren't used, the number should be zero
-        Assertions.assertEquals(resultDataset.count(),formatted.getJsonArray("data").getJsonArray(0).size());
+        Assertions.assertEquals(3,formatted.getJsonArray("data").getJsonArray(0).size());
 
         // Data must contain additional arrays equal to the number of columns in the source data (minus the number of group by columns)
-        Assertions.assertEquals(resultDataset.schema().size()-groupByCount,formatted.getJsonArray("data").size()-1);
+        Assertions.assertEquals(6,formatted.getJsonArray("data").size()-1);
 
         // Each additional array within Data should contain one value for each row of data in the original dataset
-        Assertions.assertEquals(resultDataset.count(),formatted.getJsonArray("data").getJsonArray(1).size());
-        Assertions.assertEquals(resultDataset.count(),formatted.getJsonArray("data").getJsonArray(2).size());
-        Assertions.assertEquals(resultDataset.count(),formatted.getJsonArray("data").getJsonArray(3).size());
+        Assertions.assertEquals(3,formatted.getJsonArray("data").getJsonArray(1).size());
+        Assertions.assertEquals(3,formatted.getJsonArray("data").getJsonArray(2).size());
+        Assertions.assertEquals(3,formatted.getJsonArray("data").getJsonArray(3).size());
 
         // Check options
         // Options must contain a series array, a labels array and a graphType
@@ -436,7 +436,7 @@ public final class UPlotFormatTest {
 
         // Series size must match with the size of Data array (minus 1 because first array is the X-axis labels)
         Assertions.assertEquals(formatted.getJsonArray("data").size()-1, formatted.getJsonObject("options").getJsonArray("series").size());
-        Assertions.assertEquals(resultDataset.schema().size()-groupByCount, formatted.getJsonObject("options").getJsonArray("series").size());
+        Assertions.assertEquals(6, formatted.getJsonObject("options").getJsonArray("series").size());
 
         // This dataset is aggregated, so isAggregated should be true
         Assertions.assertEquals(true,formatted.containsKey("isAggregated"));
@@ -538,7 +538,7 @@ public final class UPlotFormatTest {
 
         // Create options and Format objects to be tested
         final String graphType = "graph";
-        final String xAxisLabel = "operation.success";
+        final String xAxisLabel = "operation";
         final JsonObject optionsJson = Json.createObjectBuilder()
                 .add("type","uPlot")
                 .add("requestOptions",Json.createObjectBuilder()
@@ -557,14 +557,14 @@ public final class UPlotFormatTest {
 
         // Check data
         // Data must contain at least two arrays, (1 for x-axis lables, 3 for data series)
-        Assertions.assertEquals(4, formatted.getJsonArray("data").size());
+        Assertions.assertEquals(7, formatted.getJsonArray("data").size());
 
         // First array of Data is the indexes for the series names used for X axis. It's length should be the number of unique combinations you can make with the values of the "group by" clause used.
         // In cases where aggregations are used, the dataset's size should always equal this number. If no aggregations aren't used, the number should be zero
         Assertions.assertEquals(resultDataset.count(),formatted.getJsonArray("data").getJsonArray(0).size());
 
         // Data must contain additional arrays equal to the number of columns in the source data (minus the number of group by columns)
-        Assertions.assertEquals(resultDataset.schema().size()-groupByCount,formatted.getJsonArray("data").size()-1);
+        Assertions.assertEquals(6,formatted.getJsonArray("data").size()-1);
 
         // Each additional array within Data should contain one value for each row of data in the original dataset
         Assertions.assertEquals(resultDataset.count(),formatted.getJsonArray("data").getJsonArray(1).size());
@@ -588,7 +588,7 @@ public final class UPlotFormatTest {
 
         // Series size must match with the size of second array of Data and the number of columns in the result dataset schema (minus number of group by fields used)
         Assertions.assertEquals(formatted.getJsonArray("data").size()-1, formatted.getJsonObject("options").getJsonArray("series").size());
-        Assertions.assertEquals(resultDataset.schema().size()-groupByCount, formatted.getJsonObject("options").getJsonArray("series").size());
+        Assertions.assertEquals(6, formatted.getJsonObject("options").getJsonArray("series").size());
 
         // This dataset is aggregated, so isAggregated should be true
         Assertions.assertEquals(true,formatted.containsKey("isAggregated"));
