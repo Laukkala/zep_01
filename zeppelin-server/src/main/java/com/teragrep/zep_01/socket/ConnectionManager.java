@@ -32,6 +32,7 @@ import com.teragrep.zep_01.notebook.AuthorizationService;
 import com.teragrep.zep_01.common.Message;
 import com.teragrep.zep_01.notebook.socket.WatcherMessage;
 import com.teragrep.zep_01.user.AuthenticationInfo;
+import com.teragrep.zep_01.util.WatcherSecurityKey;
 import org.eclipse.jetty.websocket.api.WebSocketException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -469,7 +470,7 @@ public class ConnectionManager {
   }
 
   public void switchConnectionToWatcher(NotebookSocket conn) {
-    if (!conn.watcherPermitted()) {
+    if (!isSessionAllowedToSwitchToWatcher(conn)) {
       LOGGER.error("Cannot switch this client to watcher, invalid security key");
       return;
     }
@@ -485,5 +486,11 @@ public class ConnectionManager {
     removeConnection(conn);
     removeConnectionFromAllNote(conn);
     removeUserConnection(conn.getUser(), conn);
+  }
+
+  private boolean isSessionAllowedToSwitchToWatcher(NotebookSocket session) {
+    String watcherSecurityKey = session.getRequest().getHeader(WatcherSecurityKey.HTTP_HEADER);
+    return !(StringUtils.isBlank(watcherSecurityKey) || !watcherSecurityKey
+        .equals(WatcherSecurityKey.getKey()));
   }
 }
