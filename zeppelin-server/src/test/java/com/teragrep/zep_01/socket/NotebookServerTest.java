@@ -120,8 +120,8 @@ public class NotebookServerTest extends AbstractTestRestApi {
     if (!ZeppelinConfiguration.create().isZeppelinNotebookCollaborativeModeEnable()) {
       return;
     }
-    NotebookSocket sock1 = createWebSocket();
-    NotebookSocket sock2 = createWebSocket();
+    WebSocketEndpoint sock1 = createWebSocket();
+    WebSocketEndpoint sock2 = createWebSocket();
 
     String noteName = "Note with millis " + System.currentTimeMillis();
     notebookServer.onMessage(sock1, new Message(OP.NEW_NOTE).put("name", noteName).toJson());
@@ -172,7 +172,7 @@ public class NotebookServerTest extends AbstractTestRestApi {
     verify(sock2, times(sock2SendCount)).send(anyString());
   }
 
-  private void patchParagraph(NotebookSocket noteSocket, String paragraphId, String patch) {
+  private void patchParagraph(WebSocketEndpoint noteSocket, String paragraphId, String patch) {
     Message message = new Message(OP.PATCH_PARAGRAPH);
     message.put("patch", patch);
     message.put("id", paragraphId);
@@ -217,8 +217,8 @@ public class NotebookServerTest extends AbstractTestRestApi {
     interpreterGroup.getAngularObjectRegistry().add("object1", "value1", note1.getId(), null);
 
     // create two sockets and open it
-    NotebookSocket sock1 = createWebSocket();
-    NotebookSocket sock2 = createWebSocket();
+    WebSocketEndpoint sock1 = createWebSocket();
+    WebSocketEndpoint sock2 = createWebSocket();
 
     assertEquals(sock1, sock1);
     assertNotEquals(sock1, sock2);
@@ -283,7 +283,7 @@ public class NotebookServerTest extends AbstractTestRestApi {
     Thread.sleep(1000);
 
     // create two sockets and open it
-    NotebookSocket sock1 = createWebSocket();
+    WebSocketEndpoint sock1 = createWebSocket();
 
     notebookServer.onOpen(sock1);
     verify(sock1, times(0)).send(anyString()); // getNote, getAngularObject
@@ -387,7 +387,7 @@ public class NotebookServerTest extends AbstractTestRestApi {
     note1.addOrUpdateAngularObject("angular-shared_process", ao);
 
     // create sockets and open it
-    NotebookSocket sock1 = createWebSocket();
+    WebSocketEndpoint sock1 = createWebSocket();
     notebookServer.onOpen(sock1);
 
     // Check the AngularObjectRegistry of the interpreterGroup before executing GET_NOTE
@@ -459,8 +459,8 @@ public class NotebookServerTest extends AbstractTestRestApi {
     when(mdRegistry.addAndNotifyRemoteProcess(varName, value, "noteId", "paragraphId"))
             .thenReturn(ao1);
 
-    NotebookSocket conn = mock(NotebookSocket.class);
-    NotebookSocket otherConn = mock(NotebookSocket.class);
+    WebSocketEndpoint conn = mock(WebSocketEndpoint.class);
+    WebSocketEndpoint otherConn = mock(WebSocketEndpoint.class);
 
     final String mdMsg1 = notebookServer.serializeMessage(new Message(OP.ANGULAR_OBJECT_UPDATE)
             .put("angularObject", ao1)
@@ -506,8 +506,8 @@ public class NotebookServerTest extends AbstractTestRestApi {
     final AngularObject<String> ao1 = AngularObjectBuilder.build(varName, value, "noteId",
             "paragraphId");
     when(mdRegistry.removeAndNotifyRemoteProcess(varName, "noteId", "paragraphId")).thenReturn(ao1);
-    NotebookSocket conn = mock(NotebookSocket.class);
-    NotebookSocket otherConn = mock(NotebookSocket.class);
+    WebSocketEndpoint conn = mock(WebSocketEndpoint.class);
+    WebSocketEndpoint otherConn = mock(WebSocketEndpoint.class);
 
     final String mdMsg1 = notebookServer.serializeMessage(new Message(OP.ANGULAR_OBJECT_REMOVE)
             .put("angularObject", ao1)
@@ -529,8 +529,8 @@ public class NotebookServerTest extends AbstractTestRestApi {
   @Test
   public void testCreateNoteWithDefaultInterpreterId() throws IOException {
     // create two sockets and open it
-    NotebookSocket sock1 = createWebSocket();
-    NotebookSocket sock2 = createWebSocket();
+    WebSocketEndpoint sock1 = createWebSocket();
+    WebSocketEndpoint sock2 = createWebSocket();
 
     assertEquals(sock1, sock1);
     assertNotEquals(sock1, sock2);
@@ -1107,8 +1107,8 @@ public class NotebookServerTest extends AbstractTestRestApi {
   }
 
 
-  private NotebookSocket createWebSocket() {
-    NotebookSocket sock = mock(NotebookSocket.class);
+  private WebSocketEndpoint createWebSocket() {
+    WebSocketEndpoint sock = mock(WebSocketEndpoint.class);
     when(sock.getRequest()).thenReturn(mockRequest);
     return sock;
   }
