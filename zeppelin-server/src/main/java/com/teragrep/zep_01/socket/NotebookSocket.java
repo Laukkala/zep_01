@@ -6,7 +6,7 @@ import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 
 /**
- * Represents a Websocket connectionn to a single client
+ * Represents a Websocket connection to a single client
  * Responsibilities:
  * - Receives messages from websocket client via {@link WebSocketListener}
  * - Sends messages to websocket client
