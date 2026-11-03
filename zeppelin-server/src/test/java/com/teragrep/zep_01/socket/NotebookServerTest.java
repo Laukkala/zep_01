@@ -60,6 +60,7 @@ import com.teragrep.zep_01.user.AuthenticationInfo;
 import com.teragrep.zep_01.utils.TestUtils;
 import org.junit.*;
 import org.junit.jupiter.api.Assertions;
+import org.mockito.Mockito;
 
 
 /** Basic REST API tests for notebookServer. */
@@ -144,10 +145,18 @@ public class NotebookServerTest extends AbstractTestRestApi {
         "@@ -1,7 +1,45 @@\n ABC\n-%0Aabc\n+ ssss%0Aabc ssss\n" // add text in two string
     };
 
-    int sock1SendCount = 0;
-    int sock2SendCount = 0;
-    reset(sock1);
-    reset(sock2);
+    // previously the mocks were reset() here to start the message count from 0 for future assertions, but that also clears the .thenReturn() rules set by createWebSocket(), leading to an NPE.
+    int sock1SendCount = (int) Mockito.mockingDetails(sock1)
+            .getInvocations()
+            .stream()
+            .filter(inv -> inv.getMethod().getName().equals("send"))
+            .count();
+    int sock2SendCount = (int) Mockito.mockingDetails(sock2)
+            .getInvocations()
+            .stream()
+            .filter(inv -> inv.getMethod().getName().equals("send"))
+            .count();
+
     patchParagraph(sock1, paragraphId, patches[0]);
     assertEquals("ABC", paragraph.getText());
     verify(sock1, times(sock1SendCount)).send(anyString());
@@ -706,9 +715,9 @@ public class NotebookServerTest extends AbstractTestRestApi {
     // Create connections
     final HashSet<Message.OP> collaborativeOPFilter = new HashSet<>();
     collaborativeOPFilter.add(OP.COLLABORATIVE_MODE_STATUS);
-    final FilteringFakeNotebookSocket alice = new FilteringFakeNotebookSocket(notebookServer,collaborativeOPFilter);
-    final FilteringFakeNotebookSocket bob = new FilteringFakeNotebookSocket(notebookServer,collaborativeOPFilter);
-    final FilteringFakeNotebookSocket charlie = new FilteringFakeNotebookSocket(notebookServer,collaborativeOPFilter);
+    final FilteringFakeNotebookSocket alice = new FilteringFakeNotebookSocket(collaborativeOPFilter);
+    final FilteringFakeNotebookSocket bob = new FilteringFakeNotebookSocket(collaborativeOPFilter);
+    final FilteringFakeNotebookSocket charlie = new FilteringFakeNotebookSocket(collaborativeOPFilter);
     notebookServer.onOpen(alice);
     notebookServer.onOpen(bob);
     notebookServer.onOpen(charlie);
@@ -755,9 +764,9 @@ public class NotebookServerTest extends AbstractTestRestApi {
       // Create connections
       final HashSet<Message.OP> collaborativeOPFilter = new HashSet<>();
       collaborativeOPFilter.add(OP.COLLABORATIVE_MODE_STATUS);
-      final FilteringFakeNotebookSocket alice = new FilteringFakeNotebookSocket(notebookServer,collaborativeOPFilter);
-      final FilteringFakeNotebookSocket bob = new FilteringFakeNotebookSocket(notebookServer,collaborativeOPFilter);
-      final FilteringFakeNotebookSocket charlie = new FilteringFakeNotebookSocket(notebookServer,collaborativeOPFilter);
+      final FilteringFakeNotebookSocket alice = new FilteringFakeNotebookSocket(collaborativeOPFilter);
+      final FilteringFakeNotebookSocket bob = new FilteringFakeNotebookSocket(collaborativeOPFilter);
+      final FilteringFakeNotebookSocket charlie = new FilteringFakeNotebookSocket(collaborativeOPFilter);
       notebookServer.onOpen(alice);
       notebookServer.onOpen(bob);
       notebookServer.onOpen(charlie);
@@ -817,9 +826,9 @@ public class NotebookServerTest extends AbstractTestRestApi {
       // Create connections
       final HashSet<Message.OP> collaborativeOPFilter = new HashSet<>();
       collaborativeOPFilter.add(OP.COLLABORATIVE_MODE_STATUS);
-      final FilteringFakeNotebookSocket alice = new FilteringFakeNotebookSocket(notebookServer,collaborativeOPFilter);
-      final FilteringFakeNotebookSocket bob = new FilteringFakeNotebookSocket(notebookServer,collaborativeOPFilter);
-      final FilteringFakeNotebookSocket charlie = new FilteringFakeNotebookSocket(notebookServer,collaborativeOPFilter);
+      final FilteringFakeNotebookSocket alice = new FilteringFakeNotebookSocket(collaborativeOPFilter);
+      final FilteringFakeNotebookSocket bob = new FilteringFakeNotebookSocket(collaborativeOPFilter);
+      final FilteringFakeNotebookSocket charlie = new FilteringFakeNotebookSocket(collaborativeOPFilter);
       notebookServer.onOpen(alice);
       notebookServer.onOpen(bob);
       notebookServer.onOpen(charlie);
@@ -900,9 +909,9 @@ public class NotebookServerTest extends AbstractTestRestApi {
     // Create connections
     final HashSet<Message.OP> collaborativeOPFilter = new HashSet<>();
     collaborativeOPFilter.add(OP.COLLABORATIVE_MODE_STATUS);
-    final FilteringFakeNotebookSocket alice = new FilteringFakeNotebookSocket(notebookServer,collaborativeOPFilter);
-    final FilteringFakeNotebookSocket bob = new FilteringFakeNotebookSocket(notebookServer,collaborativeOPFilter);
-    final FilteringFakeNotebookSocket charlie = new FilteringFakeNotebookSocket(notebookServer,collaborativeOPFilter);
+    final FilteringFakeNotebookSocket alice = new FilteringFakeNotebookSocket(collaborativeOPFilter);
+    final FilteringFakeNotebookSocket bob = new FilteringFakeNotebookSocket(collaborativeOPFilter);
+    final FilteringFakeNotebookSocket charlie = new FilteringFakeNotebookSocket(collaborativeOPFilter);
     notebookServer.onOpen(alice);
     notebookServer.onOpen(bob);
     notebookServer.onOpen(charlie);
@@ -975,9 +984,9 @@ public class NotebookServerTest extends AbstractTestRestApi {
 
       final HashSet<Message.OP> collaborativeOPFilter = new HashSet<>();
       collaborativeOPFilter.add(OP.COLLABORATIVE_MODE_STATUS);
-      final FilteringFakeNotebookSocket alice = new FilteringFakeNotebookSocket(notebookServer,collaborativeOPFilter);
-      final FilteringFakeNotebookSocket bob = new FilteringFakeNotebookSocket(notebookServer,collaborativeOPFilter);
-      final FilteringFakeNotebookSocket charlie = new FilteringFakeNotebookSocket(notebookServer,collaborativeOPFilter);
+      final FilteringFakeNotebookSocket alice = new FilteringFakeNotebookSocket(collaborativeOPFilter);
+      final FilteringFakeNotebookSocket bob = new FilteringFakeNotebookSocket(collaborativeOPFilter);
+      final FilteringFakeNotebookSocket charlie = new FilteringFakeNotebookSocket(collaborativeOPFilter);
       notebookServer.onOpen(alice);
       notebookServer.onOpen(bob);
       notebookServer.onOpen(charlie);
@@ -1167,6 +1176,7 @@ public class NotebookServerTest extends AbstractTestRestApi {
   private WebSocketEndpoint createWebSocket() {
     WebSocketEndpoint sock = mock(WebSocketEndpoint.class);
     when(sock.getRequest()).thenReturn(mockRequest);
+    when(sock.username()).thenReturn(new UsernameAnonymous());
     return sock;
   }
 }
