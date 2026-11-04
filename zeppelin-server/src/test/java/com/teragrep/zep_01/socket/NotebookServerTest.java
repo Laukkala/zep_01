@@ -93,6 +93,8 @@ public class NotebookServerTest extends AbstractTestRestApi {
     for(Note note : notebook.getAllNotes()){
       notebook.removeNote(note,AuthenticationInfo.ANONYMOUS);
     }
+    // must clean up notebookServer's Notebook field, since some tests call notebookServer.setNotebook() with a Mock, and that affects any tests that get executed after them, causing failures.
+    notebookServer.setNotebook(()->notebook);
   }
 
   @Before
