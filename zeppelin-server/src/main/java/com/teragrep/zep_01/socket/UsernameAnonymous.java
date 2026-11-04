@@ -1,6 +1,5 @@
 package com.teragrep.zep_01.socket;
 
-
 public final class UsernameAnonymous implements Username {
 
     @Override
