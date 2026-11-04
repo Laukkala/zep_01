@@ -1,8 +1,13 @@
 package com.teragrep.zep_01.socket;
 
-import com.teragrep.stb_01.Stubable;
+/**
+ * Represents the name of a connected user.
+ * Responsibilities
+ * - Returns the name of the user as a string
+ * - Indicates whether the connected user is considered anonymous or not
+ */
 
 public interface Username {
     public abstract String asString();
-    public boolean isAnonymous();
+    public abstract boolean isAnonymous();
 }
