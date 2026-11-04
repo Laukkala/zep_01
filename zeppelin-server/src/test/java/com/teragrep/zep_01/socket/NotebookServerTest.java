@@ -1046,7 +1046,7 @@ public class NotebookServerTest extends AbstractTestRestApi {
 
   @Test
   public void testParagraphOutputSavesResult() {
-    final NotebookSocket alice = createWebSocket();
+    final WebSocketEndpoint alice = createWebSocket();
     notebookServer.onOpen(alice);
 
     final String defaultInterpreterId = "test";
@@ -1108,9 +1108,9 @@ public class NotebookServerTest extends AbstractTestRestApi {
   public void testParagraphOutputIsBroadcast() {
     final HashSet<Message.OP> filter = new HashSet<>();
     filter.add(OP.PARAGRAPH_OUTPUT);
-    final FilteringFakeNotebookSocket alice = new FilteringFakeNotebookSocket(notebookServer, filter);
-    final FilteringFakeNotebookSocket bob = new FilteringFakeNotebookSocket(notebookServer, filter);
-    final FilteringFakeNotebookSocket charlie = new FilteringFakeNotebookSocket(notebookServer, filter);
+    final FilteringFakeNotebookSocket alice = new FilteringFakeNotebookSocket(filter);
+    final FilteringFakeNotebookSocket bob = new FilteringFakeNotebookSocket(filter);
+    final FilteringFakeNotebookSocket charlie = new FilteringFakeNotebookSocket(filter);
     notebookServer.onOpen(alice);
     notebookServer.onOpen(bob);
     notebookServer.onOpen(charlie);
