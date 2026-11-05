@@ -8,11 +8,6 @@ import org.junit.jupiter.api.Test;
 import java.io.IOException;
 
 class NotebookSocketTest {
-
-    @Test
-    public void testContract(){
-        EqualsVerifier.forClass(NotebookSocket.class).verify();
-    }
     // calling send() before a call to onWebSocketConnect() is received should result in an IOException
     @Test
     public void testCallingSendWithUninitializedConnectionThrowsIOException(){

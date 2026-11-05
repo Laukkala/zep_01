@@ -104,33 +104,4 @@ public final class NotebookSocket implements WebSocketEndpoint, WebSocketListene
   public HttpServletRequest getRequest() {
     return request;
   }
-
-  @Override
-  public boolean equals(final Object o) {
-    final boolean equals;
-    if (this == o) {
-      equals = true;
-    }
-    else if (o == null || getClass() != o.getClass()) {
-      equals = false;
-    }
-    else {
-      final NotebookSocket that = (NotebookSocket) o;
-      equals = Objects.equals(this.connection != null ? this.connection.get() : null, that.connection != null ? that.connection.get() : null)
-              && Objects.equals(this.username != null ? this.username.get() : null, that.username != null ? that.username.get() : null)
-              && Objects.equals(this.request, that.request)
-              && Objects.equals(this.listener, that.listener);
-    }
-    return equals;
-  }
-
-  @Override
-  public int hashCode() {
-    return Objects.hash(
-            connection != null ? connection.get() : null,
-            username != null ? username.get() : null,
-            request,
-            listener
-    );
-  }
 }
