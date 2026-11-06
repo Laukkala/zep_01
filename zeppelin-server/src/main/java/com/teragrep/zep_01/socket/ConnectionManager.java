@@ -85,24 +85,24 @@ public class ConnectionManager {
   private final AuthorizationService authorizationService;
 
   @Inject
-  public ConnectionManager(AuthorizationService authorizationService) {
+  public ConnectionManager(final AuthorizationService authorizationService) {
     this.authorizationService = authorizationService;
   }
 
-  public void addConnection(WebSocketEndpoint conn) {
+  public void addConnection(final WebSocketEndpoint conn) {
     connectedSockets.add(conn);
   }
 
-  public void removeConnection(WebSocketEndpoint conn) {
+  public void removeConnection(final WebSocketEndpoint conn) {
     connectedSockets.remove(conn);
   }
 
-  public void addNoteConnection(String noteId, WebSocketEndpoint socket) {
+  public void addNoteConnection(final String noteId, final WebSocketEndpoint socket) {
     LOGGER.debug("Add connection <{}> : <{}> to note: <{}>", socket.getRequest().getRemoteHost(),socket.getRequest().getRemotePort(), noteId);
     synchronized (noteSocketMap) {
       // make sure a socket relates only an single note.
       removeConnectionFromAllNote(socket);
-      List<WebSocketEndpoint> socketList = noteSocketMap.computeIfAbsent(noteId, k -> new LinkedList<>());
+      final List<WebSocketEndpoint> socketList = noteSocketMap.computeIfAbsent(noteId, k -> new LinkedList<>());
       if (!socketList.contains(socket)) {
         socketList.add(socket);
       }
@@ -110,16 +110,16 @@ public class ConnectionManager {
     }
   }
 
-  public void removeNoteConnection(String noteId) {
+  public void removeNoteConnection(final String noteId) {
     synchronized (noteSocketMap) {
       noteSocketMap.remove(noteId);
     }
   }
 
-  public void removeNoteConnection(String noteId, WebSocketEndpoint socket) {
+  public void removeNoteConnection(final String noteId, final WebSocketEndpoint socket) {
     LOGGER.debug("Remove connection <{}> : <{}> from note: <{}>", socket.getRequest().getRemoteHost(),socket.getRequest().getRemotePort(), noteId);
     synchronized (noteSocketMap) {
-      List<WebSocketEndpoint> socketList = noteSocketMap.get(noteId);
+      final List<WebSocketEndpoint> socketList = noteSocketMap.get(noteId);
       if (socketList != null && socketList.contains(socket)) {
         socketList.remove(socket);
         checkCollaborativeStatus(noteId, socketList);
@@ -127,7 +127,7 @@ public class ConnectionManager {
     }
   }
 
-  public void addUserConnection(WebSocketEndpoint conn) {
+  public void addUserConnection(final WebSocketEndpoint conn) {
     final String user = conn.username().asString();
     LOGGER.debug("Add user connection <{}> : <{}> for user: <{}>", conn.getRequest().getRemoteHost(),conn.getRequest().getRemotePort(), user);
     if (userSocketMap.containsKey(user)) {
@@ -139,7 +139,7 @@ public class ConnectionManager {
     }
   }
 
-  public void removeUserConnection(String user, WebSocketEndpoint conn) {
+  public void removeUserConnection(final String user, final WebSocketEndpoint conn) {
     LOGGER.debug("Remove user connection <{}> : <{}> for user: <{}>", conn.getRequest().getRemoteHost(),conn.getRequest().getRemotePort(), user);
     if (userSocketMap.containsKey(user)) {
       userSocketMap.get(user).remove(conn);
@@ -148,12 +148,12 @@ public class ConnectionManager {
     }
   }
 
-  public String getAssociatedNoteId(WebSocketEndpoint socket) {
+  public String getAssociatedNoteId(final WebSocketEndpoint socket) {
     String associatedNoteId = null;
     synchronized (noteSocketMap) {
-      Set<String> noteIds = noteSocketMap.keySet();
-      for (String noteId : noteIds) {
-        List<WebSocketEndpoint> sockets = noteSocketMap.get(noteId);
+      final Set<String> noteIds = noteSocketMap.keySet();
+      for (final String noteId : noteIds) {
+        final List<WebSocketEndpoint> sockets = noteSocketMap.get(noteId);
         if (sockets.contains(socket)) {
           associatedNoteId = noteId;
         }
@@ -163,26 +163,26 @@ public class ConnectionManager {
     return associatedNoteId;
   }
 
-  public void removeConnectionFromAllNote(WebSocketEndpoint socket) {
+  public void removeConnectionFromAllNote(final WebSocketEndpoint socket) {
     synchronized (noteSocketMap) {
-      Set<String> noteIds = noteSocketMap.keySet();
-      for (String noteId : noteIds) {
+      final Set<String> noteIds = noteSocketMap.keySet();
+      for (final String noteId : noteIds) {
         removeNoteConnection(noteId, socket);
       }
     }
   }
 
   // Sends a response message indicating whether or not the notebook in question has multiple users connected, and lists the usernames of the connected users
-  private void checkCollaborativeStatus(String noteId, List<WebSocketEndpoint> socketList) {
+  private void checkCollaborativeStatus(final String noteId, final List<WebSocketEndpoint> socketList) {
     if (!collaborativeModeEnable) {
       return;
     }
-    boolean isCollaborative = socketList.size() > 1;
-    Message message = new Message(Message.OP.COLLABORATIVE_MODE_STATUS);
+    final boolean isCollaborative = socketList.size() > 1;
+    final Message message = new Message(Message.OP.COLLABORATIVE_MODE_STATUS);
     message.put("status", isCollaborative);
     // Create a list of users for the response
-    Set<String> userList = new HashSet<>();
-    for (WebSocketEndpoint noteSocket : socketList) {
+    final Set<String> userList = new HashSet<>();
+    for (final WebSocketEndpoint noteSocket : socketList) {
       userList.add(noteSocket.username().asString());
     }
     message.put("users", userList);
@@ -190,37 +190,37 @@ public class ConnectionManager {
   }
 
 
-  protected String serializeMessage(Message m) {
+  protected String serializeMessage(final Message m) {
     return gson.toJson(m);
   }
 
-  public void broadcast(Message m) {
+  public void broadcast(final Message m) {
     synchronized (connectedSockets) {
-      for (WebSocketEndpoint ns : connectedSockets) {
+      for (final WebSocketEndpoint ns : connectedSockets) {
         try {
           ns.send(serializeMessage(m));
-        } catch (IOException | WebSocketException e) {
+        } catch (final IOException | WebSocketException e) {
           LOGGER.error("Send error: " + m, e);
         }
       }
     }
   }
 
-  public void broadcast(String noteId, Message m) {
+  public void broadcast(final String noteId, final Message m) {
     List<WebSocketEndpoint> socketsToBroadcast = Collections.emptyList();
     synchronized (noteSocketMap) {
       broadcastToWatchers(noteId, StringUtils.EMPTY, m);
-      List<WebSocketEndpoint> socketLists = noteSocketMap.get(noteId);
+      final List<WebSocketEndpoint> socketLists = noteSocketMap.get(noteId);
       if (socketLists == null || socketLists.size() == 0) {
         return;
       }
       socketsToBroadcast = new ArrayList<>(socketLists);
     }
     LOGGER.debug("SEND >> " + m);
-    for (WebSocketEndpoint conn : socketsToBroadcast) {
+    for (final WebSocketEndpoint conn : socketsToBroadcast) {
       try {
         conn.send(serializeMessage(m));
-      } catch (IOException | WebSocketException e) {
+      } catch (final IOException | WebSocketException e) {
         LOGGER.error("socket error", e);
       }
     }
@@ -245,9 +245,9 @@ public class ConnectionManager {
     }
   }
 
-  private void broadcastToWatchers(String noteId, String subject, Message message) {
+  private void broadcastToWatchers(final String noteId, final String subject, final Message message) {
     synchronized (watcherSockets) {
-      for (WebSocketEndpoint watcher : watcherSockets) {
+      for (final WebSocketEndpoint watcher : watcherSockets) {
         try {
           watcher.send(
               WatcherMessage.builder(noteId)
@@ -255,7 +255,7 @@ public class ConnectionManager {
                   .message(serializeMessage(message))
                   .build()
                   .toJson());
-        } catch (IOException | WebSocketException e) {
+        } catch (final IOException | WebSocketException e) {
           LOGGER.error("Cannot broadcast message to watcher", e);
         }
       }
@@ -279,11 +279,11 @@ public class ConnectionManager {
     }
   }
 
-  public void broadcastExcept(String noteId, Message m, WebSocketEndpoint exclude) {
+  public void broadcastExcept(final String noteId, final Message m, final WebSocketEndpoint exclude) {
     List<WebSocketEndpoint> socketsToBroadcast = Collections.emptyList();
     synchronized (noteSocketMap) {
       broadcastToWatchers(noteId, StringUtils.EMPTY, m);
-      List<WebSocketEndpoint> socketLists = noteSocketMap.get(noteId);
+      final List<WebSocketEndpoint> socketLists = noteSocketMap.get(noteId);
       if (socketLists == null || socketLists.size() == 0) {
         return;
       }
@@ -291,13 +291,13 @@ public class ConnectionManager {
     }
 
     LOGGER.debug("SEND >> " + m);
-    for (WebSocketEndpoint conn : socketsToBroadcast) {
+    for (final WebSocketEndpoint conn : socketsToBroadcast) {
       if (exclude.equals(conn)) {
         continue;
       }
       try {
         conn.send(serializeMessage(m));
-      } catch (IOException | WebSocketException e) {
+      } catch (final IOException | WebSocketException e) {
         LOGGER.error("socket error", e);
       }
     }
@@ -306,20 +306,20 @@ public class ConnectionManager {
   /**
    * Send websocket message to all connections regardless of notebook id.
    */
-  public void broadcastToAllConnections(String serialized) {
+  public void broadcastToAllConnections(final String serialized) {
     broadcastToAllConnectionsExcept(null, serialized);
   }
 
-  public void broadcastToAllConnectionsExcept(WebSocketEndpoint exclude, String serializedMsg) {
+  public void broadcastToAllConnectionsExcept(final WebSocketEndpoint exclude, final String serializedMsg) {
     synchronized (connectedSockets) {
-      for (WebSocketEndpoint conn : connectedSockets) {
+      for (final WebSocketEndpoint conn : connectedSockets) {
         if (exclude != null && exclude.equals(conn)) {
           continue;
         }
 
         try {
           conn.send(serializedMsg);
-        } catch (IOException | WebSocketException e) {
+        } catch (final IOException | WebSocketException e) {
           LOGGER.error("Cannot broadcast message to conn", e);
         }
       }
@@ -327,21 +327,21 @@ public class ConnectionManager {
   }
 
   public Set<String> getConnectedUsers() {
-    Set<String> connectedUsers = new HashSet<>();
-    for (WebSocketEndpoint notebookSocket : connectedSockets) {
+    final Set<String> connectedUsers = new HashSet<>();
+    for (final WebSocketEndpoint notebookSocket : connectedSockets) {
       connectedUsers.add(notebookSocket.username().asString());
     }
     return connectedUsers;
   }
 
 
-  public void multicastToUser(String user, Message m) {
+  public void multicastToUser(final String user, final Message m) {
     if (!userSocketMap.containsKey(user)) {
       LOGGER.warn("Multicasting to user {} that is not in connections map", user);
       return;
     }
 
-    for (WebSocketEndpoint conn : userSocketMap.get(user)) {
+    for (final WebSocketEndpoint conn : userSocketMap.get(user)) {
       unicast(m, conn);
     }
   }
@@ -357,10 +357,10 @@ public class ConnectionManager {
     }
   }
 
-  public void unicast(Message m, WebSocketEndpoint conn) {
+  public void unicast(final Message m, final WebSocketEndpoint conn) {
     try {
       conn.send(serializeMessage(m));
-    } catch (IOException | WebSocketException e) {
+    } catch (final IOException | WebSocketException e) {
       LOGGER.error("socket error", e);
     }
     broadcastToWatchers(StringUtils.EMPTY, StringUtils.EMPTY, m);
@@ -374,7 +374,7 @@ public class ConnectionManager {
     broadcastToWatchers(StringUtils.EMPTY, StringUtils.EMPTY, m);
   }
 
-  public void unicastParagraph(Note note, Paragraph p, String user, String msgId) {
+  public void unicastParagraph(final Note note, final Paragraph p, final String user, final String msgId) {
     if (!note.isPersonalizedMode() || p == null || user == null) {
       return;
     }
@@ -384,8 +384,8 @@ public class ConnectionManager {
       return;
     }
 
-    for (WebSocketEndpoint conn : userSocketMap.get(user)) {
-      Message m = new Message(Message.OP.PARAGRAPH).withMsgId(msgId).put("paragraph", p);
+    for (final WebSocketEndpoint conn : userSocketMap.get(user)) {
+      final Message m = new Message(Message.OP.PARAGRAPH).withMsgId(msgId).put("paragraph", p);
       unicast(m, conn);
     }
   }
@@ -394,18 +394,18 @@ public class ConnectionManager {
     void handleUser(String user, Set<String> userAndRoles);
   }
 
-  public void forAllUsers(UserIterator iterator) {
-    for (String user : userSocketMap.keySet()) {
-      Set<String> userAndRoles = authorizationService.getRoles(user);
+  public void forAllUsers(final UserIterator iterator) {
+    for (final String user : userSocketMap.keySet()) {
+      final Set<String> userAndRoles = authorizationService.getRoles(user);
       userAndRoles.add(user);
       iterator.handleUser(user, userAndRoles);
     }
   }
 
-  public void broadcastNoteListExcept(List<NoteInfo> notesInfo,
-                                      AuthenticationInfo subject) {
+  public void broadcastNoteListExcept(final List<NoteInfo> notesInfo,
+                                      final AuthenticationInfo subject) {
     Set<String> userAndRoles;
-    for (String user : userSocketMap.keySet()) {
+    for (final String user : userSocketMap.keySet()) {
       if (subject.getUser().equals(user)) {
         continue;
       }
@@ -418,11 +418,11 @@ public class ConnectionManager {
     }
   }
 
-  public void broadcastNote(Note note) {
+  public void broadcastNote(final Note note) {
     broadcast(note.getId(), new Message(Message.OP.NOTE).put("note", note));
   }
 
-  public void broadcastParagraph(Note note, Paragraph p) {
+  public void broadcastParagraph(final Note note, final Paragraph p) {
     broadcastNoteForms(note);
 
     if (note.isPersonalizedMode()) {
@@ -432,18 +432,18 @@ public class ConnectionManager {
     }
   }
 
-  public void broadcastParagraphs(Map<String, Paragraph> userParagraphMap) {
+  public void broadcastParagraphs(final Map<String, Paragraph> userParagraphMap) {
     if (null != userParagraphMap) {
-      for (String user : userParagraphMap.keySet()) {
+      for (final String user : userParagraphMap.keySet()) {
         multicastToUser(user,
             new Message(Message.OP.PARAGRAPH).put("paragraph", userParagraphMap.get(user)));
       }
     }
   }
 
-  private void broadcastNewParagraph(Note note, Paragraph para) {
+  private void broadcastNewParagraph(final Note note, final Paragraph para) {
     LOGGER.info("Broadcasting paragraph on run call instead of note.");
-    int paraIndex = note.getParagraphs().indexOf(para);
+    final int paraIndex = note.getParagraphs().indexOf(para);
     broadcast(note.getId(),
         new Message(Message.OP.PARAGRAPH_ADDED).put("paragraph", para).put("index", paraIndex));
   }
@@ -461,15 +461,15 @@ public class ConnectionManager {
   //  }
 
 
-  private void broadcastNoteForms(Note note) {
-    GUI formsSettings = new GUI();
+  private void broadcastNoteForms(final Note note) {
+    final GUI formsSettings = new GUI();
     formsSettings.setForms(note.getNoteForms());
     formsSettings.setParams(note.getNoteParams());
     broadcast(note.getId(), new Message(Message.OP.SAVE_NOTE_FORMS)
         .put("formsData", formsSettings));
   }
 
-  public void switchConnectionToWatcher(WebSocketEndpoint conn) {
+  public void switchConnectionToWatcher(final WebSocketEndpoint conn) {
     if (!isSessionAllowedToSwitchToWatcher(conn)) {
       LOGGER.error("Cannot switch this client to watcher, invalid security key");
       return;
@@ -488,8 +488,8 @@ public class ConnectionManager {
     removeUserConnection(conn.username().asString(), conn);
   }
 
-  private boolean isSessionAllowedToSwitchToWatcher(WebSocketEndpoint session) {
-    String watcherSecurityKey = session.getRequest().getHeader(WatcherSecurityKey.HTTP_HEADER);
+  private boolean isSessionAllowedToSwitchToWatcher(final WebSocketEndpoint session) {
+    final String watcherSecurityKey = session.getRequest().getHeader(WatcherSecurityKey.HTTP_HEADER);
     return !(StringUtils.isBlank(watcherSecurityKey) || !watcherSecurityKey
         .equals(WatcherSecurityKey.getKey()));
   }
