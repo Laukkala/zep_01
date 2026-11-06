@@ -113,7 +113,7 @@ public final class UserInterfaceManagerTest {
 
 
     /**
-     * Call to UserInterfaceManager.updateDataset() should result in a formatted representation of the dataset to be written to InterpreterOutput.
+     * Every call to UserInterfaceManager.updateDataset() should result in a formatted representation of the dataset to be written to InterpreterOutput, using the configured deafault format, in this case DataTables.
      */
     @Test
     void testUpdateDatasetWithDataTablesFormat() {
@@ -268,7 +268,9 @@ public final class UserInterfaceManagerTest {
         Assertions.assertEquals(expectedDataTablesBatch2Output, outputList.get(1).toString());
 
     }
-
+    /**
+     * Every call to UserInterfaceManager.updateDataset() should result in a formatted representation of the dataset to be written to InterpreterOutput, using the configured deafault format, in this case uPlot.
+     */
     @Test
     void testUpdateDatasetWithUPlotFormat(){
         final List<AvailableFormat> availableFormatList = new ArrayList<>();
@@ -375,7 +377,7 @@ public final class UserInterfaceManagerTest {
     }
 
     /**
-     * Call to UserInterfaceManager.formatDataset() should return a formatted representation of the dataset as a String.
+     * Call to UserInterfaceManager.formatDataset() should return a formatted representation of the dataset as a String, in the requested format.
      */
     @Test
     void formatDatasetTest() {
