@@ -307,7 +307,7 @@ public final class UserInterfaceManagerTest {
         final UIOption uPlotUIOption = new UIOptionImpl(uPlotOptionJson);
         userInterfaceManager.updateUIOption(uPlotUIOption);
 
-        JsonObject expecteduPlotBatch1Json = Json.createObjectBuilder()
+        final JsonObject expecteduPlotBatch1Json = Json.createObjectBuilder()
                 .add("data",Json.createArrayBuilder()
                         .add(Json.createArrayBuilder()
                                 .add(0)
@@ -336,13 +336,13 @@ public final class UserInterfaceManagerTest {
                 .add("isAggregated",true)
                 .add("type","uPlot")
                 .build();
-        String expectedUplotBatch1Output = "%uplot "+expecteduPlotBatch1Json.toString();
+        final String expectedUplotBatch1Output = "%uplot "+expecteduPlotBatch1Json.toString();
 
         Assertions.assertEquals(expectedUplotBatch1Output,outputList.get(0).toString());
 
         // second batch should be formatted properly
         Assertions.assertDoesNotThrow(()->userInterfaceManager.updateDataset(aggregatedBatch2));
-        JsonObject expecteduPlotBatch2Json = Json.createObjectBuilder()
+        final JsonObject expecteduPlotBatch2Json = Json.createObjectBuilder()
                 .add("data",Json.createArrayBuilder()
                         .add(Json.createArrayBuilder()
                                 .add(0)
@@ -371,7 +371,7 @@ public final class UserInterfaceManagerTest {
                 .add("isAggregated",true)
                 .add("type","uPlot")
                 .build();
-        String expectedUplotBatch2Output = "%uplot "+expecteduPlotBatch2Json.toString();
+        final String expectedUplotBatch2Output = "%uplot "+expecteduPlotBatch2Json.toString();
 
         Assertions.assertEquals(expectedUplotBatch2Output,outputList.get(1).toString());
     }
@@ -417,7 +417,7 @@ public final class UserInterfaceManagerTest {
 
         final String uPlotFormatted = Assertions.assertDoesNotThrow(()->userInterfaceManager.formatDataset(uPlotUIOption));
 
-        JsonObject expecteduPlotJson = Json.createObjectBuilder()
+        final JsonObject expecteduPlotJson = Json.createObjectBuilder()
                 .add("data",Json.createArrayBuilder()
                         .add(Json.createArrayBuilder()
                                 .add(0)
