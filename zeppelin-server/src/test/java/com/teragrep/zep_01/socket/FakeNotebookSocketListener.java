@@ -1,6 +1,6 @@
 package com.teragrep.zep_01.socket;
 
-public class FakeNotebookSocketListener implements NotebookSocketListener {
+public final class FakeNotebookSocketListener implements NotebookSocketListener {
     @Override
     public void onClose(final WebSocketEndpoint socket, final int code, final String message) {
         // no-op
