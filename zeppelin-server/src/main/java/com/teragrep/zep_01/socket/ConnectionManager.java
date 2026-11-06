@@ -98,7 +98,7 @@ public class ConnectionManager {
   }
 
   public void addNoteConnection(String noteId, WebSocketEndpoint socket) {
-    LOGGER.debug("Add connection {} : {} to note: {}", socket.getRequest().getRemoteHost(),socket.getRequest().getRemotePort(), noteId);
+    LOGGER.debug("Add connection <{}> : <{}> to note: <{}>", socket.getRequest().getRemoteHost(),socket.getRequest().getRemotePort(), noteId);
     synchronized (noteSocketMap) {
       // make sure a socket relates only an single note.
       removeConnectionFromAllNote(socket);
@@ -117,7 +117,7 @@ public class ConnectionManager {
   }
 
   public void removeNoteConnection(String noteId, WebSocketEndpoint socket) {
-    LOGGER.debug("Remove connection {} : {} from note: {}", socket.getRequest().getRemoteHost(),socket.getRequest().getRemotePort(), noteId);
+    LOGGER.debug("Remove connection <{}> : <{}> from note: <{}>", socket.getRequest().getRemoteHost(),socket.getRequest().getRemotePort(), noteId);
     synchronized (noteSocketMap) {
       List<WebSocketEndpoint> socketList = noteSocketMap.get(noteId);
       if (socketList != null && socketList.contains(socket)) {
@@ -129,7 +129,7 @@ public class ConnectionManager {
 
   public void addUserConnection(WebSocketEndpoint conn) {
     final String user = conn.username().asString();
-    LOGGER.debug("Add user connection {} : {} for user: {}", conn.getRequest().getRemoteHost(),conn.getRequest().getRemotePort(), user);
+    LOGGER.debug("Add user connection <{}> : <{}> for user: <{}>", conn.getRequest().getRemoteHost(),conn.getRequest().getRemotePort(), user);
     if (userSocketMap.containsKey(user)) {
       userSocketMap.get(user).add(conn);
     } else {
@@ -140,7 +140,7 @@ public class ConnectionManager {
   }
 
   public void removeUserConnection(String user, WebSocketEndpoint conn) {
-    LOGGER.debug("Remove user connection {} : {} for user: {}", conn.getRequest().getRemoteHost(),conn.getRequest().getRemotePort(), user);
+    LOGGER.debug("Remove user connection <{}> : <{}> for user: <{}>", conn.getRequest().getRemoteHost(),conn.getRequest().getRemotePort(), user);
     if (userSocketMap.containsKey(user)) {
       userSocketMap.get(user).remove(conn);
     } else {
