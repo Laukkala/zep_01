@@ -21,7 +21,6 @@ import org.eclipse.jetty.websocket.api.WebSocketListener;
 
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
-import java.util.Objects;
 import java.util.concurrent.atomic.AtomicReference;
 
 /**
