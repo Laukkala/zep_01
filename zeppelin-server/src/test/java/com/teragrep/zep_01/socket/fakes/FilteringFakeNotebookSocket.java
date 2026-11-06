@@ -8,7 +8,6 @@ import java.util.*;
 
 /**
  * Represents a single connection to a NotebookServer. Captures Messages that have a matchin OpCode to the given filter
- * TODO: this should be refactored into a decorator for a FakeNotebookSocket that accepts all incoming messages. This is pending extraction of NotebookSocket into an interface instead of concrete class
  */
 
 // Have to extend NotebookSocket instead of implementing an Interface as we rely on send(), which isn't declared in an Interface, but a concrete class

@@ -11,8 +11,6 @@ import java.io.IOException;
  * - Sets a {@link Username} for this connection.
  **/
 
- // TODO: username() and rename() should be moved to ConnectionManager from this Interface. See ZEP_01 issue #368
-
 public interface WebSocketEndpoint {
 
     /**
