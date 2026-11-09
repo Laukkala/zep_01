@@ -63,24 +63,18 @@ public final class DataTablesDatasetTransformation {
 
     public Dataset<Row> order(){
         final Dataset<Row> rv;
-        if(order.isEmpty()){
-            // No ordering was given, no need to do any transformation
-            rv = dataset;
-        }
-        else {
-            String[] colNames = dataset.columns();
-            Column[] columns = order.stream().map((order)->{
-                final Column column;
-                if(order.descending()){
-                    column = org.apache.spark.sql.functions.col(colNames[order.columnIndex()]).desc();
-                }
-                else {
-                    column = org.apache.spark.sql.functions.col(colNames[order.columnIndex()]).asc();
-                }
-                return column;
-            }).toArray(Column[]::new);
-            rv = dataset.orderBy(columns);
-        }
+        String[] colNames = dataset.columns();
+        Column[] columns = order.stream().map((order)->{
+            final Column column;
+            if(order.descending()){
+                column = org.apache.spark.sql.functions.col(colNames[order.columnIndex()]).desc();
+            }
+            else {
+                column = org.apache.spark.sql.functions.col(colNames[order.columnIndex()]).asc();
+            }
+            return column;
+        }).toArray(Column[]::new);
+        rv = dataset.orderBy(columns);
         return rv;
     }
 

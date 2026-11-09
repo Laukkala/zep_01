@@ -46,16 +46,15 @@
 package com.teragrep.pth_07.ui.elements.table_dynamic.formats;
 
 import org.apache.spark.sql.*;
-import org.apache.spark.sql.types.DataTypes;
-import org.apache.spark.sql.types.MetadataBuilder;
-import org.apache.spark.sql.types.StructField;
-import org.apache.spark.sql.types.StructType;
+import org.apache.spark.sql.types.*;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 class DataTablesDatasetTransformationTest {
 
@@ -142,5 +141,16 @@ class DataTablesDatasetTransformationTest {
             Assertions.assertTrue(timeValues.get(i).before(previousTime) || timeValues.get(i).equals(previousTime));
             previousTime = timeValues.get(i);
         }
+    }
+
+    @Test
+    void testEmptyOrder() {
+        // Ordering by an empty list should be effectively a no-op. Resulting dataset should contain same schema (including metadata) and data that original had
+        List<Order> order = new ArrayList<>();
+        Dataset<Row> originalDataset = sourceData.groupBy(org.apache.spark.sql.functions.col("operation")).count().withMetadata("operation",new MetadataBuilder().putBoolean("dpl_internal_isGroupByColumn",true).build());
+        DataTablesDatasetTransformation transformation = new DataTablesDatasetTransformation(originalDataset,order);
+        Dataset<Row> transformedDataset = transformation.order();
+        Assertions.assertEquals(originalDataset.schema(),transformedDataset.schema());
+        Assertions.assertEquals(originalDataset.collectAsList(),transformedDataset.collectAsList());
     }
 }
