@@ -1115,7 +1115,7 @@ public class NotebookServerTest extends AbstractTestRestApi {
 
   @Test
   public void testParagraphOutputSavesResult() {
-    final NotebookSocket alice = createWebSocket();
+    final WebSocketEndpoint alice = createWebSocket();
     notebookServer.onOpen(alice);
 
     final String defaultInterpreterId = "test";
