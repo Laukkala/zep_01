@@ -39,6 +39,7 @@ import javax.servlet.http.HttpServletRequest;
 import com.teragrep.zep_01.interpreter.*;
 import com.teragrep.zep_01.notebook.repo.Revision;
 import com.teragrep.zep_01.socket.fakes.FilteringFakeNotebookSocket;
+import jakarta.json.Json;
 import org.apache.thrift.TException;
 import com.teragrep.zep_01.conf.ZeppelinConfiguration;
 import com.teragrep.zep_01.display.AngularObject;
