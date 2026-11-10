@@ -109,14 +109,15 @@ public final class UserInterfaceManager {
     public String formatDataset(final UIOption uiOption) throws InterpreterException{
         datasetStore.updateUIOptions(uiOption);
         final RenderFormat renderFormat = datasetStore.toRenderFormat(uiOption);
+        final String formatted = renderFormat.asJson().toString();
+        // Prepend formatted string with "%{InterpreterResult.Type}\n so that InterpreterOutput.write() parses the type correctly instead of treating the output as TEXT
         final StringBuilder builder = new StringBuilder();
-        // Prepend "%{InterpreterResult.Type}\n so that InterpreterOutput.write() parses the type correctly instead of treating the output as TEXT
         builder.append("%"+renderFormat.type().label.toLowerCase());
         builder.append("\n");
-        builder.append(renderFormat.asJson().toString());
+        builder.append(formatted);
         final String output = builder.toString();
         datasetStore.writeToDisk(output);
-        return output;
+        return formatted;
     }
 
     public void updateUIOption(UIOption uiOption){
