@@ -88,12 +88,7 @@ public final class DatasetStore {
         output.append("%"+renderFormat.type().label.toLowerCase());
         output.append("\n");
         output.append(renderFormat.asJson().toString());
-        try{
-            writeToDisk(output.toString());
-        }
-        catch (IOException e){
-            throw new InterpreterException("Failed to write dataset update to disk!",e);
-        }
+        writeToDisk(output.toString());
     }
 
     // Switch output format for subsequent batches
@@ -107,9 +102,14 @@ public final class DatasetStore {
     }
 
     // Write given String to disk via InterpreterOutput. NotebookServer catches this event in onOutputUpdate() / onOutputAppend()
-    private void writeToDisk(String output) throws IOException {
-        interpreterContext.out.clear(false);
-        interpreterContext.out.write(output);
-        interpreterContext.out.flush();
+    public void writeToDisk(String output) throws InterpreterException {
+        try{
+            interpreterContext.out.clear(false);
+            interpreterContext.out.write(output);
+            interpreterContext.out.flush();
+        }
+        catch (IOException e){
+            throw new InterpreterException("Failed to write dataset update to disk!",e);
+        }
     }
 }
