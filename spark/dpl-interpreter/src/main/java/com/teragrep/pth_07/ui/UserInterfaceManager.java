@@ -106,10 +106,12 @@ public final class UserInterfaceManager {
      * @param uiOption UIOption containing the wanted formatting options
      * @return String representing the formatted dataset.
      */
-    public String formatDataset(UIOption uiOption){
+    public String formatDataset(UIOption uiOption) throws InterpreterException{
         datasetStore.updateUIOptions(uiOption);
         RenderFormat renderFormat = datasetStore.toRenderFormat(uiOption);
-        return renderFormat.asJson().toString();
+        String formatted = renderFormat.asJson().toString();
+        datasetStore.writeToDisk(formatted);
+        return formatted;
     }
 
     public void updateUIOption(UIOption uiOption){
