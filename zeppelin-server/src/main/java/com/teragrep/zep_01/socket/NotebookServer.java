@@ -1156,9 +1156,6 @@ public class NotebookServer extends WebSocketServlet
       final InterpreterResult.Type type = InterpreterResult.Type.valueOf(outputJson.getString("type").toUpperCase());
       paragraph.updateOutputBuffer(0, type,outputJson.toString());
       paragraph.checkpointOutput();
-
-      final JsonMessage msg = new JsonMessage(new MessageIdImpl(msgId), OP.PARAGRAPH_OUTPUT, paragraphOutputResponse);
-      getConnectionManager().broadcast(noteId,msg.asJson().toString());
     } catch (InterpreterException e) {
       LOG.error("Failed to retrieve output for note: {} paragraph: {} cause: {}", noteId, paragraphId, e.getCause(), e);
       final JsonObject errorJson = Json.createObjectBuilder()
