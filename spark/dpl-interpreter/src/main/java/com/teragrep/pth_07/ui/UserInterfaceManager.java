@@ -116,7 +116,7 @@ public final class UserInterfaceManager {
         builder.append("\n");
         builder.append(formatted);
         final String output = builder.toString();
-        datasetStore.writeToDisk(output);
+        datasetStore.saveOutput(output);
         return formatted;
     }
 
