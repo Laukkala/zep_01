@@ -111,11 +111,7 @@ public final class UserInterfaceManager {
         final RenderFormat renderFormat = datasetStore.toRenderFormat(uiOption);
         final String formatted = renderFormat.asJson().toString();
         // Prepend formatted string with "%{InterpreterResult.Type}\n so that InterpreterOutput.write() parses the type correctly instead of treating the output as TEXT
-        final StringBuilder builder = new StringBuilder();
-        builder.append("%"+renderFormat.type().label.toLowerCase());
-        builder.append("\n");
-        builder.append(formatted);
-        final String output = builder.toString();
+        final String output = "%" + renderFormat.type().label.toLowerCase() + "\n" + formatted;
         datasetStore.saveOutput(output);
         return formatted;
     }
