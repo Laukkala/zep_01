@@ -88,7 +88,7 @@ public final class DatasetStore {
         output.append("%"+renderFormat.type().label.toLowerCase());
         output.append("\n");
         output.append(renderFormat.asJson().toString());
-        writeToDisk(output.toString());
+        saveOutput(output.toString());
     }
 
     // Switch output format for subsequent batches
@@ -101,8 +101,8 @@ public final class DatasetStore {
         return datasetRef.get().toRenderFormat(uiOption);
     }
 
-    // Write given String to disk via InterpreterOutput. NotebookServer catches this event in onOutputUpdate() / onOutputAppend()
-    public void writeToDisk(String output) throws InterpreterException {
+    // Save output via InterpreterOutput. NotebookServer catches this event in onOutputUpdate() / onOutputAppend()
+    public void saveOutput(String output) throws InterpreterException {
         try{
             interpreterContext.out.clear(false);
             interpreterContext.out.write(output);
