@@ -1147,16 +1147,7 @@ public class NotebookServer extends WebSocketServlet
 
     try {
       // Format the dataset within RemoteInterpreter, then return the output
-      final String output = managedInterpreterGroup.formatDataset(sessionId, interpreter.getClassName(), noteId, paragraphId, options);
-      final JsonObject outputJson;
-      try (JsonReader jsonReader = Json.createReader(new StringReader(output))) {
-        outputJson = jsonReader.readObject();
-      }
-      // UI-initiated reformatting requests do not trigger Job.completeWithSuccess(), which saves the reformatted output to paragraph's "result" variable.
-      // To allow for other users to see the reformatted data, we save it to the paragraph here.
-      final InterpreterResult.Type type = InterpreterResult.Type.valueOf(outputJson.getString("type").toUpperCase());
-      paragraph.updateOutputBuffer(0, type,outputJson.toString());
-      paragraph.checkpointOutput();
+      managedInterpreterGroup.formatDataset(sessionId, interpreter.getClassName(), noteId, paragraphId, options);
     } catch (InterpreterException e) {
       LOG.error("Failed to retrieve output for note: {} paragraph: {} cause: {}", noteId, paragraphId, e.getCause(), e);
       final JsonObject errorJson = Json.createObjectBuilder()
