@@ -19,8 +19,11 @@
 package com.teragrep.zep_01.interpreter;
 
 import jakarta.json.Json;
+import jakarta.json.JsonObjectBuilder;
 
+import java.io.IOException;
 import java.util.Properties;
+import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicReference;
 
 /**
@@ -44,7 +47,20 @@ public class FakeRemoteInterpreter extends Interpreter {
   @Override
   public InterpreterResult interpret(String st, InterpreterContext context) {
     interpreterContext.set(context);
-    return new InterpreterResult(InterpreterResult.Code.SUCCESS, st);
+        try {
+          // send 3 batches of data. Each containing the input string one additional time
+          for (int i = 0; i < 3; i++) {
+            Thread.sleep(500);
+            JsonObjectBuilder output = Json.createObjectBuilder();
+            output.add("data", i);
+            interpreterContext.get().out().clear(false);
+            interpreterContext.get().out().write("%" + InterpreterResult.Type.DATATABLES.label.toLowerCase() + "\n" + output.build().toString());
+            interpreterContext.get().out().flush();
+          }
+        } catch (IOException | InterruptedException exception) {
+          return new InterpreterResult(InterpreterResult.Code.ERROR, exception.getMessage());
+        }
+        return new InterpreterResult(InterpreterResult.Code.SUCCESS, Json.createObjectBuilder().add("data", "").build().toString());
   }
 
   @Override

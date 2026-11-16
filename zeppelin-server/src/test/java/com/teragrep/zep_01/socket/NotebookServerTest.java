@@ -32,7 +32,6 @@ import java.net.UnknownHostException;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
-import java.util.stream.Collectors;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -79,6 +78,8 @@ public class NotebookServerTest extends AbstractTestRestApi {
     authorizationService =  TestUtils.getInstance(AuthorizationService.class);
     notebookServer = TestUtils.getInstance(NotebookServer.class);
     notebookService = TestUtils.getInstance(NotebookService.class);
+    // init() returns early, wait 5 seconds to initialize server
+    Thread.sleep(5000);
   }
 
   @AfterClass
@@ -1077,7 +1078,7 @@ public class NotebookServerTest extends AbstractTestRestApi {
 
     // alice runs paragraph
     // paragraph must be run before formatting, since interpreter instances are created on paragraph execution
-    final String expectedOutput = Json.createObjectBuilder().add("data","someData").add("type", InterpreterResult.Type.TEXT.label).build().toString();
+    final String expectedOutput = Json.createObjectBuilder().add("data",2).build().toString();
     notebookServer.onMessage(alice, new Message(OP.RUN_PARAGRAPH)
             .put("id",paragraph.getId())
             .put("noteId",note.getId())
@@ -1095,8 +1096,15 @@ public class NotebookServerTest extends AbstractTestRestApi {
       }
     }
 
-    // EchoInterpreter execution should output proper data
+    // FakeRemoteInterpreter execution should output proper data
     Assertions.assertEquals(expectedOutput, paragraph.getReturn().message().get(0).getData());
+    Assertions.assertEquals(InterpreterResult.Type.DATATABLES, paragraph.getReturn().message().get(0).getType());
+
+    // alice and bob should receive one output message for each batch sent by interpreter
+    Assertions.assertEquals(3,alice.sentMessages().size());
+    Assertions.assertEquals(3,bob.sentMessages().size());
+    // charlie should not receive such a message as they are not connected to the same notebook
+    Assertions.assertEquals(0,charlie.sentMessages().size());
 
     // format note from alice
     notebookServer.onMessage(alice,
@@ -1105,9 +1113,9 @@ public class NotebookServerTest extends AbstractTestRestApi {
                     .put("paragraphId",paragraph.getId())
                     .put("options", "{}")
                     .withMsgId("msgId").toJson());
-    // alice and bob should receive PARAGRAPH_OUTPUT
-    Assertions.assertEquals(1,alice.sentMessages().size());
-    Assertions.assertEquals(1,bob.sentMessages().size());
+    // alice and bob should receive additional PARAGRAPH_OUTPUT
+    Assertions.assertEquals(4,alice.sentMessages().size());
+    Assertions.assertEquals(4,bob.sentMessages().size());
     // charlie should not receive such a message as they are not connected to the same notebook
     Assertions.assertEquals(0,charlie.sentMessages().size());
   }
@@ -1139,7 +1147,7 @@ public class NotebookServerTest extends AbstractTestRestApi {
 
     // alice runs paragraph
     // paragraph must be run before formatting, since interpreter instances are created on paragraph execution
-    final String expectedOutput = Json.createObjectBuilder().add("data","someData").add("type",InterpreterResult.Type.TEXT.label).build().toString();
+    final String expectedOutput = Json.createObjectBuilder().add("data",2).build().toString();
     notebookServer.onMessage(alice, new Message(OP.RUN_PARAGRAPH)
             .put("id",paragraph.getId())
             .put("noteId",note.getId())
@@ -1157,8 +1165,9 @@ public class NotebookServerTest extends AbstractTestRestApi {
       }
     }
 
-    // EchoInterpreter execution should output proper data
+    // FakeRemoteInterpreter execution should output proper data
     Assertions.assertEquals(expectedOutput, paragraph.getReturn().message().get(0).getData());
+    Assertions.assertEquals(InterpreterResult.Type.DATATABLES, paragraph.getReturn().message().get(0).getType());
 
     // format note from alice
     notebookServer.onMessage(alice,
@@ -1168,9 +1177,69 @@ public class NotebookServerTest extends AbstractTestRestApi {
                     .put("options", "{}")
                     .withMsgId("msgId").toJson());
 
-    // new reformatted output data (created by EchoInterpreter.formatDataset()) should be within paragraph's result after reformatting
+    // new reformatted output data (created by FakeRemoteInterpreter.formatDataset()) should be within paragraph's result after reformatting
     String expectedReformattedData = Json.createObjectBuilder().add("data","consider yourself reformatted").add("type",InterpreterResult.Type.TEXT.label).build().toString();
     Assertions.assertEquals(expectedReformattedData, paragraph.getReturn().message().get(0).getData());
+  }
+
+
+  @Test
+  public void testParagraphOutputSavesResultAfterFinalBatch() {
+    final Set<Message.OP> filteredOps = new HashSet<>();
+    filteredOps.add(OP.PARAGRAPH_OUTPUT);
+    final FilteringFakeNotebookSocket alice = new FilteringFakeNotebookSocket(filteredOps);
+    notebookServer.onOpen(alice);
+
+    final String defaultInterpreterId = "test";
+    notebookServer.onMessage(alice, new Message(OP.NEW_NOTE).put("defaultInterpreterGroup",defaultInterpreterId).toJson());
+    notebookServer.onMessage(alice, new Message(OP.INSERT_PARAGRAPH).put("index",0).toJson());
+    Assertions.assertEquals(1,notebook.getAllNotes().size());
+
+    final Note note = notebook.getAllNotes().get(0);
+    final Paragraph paragraph = note.getParagraph(0);
+
+    notebookServer.onMessage(alice, new Message(OP.COMMIT_PARAGRAPH)
+            .put("id",paragraph.getId())
+            .put("title","")
+            .put("config",new HashMap<>())
+            .put("params",new HashMap<>())
+            .put("paragraph","%test\nsomeText").toJson());
+    final Properties properties = new Properties();
+
+    properties.put("CLASSPATH", System.getProperty("java.class.path"));
+    Assertions.assertDoesNotThrow(()->notebook.getInterpreterSettingManager().getInterpreterGroupById("test-shared_process").getOrCreateInterpreterProcess("alice",properties));
+
+    // alice starts running of paragraph
+    final String expectedOutput = "batch 0: {\"data\":\"someData\",\"type\":\"text\"}batch 1: {\"data\":\"someData\",\"type\":\"text\"}batch 2: {\"data\":\"someData\",\"type\":\"text\"}";
+    notebookServer.onMessage(alice, new Message(OP.RUN_PARAGRAPH)
+            .put("id", paragraph.getId())
+            .put("noteId", note.getId())
+            .put("title", "")
+            .put("config", new HashMap<>())
+            .put("params", new HashMap<>())
+            .put("paragraph", "%test.dpl\n" + expectedOutput).toJson());
+    while (alice.sentMessages().size() < 3){
+      // wait until 3 batches of data arrive
+    }
+    Assertions.assertEquals(3,alice.sentMessages().size());
+    // format note from alice
+    notebookServer.onMessage(alice,
+            new Message(OP.PARAGRAPH_OUTPUT_REQUEST)
+                    .put("noteId", note.getId())
+                    .put("paragraphId",paragraph.getId())
+                    .put("options", "{}")
+                    .withMsgId("msgId").toJson());
+    final String expected = Json.createObjectBuilder()
+            .add("data","consider yourself reformatted")
+            .add("type","text")
+            .build().toString();
+
+    while (alice.sentMessages().size() < 4){
+      // wait until output request is responded to
+    }
+    Assertions.assertEquals(4,alice.sentMessages().size());
+    // Final output saved to paragraph should be the one from paragraph format request.
+    Assertions.assertEquals(expected,paragraph.getReturn().message().get(0).getData());
   }
 
   private WebSocketEndpoint createWebSocket() {
