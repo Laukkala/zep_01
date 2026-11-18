@@ -23,7 +23,6 @@ import jakarta.json.JsonObjectBuilder;
 
 import java.io.IOException;
 import java.util.Properties;
-import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicReference;
 
 /**
@@ -60,7 +59,7 @@ public class FakeRemoteInterpreter extends Interpreter {
         } catch (IOException | InterruptedException exception) {
           return new InterpreterResult(InterpreterResult.Code.ERROR, exception.getMessage());
         }
-        return new InterpreterResult(InterpreterResult.Code.SUCCESS, Json.createObjectBuilder().add("data", "").build().toString());
+      return new InterpreterResult(InterpreterResult.Code.SUCCESS, Json.createObjectBuilder().add("data", "").build().toString());
   }
 
   @Override
@@ -81,10 +80,18 @@ public class FakeRemoteInterpreter extends Interpreter {
   @Override
   public String formatDataset(final String noteId, final String paragraphId, final String options) throws InterpreterException {
     if(interpreterContext.get() != null){
-      final String formatted = Json.createObjectBuilder().add("data", "consider yourself reformatted").add("type", InterpreterResult.Type.TEXT.label).build().toString();
-      // this simulates RemoteInterpreterServer calling onUpdate(), which notifies NotebookServer that there is new output to display for the paragraph.
-      interpreterContext.get().getIntpEventClient().onInterpreterOutputUpdate(noteId,paragraphId,0, InterpreterResult.Type.TEXT,formatted);
-      return formatted;
+      final String formatted = Json.createObjectBuilder().add("data", "consider yourself reformatted").add("type", InterpreterResult.Type.DATATABLES.label).build().toString();
+      // this simulates DatasetStore calling saveToDisk(), which notifies NotebookServer that there is new output to display for the paragraph.
+      try{
+        Thread.sleep(500);
+        interpreterContext.get().out().clear(false);
+        interpreterContext.get().out().write("%" + InterpreterResult.Type.DATATABLES.label.toLowerCase() + "\n" + formatted.toString());
+        interpreterContext.get().out().flush();
+        return formatted;
+      }
+      catch (IOException | InterruptedException ioException){
+        throw new InterpreterException(ioException);
+      }
     }
     else {
       throw new InterpreterException("Attempt to format dataset without any call to interpret() first!");
