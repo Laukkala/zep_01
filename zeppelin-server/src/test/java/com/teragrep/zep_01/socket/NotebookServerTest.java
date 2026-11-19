@@ -29,7 +29,6 @@ import static org.mockito.Mockito.*;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
-import java.time.Duration;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
@@ -1219,11 +1218,13 @@ public class NotebookServerTest extends AbstractTestRestApi {
             .put("config", new HashMap<>())
             .put("params", new HashMap<>())
             .put("paragraph", "%test.dpl\n" + expectedOutput).toJson());
-    Assertions.assertTimeoutPreemptively(Duration.ofMillis(5000),()->{
-      while (alice.sentMessages().size() < 3){
-        // wait until 3 batches of data arrive
+    Instant timeout = Instant.now().plusMillis(5000);
+    while (alice.sentMessages().size() < 3){
+      // wait until 3 batches of data arrive
+      if(Instant.now().isAfter(timeout)){
+        Assertions.fail("Timeout before all batches of data arrived from interpreter!");
       }
-    });
+    }
 
     Assertions.assertEquals(3,alice.sentMessages().size());
     // format note from alice
@@ -1237,22 +1238,26 @@ public class NotebookServerTest extends AbstractTestRestApi {
             .add("data","consider yourself reformatted")
             .add("type","dataTables")
             .build().toString();
-    Assertions.assertTimeoutPreemptively(Duration.ofMillis(5000),()->{
-      while (alice.sentMessages().size() < 4){
-        // wait until output request is responded to
-        Assertions.assertNotEquals(Job.Status.FINISHED,paragraph.getStatus());
+
+    timeout = Instant.now().plusMillis(5000);
+    while (alice.sentMessages().size() < 4){
+      // wait until output request is responded to
+      Assertions.assertNotEquals(Job.Status.FINISHED,paragraph.getStatus());
+      if(Instant.now().isAfter(timeout)){
+        Assertions.fail("Timeout before formatting response arrived from interpreter!");
       }
-    });
+    }
     Assertions.assertEquals(4,alice.sentMessages().size());
     // Final output saved to paragraph should be the one from paragraph format request.
     Assertions.assertEquals(expected,paragraph.getReturn().message().get(0).getData());
-    Assertions.assertTimeoutPreemptively(Duration.ofMillis(5000),()->{
-      while (alice.sentMessages().size() < 4){
-        // wait until paragraph status is set to FINISHED
-        while (!paragraph.getStatus().isCompleted()){
-        }
+
+    timeout = Instant.now().plusMillis(5000);
+    // wait until paragraph status is set to FINISHED
+    while (!paragraph.getStatus().isCompleted()){
+      if(Instant.now().isAfter(timeout)){
+        Assertions.fail("Timeout before paragraph was updated to FINISHED status!");
       }
-    });
+    }
 
     // paragraph status flag is set before saving is complete, so we must wait for it to complete
     Assertions.assertDoesNotThrow(()->Thread.sleep(1000));
