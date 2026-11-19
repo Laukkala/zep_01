@@ -78,8 +78,6 @@ public class NotebookServerTest extends AbstractTestRestApi {
     authorizationService =  TestUtils.getInstance(AuthorizationService.class);
     notebookServer = TestUtils.getInstance(NotebookServer.class);
     notebookService = TestUtils.getInstance(NotebookService.class);
-    // init() returns early, wait 5 seconds to initialize server
-    Thread.sleep(5000);
   }
 
   @AfterClass
@@ -1258,9 +1256,6 @@ public class NotebookServerTest extends AbstractTestRestApi {
         Assertions.fail("Timeout before paragraph was updated to FINISHED status!");
       }
     }
-
-    // paragraph status flag is set before saving is complete, so we must wait for it to complete
-    Assertions.assertDoesNotThrow(()->Thread.sleep(1000));
     Assertions.assertEquals(expected,paragraph.getReturn().message().get(0).getData());
   }
 
